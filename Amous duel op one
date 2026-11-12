@@ -141,23 +141,14 @@ local function fn3(arg, arg2, arg3, arg4)
 	return UDim2.new(num, num2, num3, num4)
 end
 local function fn4(arg)
-	local udim2 = UDim2.new(0.5, -170, 1, -56)
-	if type(arg) == "table" and tonumber(arg.sx) == 0.5 and tonumber(arg.sy) == 0.5 then
-		local num, num2 = tonumber(arg.ox), tonumber(arg.oy)
-		if num == -82 and num2 == -25 or num == -74 and num2 == -21 or num == -59 and num2 == -21 then
-			return udim2
-		end
+	-- [PATCH] minibutton default: top-left, just under the Roblox top bar (this ScreenGui ignores
+	-- the GUI inset). Only positions saved by the new layout (v == 2) are honoured, because older
+	-- saves belong to the old bottom-centre bar.
+	local udim2 = UDim2.new(0, 12, 0, 56)
+	if type(arg) == "table" and tonumber(arg.v) == 2 then
+		return fn3(arg, udim2, 150, 36)
 	end
-	if
-		type(arg) == "table"
-		and tonumber(arg.sx) == 0
-		and tonumber(arg.ox) == 16
-		and tonumber(arg.sy) == 0
-		and tonumber(arg.oy) == 76
-	then
-		return udim2
-	end
-	return fn3(arg, udim2, 340, 44)
+	return udim2
 end
 local v, v2, v3, v4, fn5, fn6, safeMode, v5, v6, v7, v8, textLabel
 local instaResetEnabled = false
@@ -3855,54 +3846,55 @@ Config._buildHeadDisplay = function(discord)
 	local uiScale = Instance.new("UIScale", frame)
 	uiScale.Name = "AmousHeadDisplayScale"
 	uiScale.Scale = 1
-	-- [PATCH] head label card (matches the reference image): dark rounded card,
-	-- "Amous" on top, speed meter below. Labels carry AmousKeepStyle so the theme/font
-	-- passes leave their colour and font alone.
+	-- [PATCH] head label (reference image): bold "Amous Duel" on top, normal-weight
+	-- "discord.gg/amoushub" under it, a thin line, then the speed label. No background card.
+	-- `frame` (100x34) stays as the invisible anchor the two positioning loops use; the card is
+	-- centred on it and grows upward, so those loops need no change. Everything carries
+	-- AmousKeepStyle so the theme/font passes leave colours and fonts alone.
 	local card = Instance.new("Frame", frame)
 	card.Name = "AmousHeadCard"
-	card.Size = UDim2.new(1, 0, 1, 0)
-	card.BackgroundColor3 = Color3.fromRGB(10, 10, 20)
-	card.BackgroundTransparency = 0.05
+	card.AnchorPoint = Vector2.new(0.5, 1)
+	card.Position = UDim2.new(0.5, 0, 1, 0)
+	card.Size = UDim2.new(0, 210, 0, 68)
+	card.BackgroundTransparency = 1
 	card.BorderSizePixel = 0
 	card.ZIndex = 3
-	local cardCorner = Instance.new("UICorner", card)
-	cardCorner.CornerRadius = UDim.new(0, 8)
-	local cardStroke = Instance.new("UIStroke", card)
-	cardStroke.Name = "AmousHeadCardStroke"
-	cardStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-	cardStroke.Color = Color3.fromRGB(53, 224, 255)
-	cardStroke.Thickness = 1.5
-	cardStroke.Transparency = 0
-	local nameLabel = Instance.new("TextLabel", card)
-	nameLabel.Name = "AmousHeadName"
-	nameLabel.Size = UDim2.new(1, -16, 0, 16)
-	nameLabel.Position = UDim2.new(0, 8, 0, 3)
-	nameLabel.BackgroundTransparency = 1
-	nameLabel.Text = "Amous"
-	nameLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-	nameLabel.Font = Enum.Font.GothamMedium
-	nameLabel.TextSize = 12
-	nameLabel.TextXAlignment = Enum.TextXAlignment.Left
-	nameLabel.TextYAlignment = Enum.TextYAlignment.Center
-	nameLabel.ZIndex = 4
-	nameLabel:SetAttribute("AmousKeepStyle", true)
-	local textLabel2 = Instance.new("TextLabel", card)
-	textLabel2.Name = "AmousHeadSpeed"
-	textLabel2.Size = UDim2.new(1, -16, 0, 12)
-	textLabel2.Position = UDim2.new(0, 8, 0, 19)
-	textLabel2.BackgroundTransparency = 1
-	textLabel2.Text = string.format("%.1f", tonumber(Config.normalSpeed) or 0)
-	textLabel2.TextColor3 = Color3.fromRGB(53, 224, 255)
-	textLabel2.Font = Enum.Font.Gotham
-	textLabel2.TextSize = 9
-	textLabel2.TextXAlignment = Enum.TextXAlignment.Left
-	textLabel2.TextYAlignment = Enum.TextYAlignment.Center
-	textLabel2.ZIndex = 4
-	textLabel2:SetAttribute("AmousKeepStyle", true)
+	card:SetAttribute("AmousKeepStyle", true)
+	local function mkHeadText(name, y, h, text, font, size, color, strokeTransparency)
+		local label = Instance.new("TextLabel", card)
+		label.Name = name
+		label.Size = UDim2.new(1, 0, 0, h)
+		label.Position = UDim2.new(0, 0, 0, y)
+		label.BackgroundTransparency = 1
+		label.Text = text
+		label.TextColor3 = color
+		label.Font = font
+		label.TextSize = size
+		label.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+		label.TextStrokeTransparency = strokeTransparency
+		label.TextXAlignment = Enum.TextXAlignment.Center
+		label.TextYAlignment = Enum.TextYAlignment.Center
+		label.ZIndex = 4
+		label:SetAttribute("AmousKeepStyle", true)
+		return label
+	end
+	local nameLabel = mkHeadText("AmousHeadName", 0, 26, "Amous Duel", Enum.Font.FredokaOne, 24, Color3.fromRGB(255, 255, 255), 0)
+	local discordLabel = mkHeadText("AmousHeadDiscord", 26, 16, "discord.gg/amoushub", Enum.Font.Gotham, 13, Color3.fromRGB(255, 255, 255), 0.35)
+	local headLine = Instance.new("Frame", card)
+	headLine.Name = "AmousHeadDivider"
+	headLine.AnchorPoint = Vector2.new(0.5, 0)
+	headLine.Position = UDim2.new(0.5, 0, 0, 45)
+	headLine.Size = UDim2.new(0.92, 0, 0, 2)
+	headLine.BackgroundColor3 = Color3.fromRGB(190, 255, 205)
+	headLine.BackgroundTransparency = 0.15
+	headLine.BorderSizePixel = 0
+	headLine.ZIndex = 4
+	headLine:SetAttribute("AmousKeepStyle", true)
+	local textLabel2 = mkHeadText("AmousHeadSpeed", 49, 19, string.format("%.1f", tonumber(Config.normalSpeed) or 0), Enum.Font.FredokaOne, 18, Color3.fromRGB(90, 255, 130), 0)
 	tbl27.sg = screenGui
 	tbl27.frame = frame
-	tbl27.discord = nil
-	tbl27.divider = nil
+	tbl27.discord = discordLabel
+	tbl27.divider = headLine
 	tbl27.speed = textLabel2
 	tbl27.scale = uiScale
 	v19 = textLabel2
@@ -11481,199 +11473,44 @@ tbl31 = {
 			obj.Parent = parent
 			return obj
 		end
+		-- [PATCH v5] minibutton = black pill with one centred label (reference image).
+		-- Tap opens the menu, drag moves it (handlers further down are unchanged).
 		local frame4 = Config._miniMk("Frame", screenGui, {
 			Name = "MinimizedFrame",
-			Size = UDim2.new(0, 340, 0, 44),
+			Size = UDim2.new(0, 150, 0, 36),
 			Position = fn4(tbl2.minimized),
-			BackgroundColor3 = Color3.fromRGB(12, 13, 18),
+			BackgroundColor3 = Color3.fromRGB(0, 0, 0),
 			BackgroundTransparency = 0,
 			BorderSizePixel = 0,
 			Visible = false,
 			ZIndex = 20,
 			Active = true,
 		})
-		frame4:SetAttribute("AmousKeepStyle", true) -- fixed dark colour, theme must not lighten it
-		mkCorner(frame4, 11)
+		frame4:SetAttribute("AmousKeepStyle", true) -- fixed black, theme must not recolour it
+		mkCorner(frame4, 18)
 		Config._miniMk("UIScale", frame4, { Name = "AmousMinimizedScale", Scale = 1 })
 		local uiStroke = Config._miniMk("UIStroke", frame4, {
 			Name = "MinimizedStroke",
-			Color = glass.border,
+			Color = Color3.fromRGB(38, 38, 44),
 			Thickness = 1,
-			Transparency = 0.3,
+			Transparency = 0.35,
 			ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
 		})
-		character = Instance.new("UIGradient", uiStroke)
-		character.Rotation = 0
-		character.Name = "MinimizedGradient"
-		character.Color = ColorSequence.new({
-			ColorSequenceKeypoint.new(0, glass.accent),
-			ColorSequenceKeypoint.new(0.5, glass.accent2),
-			ColorSequenceKeypoint.new(1, glass.accent),
-		})
-		do
-			local miniBg = Config._miniMk("ImageLabel", frame4, {
-				Name = "MinimizedBgImage",
-				Size = UDim2.new(1, 0, 1, 0),
-				BackgroundTransparency = 1,
-				BorderSizePixel = 0,
-				ScaleType = Enum.ScaleType.Crop,
-				ZIndex = 21,
-			})
-			miniBg:SetAttribute("AmousKeepStyle", true)
-			mkCorner(miniBg, 11)
-			local miniShade = Config._miniMk("Frame", frame4, {
-				Name = "MinimizedBgShade",
-				Size = UDim2.new(1, 0, 1, 0),
-				BackgroundColor3 = Color3.fromRGB(0, 0, 0),
-				BackgroundTransparency = 0.45,
-				BorderSizePixel = 0,
-				ZIndex = 21,
-			})
-			miniShade:SetAttribute("AmousKeepStyle", true)
-			mkCorner(miniShade, 11)
-			local miniBgId = Config._btnPanelDigits(Config.mainBgImageId)
-			if miniBgId == "" then
-				miniBgId = "129689244551933"
-			end
-			Config._btnPanelApplyImage(miniBg, miniBgId)
-		end
-		character = Config._miniMk("TextLabel", frame4, {
-			Name = "MinimizedLogo",
-			Size = UDim2.new(0, 30, 0, 30),
-			Position = UDim2.new(0, 10, 0.5, -15),
-			BackgroundTransparency = 1,
-			BorderSizePixel = 0,
-			Text = "",
-			ZIndex = 22,
-		})
-		do
-			local logoImage = Config._miniMk("ImageLabel", character, {
-				Name = "MinimizedLogoImage",
-				Size = UDim2.new(1, 0, 1, 0),
-				BackgroundTransparency = 1,
-				BorderSizePixel = 0,
-				ScaleType = Enum.ScaleType.Fit,
-				ZIndex = 23,
-			})
-			logoImage:SetAttribute("AmousKeepStyle", true)
-			if Config._btnPanelApplyImage then
-				Config._btnPanelApplyImage(logoImage, "122464983051735")
-			else
-				logoImage.Image = "rbxassetid://122464983051735"
-			end
-		end
+		uiStroke:SetAttribute("AmousKeepStyle", true)
 		textButton = Config._miniMk("TextLabel", frame4, {
 			Name = "MinimizedBrand",
-			Size = UDim2.new(0, 150, 0, 17),
-			Position = UDim2.new(0, 47, 0, 6),
+			Size = UDim2.new(1, 0, 1, 0),
 			BackgroundTransparency = 1,
-			Text = "AMOUS HUB",
-			TextColor3 = Color3.fromRGB(255, 255, 255),
-			Font = Enum.Font.GothamBold,
-			TextSize = 14,
-			TextXAlignment = Enum.TextXAlignment.Left,
+			Text = "Amous Hub",
+			TextColor3 = Color3.fromRGB(235, 235, 235),
+			Font = Enum.Font.SciFi,
+			TextSize = 18,
+			TextXAlignment = Enum.TextXAlignment.Center,
 			TextYAlignment = Enum.TextYAlignment.Center,
 			TextStrokeTransparency = 1,
 			ZIndex = 22,
 		})
-		textButton = Config._miniMk("TextLabel", frame4, {
-			Name = "MinimizedSub",
-			Size = UDim2.new(0, 150, 0, 14),
-			Position = UDim2.new(0, 47, 0, 24),
-			BackgroundTransparency = 1,
-			Text = "discord.gg/Amous",
-			TextColor3 = glass.muted,
-			Font = Enum.Font.GothamMedium,
-			TextSize = 11,
-			TextXAlignment = Enum.TextXAlignment.Left,
-			TextYAlignment = Enum.TextYAlignment.Center,
-			ZIndex = 22,
-		})
-		textButton = Config._miniMk("Frame", frame4, {
-			Name = "MiniDivider",
-			Size = UDim2.new(0, 1, 0, 24),
-			Position = UDim2.new(0, 205, 0.5, -12),
-			BackgroundColor3 = glass.border,
-			BackgroundTransparency = 0.4,
-			BorderSizePixel = 0,
-			ZIndex = 22,
-		})
 		textButton:SetAttribute("AmousKeepStyle", true)
-		for _, row in ipairs({ { "FPS", 6, "Fps" }, { "MS", 24, "Ms" } }) do
-			Config._miniMk("TextLabel", frame4, {
-				Name = "Mini" .. row[3] .. "Label",
-				Size = UDim2.new(0, 30, 0, 15),
-				Position = UDim2.new(0, 216, 0, row[2]),
-				BackgroundTransparency = 1,
-				Text = row[1],
-				TextColor3 = glass.muted,
-				Font = Enum.Font.GothamMedium,
-				TextSize = 11,
-				TextXAlignment = Enum.TextXAlignment.Left,
-				ZIndex = 22,
-			})
-			textButton = Config._miniMk("TextLabel", frame4, {
-				Name = "Mini" .. row[3] .. "Value",
-				Size = UDim2.new(0, 38, 0, 15),
-				Position = UDim2.new(0, 250, 0, row[2]),
-				BackgroundTransparency = 1,
-				Text = "--",
-				TextColor3 = Color3.fromRGB(80, 220, 110),
-				Font = Enum.Font.GothamBold,
-				TextSize = 12,
-				TextXAlignment = Enum.TextXAlignment.Left,
-				ZIndex = 22,
-			})
-			textButton:SetAttribute("AmousKeepStyle", true)
-			Config["_mini" .. row[3] .. "Value"] = textButton
-		end
-		frame3 = Config._miniMk("TextLabel", frame4, {
-			Name = "MinimizedOpen",
-			Size = UDim2.new(0, 54, 0, 30),
-			Position = UDim2.new(1, -62, 0.5, -15),
-			BackgroundColor3 = Color3.fromRGB(34, 36, 46),
-			BackgroundTransparency = 0,
-			BorderSizePixel = 0,
-			Text = "OPEN",
-			TextColor3 = glass.text,
-			Font = Enum.Font.GothamBold,
-			TextSize = 12,
-			ZIndex = 22,
-		})
-		frame3:SetAttribute("AmousKeepStyle", true)
-		mkCorner(frame3, 8)
-		mkStroke(frame3, glass.border, 1).Transparency = 0.6
-		-- live FPS / MS (same sources as the stats bar); stops itself when the bar is destroyed
-		if Config._miniStatConn then
-			pcall(function()
-				Config._miniStatConn:Disconnect()
-			end)
-		end
-		Config._miniStatFrames, Config._miniStatAcc = 0, 0
-		Config._miniStatConn = RunService.RenderStepped:Connect(function(deltaTime)
-			if not frame4.Parent then
-				if Config._miniStatConn then
-					Config._miniStatConn:Disconnect()
-					Config._miniStatConn = nil
-				end
-				return
-			end
-			if not frame4.Visible then
-				Config._miniStatFrames, Config._miniStatAcc = 0, 0
-				return
-			end
-			Config._miniStatFrames += 1
-			Config._miniStatAcc += deltaTime
-			if Config._miniStatAcc >= 0.5 then
-				Config._miniFpsValue.Text = tostring(math.floor(Config._miniStatFrames / Config._miniStatAcc + 0.5))
-				local ms = 0
-				pcall(function()
-					ms = math.floor(localPlayer:GetNetworkPing() * 1000 + 0.5)
-				end)
-				Config._miniMsValue.Text = tostring(ms)
-				Config._miniStatFrames, Config._miniStatAcc = 0, 0
-			end
-		end)
 		frame4.MouseEnter:Connect(function()
 			TweenService:Create(frame4, TweenInfo.new(0.12), { BackgroundTransparency = 0 }):Play()
 			TweenService:Create(uiStroke, TweenInfo.new(0.12), { Transparency = 0.16 }):Play()
@@ -12189,6 +12026,7 @@ tbl31 = {
 					oy = frame.Position.Y.Offset,
 				},
 				minimized = frame4 and {
+					v = 2,
 					sx = frame4.Position.X.Scale,
 					ox = frame4.Position.X.Offset,
 					sy = frame4.Position.Y.Scale,
