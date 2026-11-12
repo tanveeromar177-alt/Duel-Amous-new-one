@@ -142,10 +142,10 @@ local function fn3(arg, arg2, arg3, arg4)
 end
 local function fn4(arg)
 	-- [PATCH] minibutton default: top-left, just under the Roblox top bar (this ScreenGui ignores
-	-- the GUI inset). Only positions saved by the new layout (v == 2) are honoured, because older
+	-- the GUI inset). Only positions saved by the new layout (v == 3) are honoured, because older
 	-- saves belong to the old bottom-centre bar.
-	local udim2 = UDim2.new(0, 12, 0, 56)
-	if type(arg) == "table" and tonumber(arg.v) == 2 then
+	local udim2 = UDim2.new(0, 12, 0, 98)
+	if type(arg) == "table" and tonumber(arg.v) == 3 then
 		return fn3(arg, udim2, 150, 36)
 	end
 	return udim2
@@ -3855,7 +3855,7 @@ Config._buildHeadDisplay = function(discord)
 	card.Name = "AmousHeadCard"
 	card.AnchorPoint = Vector2.new(0.5, 1)
 	card.Position = UDim2.new(0.5, 0, 1, 0)
-	card.Size = UDim2.new(0, 210, 0, 68)
+	card.Size = UDim2.new(0, 130, 0, 44)
 	card.BackgroundTransparency = 1
 	card.BorderSizePixel = 0
 	card.ZIndex = 3
@@ -3878,19 +3878,19 @@ Config._buildHeadDisplay = function(discord)
 		label:SetAttribute("AmousKeepStyle", true)
 		return label
 	end
-	local nameLabel = mkHeadText("AmousHeadName", 0, 26, "Amous Duel", Enum.Font.FredokaOne, 24, Color3.fromRGB(255, 255, 255), 0)
-	local discordLabel = mkHeadText("AmousHeadDiscord", 26, 16, "discord.gg/amoushub", Enum.Font.Gotham, 13, Color3.fromRGB(255, 255, 255), 0.35)
+	local nameLabel = mkHeadText("AmousHeadName", 0, 17, "Amous Duel", Enum.Font.FredokaOne, 15, Color3.fromRGB(255, 255, 255), 0)
+	local discordLabel = mkHeadText("AmousHeadDiscord", 17, 11, "discord.gg/amoushub", Enum.Font.Gotham, 10, Color3.fromRGB(255, 255, 255), 0.4)
 	local headLine = Instance.new("Frame", card)
 	headLine.Name = "AmousHeadDivider"
 	headLine.AnchorPoint = Vector2.new(0.5, 0)
-	headLine.Position = UDim2.new(0.5, 0, 0, 45)
-	headLine.Size = UDim2.new(0.92, 0, 0, 2)
-	headLine.BackgroundColor3 = Color3.fromRGB(190, 255, 205)
-	headLine.BackgroundTransparency = 0.15
+	headLine.Position = UDim2.new(0.5, 0, 0, 30)
+	headLine.Size = UDim2.new(0.92, 0, 0, 1)
+	headLine.BackgroundColor3 = Color3.fromRGB(53, 224, 255)
+	headLine.BackgroundTransparency = 0
 	headLine.BorderSizePixel = 0
 	headLine.ZIndex = 4
 	headLine:SetAttribute("AmousKeepStyle", true)
-	local textLabel2 = mkHeadText("AmousHeadSpeed", 49, 19, string.format("%.1f", tonumber(Config.normalSpeed) or 0), Enum.Font.FredokaOne, 18, Color3.fromRGB(90, 255, 130), 0)
+	local textLabel2 = mkHeadText("AmousHeadSpeed", 32, 12, string.format("%.1f", tonumber(Config.normalSpeed) or 0), Enum.Font.FredokaOne, 12, Color3.fromRGB(53, 224, 255), 0)
 	tbl27.sg = screenGui
 	tbl27.frame = frame
 	tbl27.discord = discordLabel
@@ -11473,27 +11473,27 @@ tbl31 = {
 			obj.Parent = parent
 			return obj
 		end
-		-- [PATCH v5] minibutton = black pill with one centred label (reference image).
+		-- [PATCH v5] minibutton = dark pill with cyan border with one centred label (reference image).
 		-- Tap opens the menu, drag moves it (handlers further down are unchanged).
 		local frame4 = Config._miniMk("Frame", screenGui, {
 			Name = "MinimizedFrame",
 			Size = UDim2.new(0, 150, 0, 36),
 			Position = fn4(tbl2.minimized),
-			BackgroundColor3 = Color3.fromRGB(0, 0, 0),
+			BackgroundColor3 = Color3.fromRGB(10, 10, 20),
 			BackgroundTransparency = 0,
 			BorderSizePixel = 0,
 			Visible = false,
 			ZIndex = 20,
 			Active = true,
 		})
-		frame4:SetAttribute("AmousKeepStyle", true) -- fixed black, theme must not recolour it
+		frame4:SetAttribute("AmousKeepStyle", true) -- fixed dark navy, theme must not recolour it
 		mkCorner(frame4, 18)
 		Config._miniMk("UIScale", frame4, { Name = "AmousMinimizedScale", Scale = 1 })
 		local uiStroke = Config._miniMk("UIStroke", frame4, {
 			Name = "MinimizedStroke",
-			Color = Color3.fromRGB(38, 38, 44),
-			Thickness = 1,
-			Transparency = 0.35,
+			Color = Color3.fromRGB(53, 224, 255),
+			Thickness = 1.5,
+			Transparency = 0,
 			ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
 		})
 		uiStroke:SetAttribute("AmousKeepStyle", true)
@@ -11502,7 +11502,7 @@ tbl31 = {
 			Size = UDim2.new(1, 0, 1, 0),
 			BackgroundTransparency = 1,
 			Text = "Amous Hub",
-			TextColor3 = Color3.fromRGB(235, 235, 235),
+			TextColor3 = Color3.fromRGB(255, 255, 255),
 			Font = Enum.Font.SciFi,
 			TextSize = 18,
 			TextXAlignment = Enum.TextXAlignment.Center,
@@ -11513,11 +11513,11 @@ tbl31 = {
 		textButton:SetAttribute("AmousKeepStyle", true)
 		frame4.MouseEnter:Connect(function()
 			TweenService:Create(frame4, TweenInfo.new(0.12), { BackgroundTransparency = 0 }):Play()
-			TweenService:Create(uiStroke, TweenInfo.new(0.12), { Transparency = 0.16 }):Play()
+			TweenService:Create(uiStroke, TweenInfo.new(0.12), { Transparency = 0 }):Play()
 		end)
 		frame4.MouseLeave:Connect(function()
 			TweenService:Create(frame4, TweenInfo.new(0.12), { BackgroundTransparency = 0 }):Play()
-			TweenService:Create(uiStroke, TweenInfo.new(0.12), { Transparency = 0.3 }):Play()
+			TweenService:Create(uiStroke, TweenInfo.new(0.12), { Transparency = 0 }):Play()
 		end)
 		local connection7, connection8, connection9, connection10, position, v42
 		local flag7, position2 = false
@@ -12026,7 +12026,7 @@ tbl31 = {
 					oy = frame.Position.Y.Offset,
 				},
 				minimized = frame4 and {
-					v = 2,
+					v = 3,
 					sx = frame4.Position.X.Scale,
 					ox = frame4.Position.X.Offset,
 					sy = frame4.Position.Y.Scale,
