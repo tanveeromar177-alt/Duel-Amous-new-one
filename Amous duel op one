@@ -228,6 +228,7 @@ Config = {
 	antiRagdollEnabled = false,
 	antiRagdollMode = "V1",
 	antiLagEnabled = false,
+	tronTrailEnabled = false,
 	potatoGraphicsEnabled = false,
 	stealToggled = false,
 	medusaCounterEnabled = false,
@@ -4349,6 +4350,7 @@ local function fn31()
 		antiRagdoll = Config.antiRagdollEnabled,
 		antiRagdollEnabled = Config.antiRagdollEnabled,
 		antiLag = Config.antiLagEnabled,
+		tronTrail = Config.tronTrailEnabled,
 		potatoGraphics = Config.potatoGraphicsEnabled,
 		medusaCounter = Config.medusaCounterEnabled,
 		instaReset = false,
@@ -4512,6 +4514,7 @@ local function fn33()
 		antiRagdoll = Config.antiRagdollEnabled,
 		antiRagdollEnabled = Config.antiRagdollEnabled,
 		antiLag = Config.antiLagEnabled,
+		tronTrail = Config.tronTrailEnabled,
 		potatoGraphics = Config.potatoGraphicsEnabled,
 		medusaCounter = Config.medusaCounterEnabled,
 		batAimbotToggled = Config.batAimbotToggled,
@@ -5272,6 +5275,9 @@ local function fn39()
 	if v23.antiLag ~= nil then
 		Config.antiLagEnabled = v23.antiLag
 	end
+	if v23.tronTrail ~= nil then
+		Config.tronTrailEnabled = v23.tronTrail == true
+	end
 	if v23.potatoGraphics ~= nil then
 		Config.potatoGraphicsEnabled = v23.potatoGraphics
 	end
@@ -5816,6 +5822,12 @@ local function fn40(arg)
 				startAntiRagdoll()
 			else
 				stopAntiRagdoll()
+			end
+		end
+		if arg.tronTrail ~= nil and Config._setTronTrail then
+			pcall(Config._setTronTrail, arg.tronTrail == true)
+			if Config._tronTrailUI then
+				pcall(Config._tronTrailUI, arg.tronTrail == true)
 			end
 		end
 		if arg.antiLag ~= nil and setAntiLag_ then
@@ -12547,7 +12559,7 @@ tbl31 = {
 			if not flag9 then
 				return
 			end
-			if os.clock() - now >= 0.003 then
+			if os.clock() - now >= 0.012 then
 				RunService.Heartbeat:Wait()
 				now = os.clock()
 			end
@@ -18986,6 +18998,150 @@ return {
 					Config._antiLagApplying = false
 				end)
 			end
+			do
+				if Config._tronTrailCleanup then
+					pcall(Config._tronTrailCleanup)
+				end
+				local TrailRun = game:GetService("RunService")
+				local TrailPlayer = game:GetService("Players").LocalPlayer
+				local TRAIL_BLUE = Color3.fromRGB(0, 140, 255)
+				local trail = { objects = {}, trails = {}, moving = false }
+				local heartbeat, removingConn
+				local function clearTrail()
+					trail.root, trail.humanoid, trail.position = nil, nil, nil
+					trail.moving = false
+					for _, object in ipairs(trail.objects) do
+						pcall(function()
+							object:Destroy()
+						end)
+					end
+					trail.objects, trail.trails = {}, {}
+				end
+				local function buildTrail(root, humanoid)
+					clearTrail()
+					trail.root, trail.humanoid, trail.position = root, humanoid, root.Position
+					for _, object in ipairs(root:GetChildren()) do
+						if object:GetAttribute("AmousTrailEffect") == true then
+							object:Destroy()
+						end
+					end
+					local layers = {
+						{ name = "Aurora", top = 0.90, bottom = -1.10, alpha = 0.68, lifetime = 0.50 },
+						{ name = "Blade", top = 0.12, bottom = -0.12, alpha = 0.05, lifetime = 0.44 },
+						{ name = "Edge", top = 0.045, bottom = -0.045, alpha = 0, lifetime = 0.36 },
+					}
+					for index, layer in ipairs(layers) do
+						local attachments = {}
+						for i, height in ipairs({ layer.top, layer.bottom }) do
+							local attachment = Instance.new("Attachment")
+							attachment.Name = "AmousTrail" .. layer.name .. i
+							attachment.Position = Vector3.new(0, height, root.Size.Z * 0.5 + 0.35)
+							attachment:SetAttribute("AmousTrailEffect", true)
+							attachment.Parent = root
+							attachments[i] = attachment
+							trail.objects[#trail.objects + 1] = attachment
+						end
+						local object = Instance.new("Trail")
+						trail.objects[#trail.objects + 1] = object
+						object.Name = "AmousTrail" .. layer.name
+						object:SetAttribute("AmousTrailEffect", true)
+						object.Attachment0, object.Attachment1 = attachments[1], attachments[2]
+						object.Enabled = false
+						object.FaceCamera = true
+						object.Lifetime = layer.lifetime
+						object.MinLength = 0.03
+						object.MaxLength = 28
+						object.LightEmission = 1
+						object.LightInfluence = 0
+						object.WidthScale = NumberSequence.new({
+							NumberSequenceKeypoint.new(0, 1),
+							NumberSequenceKeypoint.new(0.35, 0.9),
+							NumberSequenceKeypoint.new(0.80, 0.32),
+							NumberSequenceKeypoint.new(1, 0),
+						})
+						object.Transparency = NumberSequence.new({
+							NumberSequenceKeypoint.new(0, layer.alpha),
+							NumberSequenceKeypoint.new(0.45, math.min(0.95, layer.alpha + 0.13)),
+							NumberSequenceKeypoint.new(0.8, 0.83),
+							NumberSequenceKeypoint.new(1, 1),
+						})
+						local light = TRAIL_BLUE:Lerp(Color3.new(1, 1, 1), index == 3 and 0.68 or 0.24)
+						object.Color = ColorSequence.new({
+							ColorSequenceKeypoint.new(0, light),
+							ColorSequenceKeypoint.new(0.28, TRAIL_BLUE),
+							ColorSequenceKeypoint.new(1, TRAIL_BLUE:Lerp(Color3.new(0, 0, 0), 0.22)),
+						})
+						object.Parent = root
+						trail.trails[index] = object
+					end
+				end
+				local function stepTrail(dt)
+					if not Config.tronTrailEnabled then
+						return
+					end
+					local character = TrailPlayer.Character
+					local root = character and character:FindFirstChild("HumanoidRootPart")
+					local humanoid = character and character:FindFirstChildOfClass("Humanoid")
+					if not root or not humanoid or humanoid.Health <= 0 then
+						if trail.root then
+							clearTrail()
+						end
+						return
+					end
+					if trail.root ~= root or not trail.trails[1] or not trail.trails[1].Parent then
+						buildTrail(root, humanoid)
+					end
+					local position = root.Position
+					local delta = position - (trail.position or position)
+					trail.position = position
+					local distance = Vector3.new(delta.X, 0, delta.Z).Magnitude
+					local teleported = dt <= 0 or dt > 0.25 or delta.Magnitude > math.max(24, dt * 600)
+					local moving = not teleported and distance / math.max(dt, 0.001) > 2.5 and not humanoid.Sit
+					if teleported then
+						for _, object in ipairs(trail.trails) do
+							object:Clear()
+						end
+					end
+					if trail.moving ~= moving then
+						trail.moving = moving
+						for _, object in ipairs(trail.trails) do
+							if moving then
+								object:Clear()
+							end
+							object.Enabled = moving
+						end
+					end
+				end
+				function Config._setTronTrail(enabled)
+					Config.tronTrailEnabled = enabled == true
+					if Config.tronTrailEnabled then
+						if not heartbeat then
+							heartbeat = TrailRun.Heartbeat:Connect(stepTrail)
+						end
+					else
+						if heartbeat then
+							heartbeat:Disconnect()
+							heartbeat = nil
+						end
+						clearTrail()
+					end
+				end
+				removingConn = TrailPlayer.CharacterRemoving:Connect(clearTrail)
+				Config._tronTrailCleanup = function()
+					if heartbeat then
+						heartbeat:Disconnect()
+						heartbeat = nil
+					end
+					if removingConn then
+						removingConn:Disconnect()
+						removingConn = nil
+					end
+					clearTrail()
+				end
+				if Config.tronTrailEnabled then
+					Config._setTronTrail(true)
+				end
+			end
 			makeSectionHeader("Graphics")
 			makeGap(1)
 			do
@@ -19047,6 +19203,47 @@ return {
 							pcall(undoAntiLag)
 						end
 					end
+				end
+			end
+			makeGap(1)
+			do
+				local trailOn, trailFrame = Config.tronTrailEnabled or false, Instance.new("Frame", v43)
+				trailFrame.Size = UDim2.new(1, 0, 0, 40)
+				trailFrame.BorderSizePixel = 0
+				trailFrame.LayoutOrder = LO()
+				trailFrame.BackgroundColor3 = trailOn and glass.panelHover or glass.panel
+				trailFrame.BackgroundTransparency = 0.4
+				mkCorner(trailFrame, 10)
+				mkAnimStroke(trailFrame, 1)
+				local trailLabel = Instance.new("TextLabel", trailFrame)
+				trailLabel.Size = UDim2.new(0, 110, 1, 0)
+				trailLabel.Position = UDim2.new(0, 14, 0, 0)
+				trailLabel.BackgroundTransparency = 1
+				trailLabel.Text = "Trail Line"
+				trailLabel.TextColor3 = trailOn and glass.text or glass.muted
+				trailLabel.Font = Enum.Font.GothamBold
+				trailLabel.TextSize = 12
+				trailLabel.TextXAlignment = Enum.TextXAlignment.Left
+				local function paintTrailRow(on)
+					trailLabel.TextColor3 = on and glass.text or glass.muted
+					TweenService
+						:Create(
+							trailFrame,
+							TweenInfo.new(0.15),
+							{ BackgroundColor3 = on and glass.panelHover or glass.panel }
+						)
+						:Play()
+				end
+				local trailSwitch, trailSetSwitch = mkSwitch(trailFrame, trailOn, function(on)
+					Config.tronTrailEnabled = on
+					paintTrailRow(on)
+					pcall(Config._setTronTrail, on)
+					fn34()
+				end)
+				trailSwitch.Position = UDim2.new(1, -50, 0.5, -12)
+				Config._tronTrailUI = function(on)
+					trailSetSwitch(on)
+					paintTrailRow(on)
 				end
 			end
 			makeGap(1)
@@ -27692,14 +27889,12 @@ return {
 				end
 			end
 		end)
-		RunService.Heartbeat:Wait()
 		buildPage("Other", function()
 			makeGap(1)
 			buildCombatFeatures()
 			makeGap(6)
 			buildAutoStealSection()
 		end)
-		RunService.Heartbeat:Wait()
 		buildPage("Visuals", function()
 			makeGap(1)
 			buildMiscVisualFeatures()
@@ -27758,7 +27953,6 @@ return {
 				end
 			end
 		end)
-		RunService.Heartbeat:Wait()
 		buildPage("Keys", function()
 			makeGap(1)
 			makeSectionHeader("Keybinds")
@@ -27800,7 +27994,6 @@ return {
 
 			makeGap(1)
 		end)
-		RunService.Heartbeat:Wait()
 		buildPage("Config", function()
 			makeGap(1)
 			buildSettingsSection()
