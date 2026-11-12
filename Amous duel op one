@@ -146,7 +146,7 @@ local function fn4(arg)
 	-- saves belong to the old bottom-centre bar.
 	local udim2 = UDim2.new(0, 12, 0, 98)
 	if type(arg) == "table" and tonumber(arg.v) == 3 then
-		return fn3(arg, udim2, 150, 36)
+		return fn3(arg, udim2, 190, 46)
 	end
 	return udim2
 end
@@ -3878,8 +3878,8 @@ Config._buildHeadDisplay = function(discord)
 		label:SetAttribute("AmousKeepStyle", true)
 		return label
 	end
-	local nameLabel = mkHeadText("AmousHeadName", 0, 17, "Amous Duel", Enum.Font.FredokaOne, 15, Color3.fromRGB(255, 255, 255), 0)
-	local discordLabel = mkHeadText("AmousHeadDiscord", 17, 11, "discord.gg/amoushub", Enum.Font.Gotham, 10, Color3.fromRGB(255, 255, 255), 0.4)
+	local nameLabel = mkHeadText("AmousHeadName", 0, 17, "Amous Duel", Enum.Font.FredokaOne, 15, Color3.fromRGB(98, 177, 234), 0)
+	local discordLabel = mkHeadText("AmousHeadDiscord", 17, 11, "discord.gg/amoushub", Enum.Font.Gotham, 10, Color3.fromRGB(135, 195, 236), 0)
 	local headLine = Instance.new("Frame", card)
 	headLine.Name = "AmousHeadDivider"
 	headLine.AnchorPoint = Vector2.new(0.5, 0)
@@ -3891,6 +3891,51 @@ Config._buildHeadDisplay = function(discord)
 	headLine.ZIndex = 4
 	headLine:SetAttribute("AmousKeepStyle", true)
 	local textLabel2 = mkHeadText("AmousHeadSpeed", 32, 12, string.format("%.1f", tonumber(Config.normalSpeed) or 0), Enum.Font.FredokaOne, 12, Color3.fromRGB(98, 177, 234), 0)
+	-- [PATCH] shiny sweep on the three head texts: a white band travels across each text every 3 s
+	-- (1.4 s sweep + pause), each line starting a little later than the one above. UIGradient multiplies
+	-- TextColor3, so the labels become white and the gradient carries the blue.
+	local shineGradients = {}
+	for index, entry in ipairs({
+		{ nameLabel, Color3.fromRGB(98, 177, 234) },
+		{ discordLabel, Color3.fromRGB(135, 195, 236) },
+		{ textLabel2, Color3.fromRGB(98, 177, 234) },
+	}) do
+		local label, base = entry[1], entry[2]
+		label.TextColor3 = Color3.fromRGB(255, 255, 255)
+		local gradient = Instance.new("UIGradient")
+		gradient.Name = "AmousHeadShine"
+		gradient.Color = ColorSequence.new({
+			ColorSequenceKeypoint.new(0, base),
+			ColorSequenceKeypoint.new(0.38, base),
+			ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255, 255, 255)),
+			ColorSequenceKeypoint.new(0.62, base),
+			ColorSequenceKeypoint.new(1, base),
+		})
+		gradient.Offset = Vector2.new(-1, 0)
+		gradient:SetAttribute("AmousKeepStyle", true)
+		gradient.Parent = label
+		shineGradients[index] = gradient
+	end
+	if Config._headShineConn then
+		pcall(function()
+			Config._headShineConn:Disconnect()
+		end)
+	end
+	local shineStart = os.clock()
+	Config._headShineConn = RunService.RenderStepped:Connect(function()
+		if not screenGui.Parent then
+			if Config._headShineConn then
+				Config._headShineConn:Disconnect()
+				Config._headShineConn = nil
+			end
+			return
+		end
+		local now = os.clock() - shineStart
+		for index, gradient in ipairs(shineGradients) do
+			local t = (now - (index - 1) * 0.18) % 3
+			gradient.Offset = Vector2.new(t < 1.4 and (-1 + 2 * (t / 1.4)) or 1, 0)
+		end
+	end)
 	tbl27.sg = screenGui
 	tbl27.frame = frame
 	tbl27.discord = discordLabel
@@ -11478,7 +11523,7 @@ tbl31 = {
 		-- Tap opens the menu, drag moves it (handlers further down are unchanged).
 		local frame4 = Config._miniMk("Frame", screenGui, {
 			Name = "MinimizedFrame",
-			Size = UDim2.new(0, 150, 0, 36),
+			Size = UDim2.new(0, 190, 0, 46),
 			Position = fn4(tbl2.minimized),
 			BackgroundColor3 = Color3.fromRGB(31, 48, 68),
 			BackgroundTransparency = 0,
@@ -11488,7 +11533,7 @@ tbl31 = {
 			Active = true,
 		})
 		frame4:SetAttribute("AmousKeepStyle", true) -- fixed blue-grey, theme must not recolour it
-		mkCorner(frame4, 18)
+		mkCorner(frame4, 23)
 		Config._miniMk("UIScale", frame4, { Name = "AmousMinimizedScale", Scale = 1 })
 		local uiStroke = Config._miniMk("UIStroke", frame4, {
 			Name = "MinimizedStroke",
@@ -11505,7 +11550,7 @@ tbl31 = {
 			Text = "Amous Hub",
 			TextColor3 = Color3.fromRGB(255, 255, 255),
 			Font = Enum.Font.SciFi,
-			TextSize = 18,
+			TextSize = 22,
 			TextXAlignment = Enum.TextXAlignment.Center,
 			TextYAlignment = Enum.TextYAlignment.Center,
 			TextStrokeTransparency = 1,
@@ -35264,24 +35309,7 @@ Config._buildQuickGui = function()
 		n25 = Instance.new("UITextSizeConstraint", textButton)
 		n25.MinTextSize = 8
 		n25.MaxTextSize = 11
-		do
-			local silverDot = Instance.new("Frame")
-			silverDot.Name = "AmousSilverDot"
-			silverDot.Size = UDim2.fromOffset(9, 9)
-			silverDot.AnchorPoint = Vector2.new(0.5, 0.5)
-			silverDot.Position = UDim2.new(1, -9, 0, 9)
-			silverDot.BackgroundColor3 = Color3.fromRGB(87, 163, 222)
-			silverDot.BorderSizePixel = 0
-			silverDot.Active = false
-			silverDot.ZIndex = 110
-			silverDot:SetAttribute("AmousKeepStyle", true)
-			Instance.new("UICorner", silverDot).CornerRadius = UDim.new(1, 0)
-			local silverStroke = Instance.new("UIStroke", silverDot)
-			silverStroke.Color = Color3.fromRGB(255, 255, 255)
-			silverStroke.Thickness = 1
-			silverStroke:SetAttribute("AmousKeepStyle", true)
-			silverDot.Parent = frame
-		end
+		-- [PATCH] the small top-right circle on quick buttons was removed; ON state still shows through the button fill/border colour.
 		local v23, v24
 		local function fn51()
 			Config._savedQuickButtonPositions = Config._savedQuickButtonPositions or {}
