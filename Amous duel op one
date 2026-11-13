@@ -1946,8 +1946,11 @@ function destroyAnimalHoldDetector()
 	Config.heldAnimalName = nil
 end
 local v14 = (function()
-	local tbl24
-	local tbl25, tbl26, tbl27, tbl28, connection = { caches = {}, connections = {} }, {}, {}, {}
+	-- [PATCH] Auto steal logic replaced with the GOONER AUTO GRAB logic (GOONER_AUTO_GRAB_MADE_BY_MAFIA.txt):
+	-- nearest "Steal" ProximityPrompt on other players' plots, captured PromptButtonHoldBegan / Triggered callbacks,
+	-- hold 1.3 s, fire once within 10 studs (0.3 s entry delay), give up after 2.6 s.
+	-- The interface to the rest of the script is unchanged, so the Amous GUI is untouched:
+	-- StartV1/StopV1/StartV2/StopV2, Telemetry, _G.StealBar, Config.autoStealEnabled, tbl17.StealRadius (Amous radius box).
 	local autoSteal = {
 		active = false,
 		startTime = 0,
@@ -1973,11 +1976,12 @@ local v14 = (function()
 			autoSteal.visualState = "IDLE"
 		end,
 	}
-	local function fn21()
-		return pcall(function()
-			local packages, datas =
-				ReplicatedStorage:WaitForChild("Packages", 10), ReplicatedStorage:WaitForChild("Datas", 10)
-			if not packages or not datas then
+
+	-- Animal data tables (Datas.Animals / Datas.Traits) that other parts of the script read through tbl18 / tbl19.
+	task.spawn(function()
+		pcall(function()
+			local datas = ReplicatedStorage:WaitForChild("Datas", 10)
+			if not datas then
 				return
 			end
 			tbl18 = require(datas:WaitForChild("Animals"))
@@ -1987,369 +1991,203 @@ local v14 = (function()
 					tbl19 = require(traits)
 				end)
 			end
-			datas = packages:WaitForChild("Synchronizer")
-			tbl24 = {
-				channelFolder = datas:WaitForChild("Channel"),
-				routeRemote = datas:WaitForChild("CommunicationRoute"),
-				requestData = datas:FindFirstChild("RequestData"),
-			}
-		end) and tbl24 ~= nil
-	end
-	local function fn22(arg)
-		if typeof(arg) == "table" then
-			return arg
-		end
-		local tbl29 = {}
-		for match in string.gmatch(tostring(arg), "[^%.]+") do
-			table.insert(tbl29, tonumber(match) or match)
-		end
-		return tbl29
-	end
-	local function fn23(arg, arg2)
-		local v14, v15, v16 = arg2
-		for i, v17 in ipairs(fn22(arg)) do
-			v14, v15, v16 = v14 and v14[v17] or nil, v14, v17
-		end
-		return v14, v15, v16
-	end
-	local function fn24(arg, arg2)
-		local v14 = tbl25.caches[arg]
-		if typeof(v14) ~= "table" then
-			return
-		end
-		local v15, v16, v17, v18 = arg2[1], arg2[2], arg2[3], arg2[4]
-		local v19, v20, v21 = fn23(v15, v14)
-		if v16 == "Changed" then
-			if v20 ~= nil then
-				v20[v21] = v17
-			end
-		elseif v16 == "ArrayInsert" then
-			if v19 ~= nil then
-				table.insert(v19, v18, v17)
-			end
-		elseif v16 == "ArrayRemoved" then
-			if v19 ~= nil then
-				table.remove(v19, v18)
-			end
-		elseif v16 == "DictionaryInsert" then
-			if v19 ~= nil then
-				v19[v18] = v17
-			end
-		elseif v16 == "DictionaryRemoved" then
-			if v19 ~= nil then
-				v19[v18] = nil
-			end
-		end
-	end
-	local function fn25(arg)
-		if not tbl24 or tbl25.connections[arg] then
-			return
-		end
-		local str = tostring(arg.Name)
-		if not plots:FindFirstChild(str) then
-			return
-		end
-		if tbl24.requestData and tbl25.caches[str] == nil then
-			local ok, result = pcall(function()
-				return tbl24.requestData:InvokeServer(str)
-			end)
-			tbl25.caches[str] = ok and typeof(result) == "table" and result or {}
-		elseif tbl25.caches[str] == nil then
-			tbl25.caches[str] = {}
-		end
-		tbl25.connections[arg] = arg.OnClientEvent:Connect(function(arg2)
-			for i, v14 in ipairs(arg2) do
-				fn24(str, v14)
-			end
 		end)
-	end
-	local function fn26(arg)
-		for k, connection2 in pairs(tbl25.connections) do
-			if tostring(k.Name) == tostring(arg) then
-				connection2:Disconnect()
-				tbl25.connections[k] = nil
-				tbl25.caches[tostring(arg)] = nil
-				break
-			end
-		end
-	end
-	local function fn27()
-		if not fn21() then
-			return false
-		end
-		for i, child in ipairs(tbl24.channelFolder:GetChildren()) do
-			if child:IsA("RemoteEvent") then
-				fn25(child)
-			end
-		end
-		tbl24.channelFolder.ChildAdded:Connect(function(child)
-			if child:IsA("RemoteEvent") then
-				fn25(child)
-			end
-		end)
-		tbl24.routeRemote.OnClientEvent:Connect(function(arg)
-			for i, v14 in ipairs(arg) do
-				local v15, str = v14[1], tostring(v14[2])
-				if not plots:FindFirstChild(str) then
-					continue
-				end
-				if v15 == "ListenerAdded" then
-					v14 = tbl24.channelFolder:FindFirstChild(str)
-					if v14 and (v14:IsA("RemoteEvent")) then
-						fn25(v14)
-					end
-				elseif v15 == "ListenerRemoved" then
-					fn26(str)
-				end
-			end
-		end)
-		return true
-	end
-	local function fn28(arg)
-		return tbl25.caches[arg]
-	end
-	local function fn29(arg)
-		if not arg or not arg.plot then
-			return false
-		end
-		local yourBase = plots:FindFirstChild(arg.plot)
-		if not yourBase then
-			return false
-		end
-		arg = yourBase:FindFirstChild("PlotSign")
-		yourBase = arg and (arg:FindFirstChild("YourBase"))
-		return yourBase and (yourBase:IsA("BillboardGui")) and yourBase.Enabled
-	end
-	local function fn30(arg)
-		local v14 = plots:FindFirstChild(arg.plot)
-		if not v14 then
-			return nil
-		end
-		local animalPodiums = v14:FindFirstChild("AnimalPodiums")
-		v14 = animalPodiums and (animalPodiums:FindFirstChild(arg.slot))
-		return v14 and v14:GetPivot().Position
-	end
-	local function fn31(arg)
+	end)
+
+	local HALF_FIRE_RANGE, HALF_HOLD_MIN, HALF_HOLD_MAX, HALF_ENTRY_DELAY = 10, 1.3, 2.6, 0.3
+	local stealData = setmetatable({}, { __mode = "k" })
+	local isStealing, stealStartTime, autoConn, session = false, nil, nil, 0
+
+	local function getRoot()
 		local character = localPlayer.Character
-		local humanoidRootPart = character
-			and (character:FindFirstChild("HumanoidRootPart") or (character:FindFirstChild("UpperTorso")))
-		if not humanoidRootPart then
-			return math.huge
-		end
-		character = fn30(arg)
 		if not character then
-			return math.huge
+			return nil
 		end
-		return (humanoidRootPart.Position - character).Magnitude
+		return character:FindFirstChild("HumanoidRootPart")
+			or character:FindFirstChild("UpperTorso")
+			or character:FindFirstChild("Torso")
 	end
-	local function fn32(arg)
-		if not arg then
-			return nil
+
+	local function isMyPlotByName(plotName)
+		local plotsFolder = workspace:FindFirstChild("Plots")
+		if not plotsFolder then
+			return false
 		end
-		local spawn = tbl27[arg.uid]
-		if spawn and spawn.Parent then
-			return spawn
+		local plot = plotsFolder:FindFirstChild(plotName)
+		if not plot then
+			return false
 		end
-		spawn = plots:FindFirstChild(arg.plot)
-		if not spawn then
-			return nil
-		end
-		local animalPodiums = spawn:FindFirstChild("AnimalPodiums")
-		if not animalPodiums then
-			return nil
-		end
-		spawn = animalPodiums:FindFirstChild(arg.slot)
-		if not spawn then
-			return nil
-		end
-		animalPodiums = spawn:FindFirstChild("Base")
-		if not animalPodiums then
-			return nil
-		end
-		spawn = animalPodiums:FindFirstChild("Spawn")
-		if not spawn then
-			return nil
-		end
-		animalPodiums = spawn:FindFirstChild("PromptAttachment")
-		if not animalPodiums then
-			return nil
-		end
-		for i, child in ipairs(animalPodiums:GetChildren()) do
-			if child:IsA("ProximityPrompt") then
-				tbl27[arg.uid] = child
-				return child
+		local sign = plot:FindFirstChild("PlotSign")
+		if sign then
+			local yourBase = sign:FindFirstChild("YourBase")
+			if yourBase and yourBase:IsA("BillboardGui") then
+				return yourBase.Enabled == true
 			end
 		end
-		return nil
+		return false
 	end
-	local function fn33()
-		local tbl29 = {}
-		for i, child in ipairs(plots:GetChildren()) do
-			i = fn28(child.Name)
-			local animalList = i and i.AnimalList
-			if typeof(animalList) == "table" then
-				for k, v14 in pairs(animalList) do
-					if typeof(v14) == "table" then
-						i = v14.Index
-						local v15 = tbl18[i]
-						if v15 then
-							local tier
-							local tbl30 = {}
-							if type(v14.Tier) == "string" and v14.Tier ~= "" then
-								tier = v14.Tier
-								table.insert(tbl30, v14.Tier)
-							end
-							if type(v14.Traits) == "table" then
-								for i2, trait in ipairs(v14.Traits) do
-									if type(trait) == "string" and trait ~= "" then
-										table.insert(tbl30, trait)
+
+	-- returns the nearest Steal prompt within tbl17.StealRadius (the Amous radius box) and its podium name
+	local function findNearestPrompt()
+		local root = getRoot()
+		if not root then
+			return nil
+		end
+		local plotsFolder = workspace:FindFirstChild("Plots")
+		if not plotsFolder then
+			return nil
+		end
+		local radius = tonumber(tbl17.StealRadius) or 20
+		local nearest, nearestName, nearestDist = nil, nil, math.huge
+		for _, plot in ipairs(plotsFolder:GetChildren()) do
+			if plot:IsA("Model") and not isMyPlotByName(plot.Name) then
+				local pods = plot:FindFirstChild("AnimalPodiums")
+				if pods then
+					for _, pod in ipairs(pods:GetChildren()) do
+						local base = pod:FindFirstChild("Base")
+						local spawnPart = base and base:FindFirstChild("Spawn")
+						if spawnPart then
+							local distance = (spawnPart.Position - root.Position).Magnitude
+							if distance <= radius and distance < nearestDist then
+								local found = nil
+								local attachment = spawnPart:FindFirstChild("PromptAttachment")
+								if attachment then
+									for _, prompt in ipairs(attachment:GetChildren()) do
+										if
+											prompt:IsA("ProximityPrompt")
+											and prompt.ActionText
+											and prompt.ActionText:find("Steal")
+										then
+											found = prompt
+										end
 									end
 								end
-							end
-							if type(v14.Trait) == "string" and v14.Trait ~= "" then
-								table.insert(tbl30, v14.Trait)
-							end
-							tier = if not tier and #tbl30 > 0 then tbl30[1] else tier
-							local tbl31, tbl32 = {}, {}
-							for i2, v16 in ipairs(tbl30) do
-								if not tbl31[v16] then
-									tbl31[v16] = true
-									table.insert(tbl32, v16)
+								if not found then
+									for _, prompt in ipairs(spawnPart:GetDescendants()) do
+										if
+											prompt:IsA("ProximityPrompt")
+											and prompt.ActionText
+											and prompt.ActionText:find("Steal")
+										then
+											found = prompt
+										end
+									end
+								end
+								if found then
+									nearest, nearestName, nearestDist = found, pod.Name, distance
 								end
 							end
-							table.insert(tbl29, {
-								name = v15.DisplayName or i,
-								plot = child.Name,
-								slot = tostring(k),
-								uid = child.Name .. "_" .. tostring(k),
-								mutation = v14.Mutation or nil,
-								tier = tier,
-								tiers = tbl32,
-							})
 						end
 					end
 				end
 			end
 		end
-		tbl26 = tbl29
-		return #tbl26
+		return nearest, nearestName
 	end
-	local function fn34()
-		local character = localPlayer.Character
-		local humanoidRootPart = character
-			and (character:FindFirstChild("HumanoidRootPart") or (character:FindFirstChild("UpperTorso")))
-		if not humanoidRootPart then
-			return nil
+
+	local function promptDistance(prompt)
+		local root = getRoot()
+		if not root then
+			return math.huge
 		end
-		local huge, v14 = math.huge
-		for i, v15 in ipairs(tbl26) do
-			if fn29(v15) then
-				continue
-			end
-			character = fn30(v15)
-			if not character then
-				continue
-			end
-			i = (humanoidRootPart.Position - character).Magnitude
-			if i > tbl21.PRIME_RANGE then
-				continue
-			end
-			if i < huge then
-				huge, v14 = i, v15
-			end
+		local part = prompt.Parent
+		if part and part:IsA("Attachment") then
+			part = part.Parent
 		end
-		return v14
+		if part and part:IsA("BasePart") then
+			return (part.Position - root.Position).Magnitude
+		end
+		local ok, worldPosition = pcall(function()
+			return prompt.Parent and prompt.Parent.WorldPosition
+		end)
+		if ok and worldPosition then
+			return (worldPosition - root.Position).Magnitude
+		end
+		return math.huge
 	end
-	local function fn35(arg)
-		if tbl28[arg] then
+
+	local function executeSteal(prompt, label)
+		if isStealing then
 			return
 		end
-		local tbl29, flag4, result = { holdCallbacks = {}, triggerCallbacks = {}, ready = true }, false
-		if getconnections then
-			flag4, result = pcall(getconnections, arg.PromptButtonHoldBegan)
-		end
-		if flag4 and typeof(result) == "table" then
-			for i, v14 in ipairs(result) do
-				if typeof(v14.Function) == "function" then
-					table.insert(tbl29.holdCallbacks, v14.Function)
-				end
+		local data = stealData[prompt]
+		if not data then
+			data = { hold = {}, trigger = {}, ready = true }
+			stealData[prompt] = data
+			if getconnections then
+				pcall(function()
+					for _, connection in ipairs(getconnections(prompt.PromptButtonHoldBegan)) do
+						if connection.Function then
+							table.insert(data.hold, connection.Function)
+						end
+					end
+					for _, connection in ipairs(getconnections(prompt.Triggered)) do
+						if connection.Function then
+							table.insert(data.trigger, connection.Function)
+						end
+					end
+				end)
 			end
 		end
-		flag4, result = false
-		if getconnections then
-			flag4, result = pcall(getconnections, arg.Triggered)
+		if not data.ready then
+			return
 		end
-		if flag4 and typeof(result) == "table" then
-			for i, v14 in ipairs(result) do
-				if typeof(v14.Function) == "function" then
-					table.insert(tbl29.triggerCallbacks, v14.Function)
-				end
-			end
-		end
-		if #tbl29.holdCallbacks > 0 or #tbl29.triggerCallbacks > 0 then
-			tbl28[arg] = tbl29
-		end
-	end
-	local function fn36(arg, arg2)
-		local v14 = tbl28[arg]
-		if not v14 or not v14.ready then
-			return false
-		end
-		v14.ready = false
-		local name = arg2.name or "Animal"
+		data.ready = false
+		isStealing = true
+		stealStartTime = tick()
+		local mySession, startedAt = session, stealStartTime
 		autoSteal.active = true
-		local now = tick()
+		autoSteal.startTime = os.clock()
 		autoSteal.phase = "holding"
-		autoSteal.label = name
+		autoSteal.label = tostring(label or "")
+
 		task.spawn(function()
-			for i, holdCallback in ipairs(v14.holdCallbacks) do
-				task.spawn(holdCallback, localPlayer)
+			local fired = false
+			for _, callback in ipairs(data.hold) do
+				task.spawn(callback)
 			end
-			while autoSteal.active and tick() - now < tbl21.HOLD_MIN do
-				local n12 = (tick() - now) / tbl21.HOLD_MAX
-				if _G.StealBar then
-					_G.StealBar.SetState("STEALING")
-					_G.StealBar.SetProgress(n12)
-				end
+			while mySession == session and tick() - startedAt < HALF_HOLD_MIN do
+				_G.StealBar.SetState("STEALING")
+				_G.StealBar.SetProgress((tick() - startedAt) / HALF_HOLD_MIN)
 				task.wait()
 			end
 			autoSteal.phase = "waitingRange"
-			local flag4, flag5 = fn31(arg2) <= tbl21.STEAL_RANGE, false
-			while autoSteal.active and arg.Parent do
-				local n12 = tick() - now
-				if n12 > tbl21.HOLD_MAX then
+			local inRange = promptDistance(prompt) <= HALF_FIRE_RANGE
+			while mySession == session do
+				if tick() - startedAt > HALF_HOLD_MAX or not prompt.Parent then
 					break
 				end
-				local n13, v15 = n12 / tbl21.HOLD_MAX, fn31(arg2)
-				if _G.StealBar then
-					_G.StealBar.SetState("STEALING")
-					_G.StealBar.SetProgress(n13)
-				end
-				if v15 <= tbl21.STEAL_RANGE then
-					if not flag4 then
-						task.wait(tbl21.ENTRY_DELAY)
+				if promptDistance(prompt) <= HALF_FIRE_RANGE then
+					if not inRange then
+						task.wait(HALF_ENTRY_DELAY)
 					end
-					if autoSteal.active then
-						for i, triggerCallback in ipairs(v14.triggerCallbacks) do
-							task.spawn(triggerCallback, localPlayer)
+					if mySession == session then
+						for _, callback in ipairs(data.trigger) do
+							task.spawn(callback)
 						end
 						pcall(function()
 							if _G.AutoCarrySpeed and _G.AutoCarrySpeed.WatchPickup then
 								_G.AutoCarrySpeed.WatchPickup(1.25)
 							end
 						end)
-						flag5 = true
+						fired = true
 					end
 					break
 				end
+				_G.StealBar.SetState("STEALING")
+				_G.StealBar.SetProgress(1)
 				task.wait()
 			end
-			if flag5 then
-				if _G.StealBar then
-					_G.StealBar.SetProgress(1)
-				end
+			task.wait(0.05)
+			data.ready = true
+			-- a stop (or a restart) during this steal already reset the shared state; only the owning session touches it
+			if mySession ~= session then
+				return
+			end
+			if fired then
+				_G.StealBar.SetProgress(1)
 				autoSteal.totalSteals = autoSteal.totalSteals + 1
-				autoSteal.lastResult = "Stole " .. name
+				autoSteal.lastResult = "Stole " .. autoSteal.label
 				autoSteal.phase = "success"
 				Config.isStealing = true
 				task.spawn(function()
@@ -2358,554 +2196,54 @@ local v14 = (function()
 				end)
 			else
 				autoSteal.failedSteals = autoSteal.failedSteals + 1
-				autoSteal.lastResult = "Missed window: " .. name
+				autoSteal.lastResult = "Missed window: " .. autoSteal.label
 				autoSteal.phase = "failed"
 			end
 			autoSteal.active = false
 			autoSteal.lastResultTime = tick()
-			task.wait(tbl21.COOLDOWN)
-			v14.ready = true
-			if _G.StealBar then
-				_G.StealBar.Reset()
-			end
-		end)
-		return true
-	end
-	local function fn37(arg, arg2)
-		if not arg or not arg.Parent then
-			return false
-		end
-		fn35(arg)
-		if not tbl28[arg] then
-			return false
-		end
-		return fn36(arg, arg2)
-	end
-	local function fn38()
-		if connection then
-			return
-		end
-		connection = RunService.Heartbeat:Connect(function()
-			if not tbl21.AUTO_STEAL_ENABLED then
-				return
-			end
-			if autoSteal.active then
-				return
-			end
-			local v14 = fn34()
-			if not v14 then
-				return
-			end
-			local v15 = tbl27[v14.uid]
-			v15 = if not v15 or not v15.Parent then (fn32(v14)) else v15
-			if v15 then
-				fn37(v15, v14)
-			end
-		end)
-	end
-	local fn39, fn40
-	do
-		local active, tbl29, n12, tbl30 = false, { Data = {} }, 0, { autoSteal = nil }
-		local function fn41()
-			autoSteal.active = active
-			if active then
-				autoSteal.startTime = os.clock()
-				autoSteal.phase = "holding"
-			else
-				autoSteal.startTime = 0
-				autoSteal.phase = "idle"
-			end
-		end
-		local function fn42(arg)
-			if not plots then
-				return false
-			end
-			local yourBase = plots:FindFirstChild(arg)
-			if not yourBase then
-				return false
-			end
-			arg = yourBase:FindFirstChild("PlotSign")
-			if arg then
-				yourBase = arg:FindFirstChild("YourBase")
-				if yourBase and (yourBase:IsA("BillboardGui")) then
-					return yourBase.Enabled == true
-				end
-			end
-			return false
-		end
-		local function fn43()
-			local character = localPlayer.Character
-			if not character then
-				return nil, nil, nil
-			end
-			local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
-			if not humanoidRootPart then
-				return nil, nil, nil
-			end
-			if #tbl26 == 0 then
-				pcall(fn33)
-			end
-			local v14
-			local huge, str = math.huge
-			if #tbl26 > 0 then
-				for i, v15 in ipairs(tbl26) do
-					pcall(function()
-						if fn29(v15) then
-							return
-						end
-						local v16 = fn30(v15)
-						if not v16 then
-							return
-						end
-						local magnitude = (humanoidRootPart.Position - v16).Magnitude
-						if magnitude > tbl21.PRIME_RANGE then
-							return
-						end
-						if magnitude >= huge then
-							return
-						end
-						v16 = fn32(v15)
-						if v16 and v16.Parent then
-							v14, huge, str = v16, magnitude, tostring(v15.slot)
-						end
-					end)
-				end
-			end
-			if v14 then
-				return v14, huge, str
-			end
-			if not plots then
-				return nil, nil, nil
-			end
-			local v15
-			local huge2, name = math.huge
-			for i, child in ipairs(plots:GetChildren()) do
-				if fn42(child.Name) then
-					continue
-				end
-				i = child:FindFirstChild("AnimalPodiums")
-				if not i then
-					continue
-				end
-				for i2, child2 in ipairs(i:GetChildren()) do
-					pcall(function()
-						local base = child2:FindFirstChild("Base")
-						local spawn = base and (base:FindFirstChild("Spawn"))
-						if spawn then
-							base = spawn:FindFirstChild("PromptAttachment")
-							if base then
-								local magnitude = (
-									(base:IsA("Attachment") and base.WorldPosition or spawn.Position)
-									- humanoidRootPart.Position
-								).Magnitude
-								if magnitude < huge2 and magnitude <= tbl17.StealRadius then
-									for i3, child3 in ipairs(base:GetChildren()) do
-										if child3:IsA("ProximityPrompt") then
-											v15, huge2, name = child3, magnitude, child2.Name
-											break
-										end
-									end
-								end
-							end
-						end
-					end)
-				end
-			end
-			return v15, huge2, name
-		end
-		local function fn44(arg)
-			local parent = arg and arg.Parent
-			if parent then
-				if parent:IsA("Attachment") then
-					return parent.WorldPosition
-				end
-				if parent:IsA("BasePart") then
-					return parent.Position
-				end
-				if parent:IsA("Model") and parent.PrimaryPart then
-					return parent.PrimaryPart.Position
-				end
-			end
-			return nil
-		end
-		local function fn45(arg, arg2)
-			if arg then
-				for i, child in ipairs(arg:GetChildren()) do
-					if child:IsA("Model") and (child.PrimaryPart or (child:FindFirstChildOfClass("BasePart"))) then
-						return child
-					end
-				end
-			end
-			local n13, v14 = 14
-			for i, child in ipairs(workspace:GetChildren()) do
-				if not child:IsA("Model") or child == localPlayer.Character or (child:IsA("Tool")) then
-					continue
-				end
-				arg = child.PrimaryPart or (child:FindFirstChildOfClass("BasePart"))
-				if not arg then
-					continue
-				end
-				if tbl18 then
-					local str, flag4 = child.Name:upper(), false
-					for k, v15 in pairs(tbl18) do
-						if
-							str:find(k:upper())
-							or type(v15) == "table" and v15.DisplayName and (str:find(v15.DisplayName:upper()))
-						then
-							flag4 = true
-							break
-						end
-					end
-					if not flag4 then
-						continue
-					end
-				end
-				i = (arg.Position - arg2).Magnitude
-				if i < n13 then
-					n13, v14 = i, child
-				end
-			end
-			return v14
-		end
-		local function fn46(arg, arg2)
-			if arg2 and arg2.animal and arg2.animal.Parent then
-				local animal = arg2.animal
-				local primaryPart = animal.PrimaryPart or (animal:FindFirstChildOfClass("BasePart"))
-				if primaryPart then
-					return primaryPart.Position
-				end
-			end
-			local v14 = fn44(arg)
-			if v14 then
-				return v14
-			end
-			if arg2 and arg2.pos then
-				return arg2.pos
-			end
-			return nil
-		end
-		local function fn47(arg)
-			local tbl31 = tbl29.Data[arg]
-			if tbl31 then
-				return tbl31
-			end
-			tbl31 = { hold = {}, trigger = {}, useFallback = true, ready = true }
-			tbl29.Data[arg] = tbl31
-			local parent = arg.Parent
-			local parent2 = parent and (parent:IsA("Attachment")) and parent.Parent
-			if parent2 and (parent2:IsA("BasePart")) then
-				tbl31.pos = parent2.Position
-			end
-			parent = parent2 and (parent2:IsA("BasePart")) and parent2.Parent
-			tbl31.animal = fn45(parent and parent.Parent, tbl31.pos)
-			pcall(function()
-				if getconnections then
-					for i, v14 in ipairs(getconnections(arg.PromptButtonHoldBegan)) do
-						if v14.Function then
-							table.insert(tbl31.hold, v14.Function)
-						end
-					end
-					for i, v14 in ipairs(getconnections(arg.Triggered)) do
-						if v14.Function then
-							table.insert(tbl31.trigger, v14.Function)
-						end
-					end
-				end
-			end)
-			if #tbl31.hold > 0 or #tbl31.trigger > 0 then
-				tbl31.useFallback = false
-			end
-			return tbl31
-		end
-		local function fn48(arg)
-			if active then
-				return
-			end
-			local v14 = fn47(arg)
-			if not v14.ready then
-				return
-			end
-			v14.ready = false
-			active = true
-			n12 = tick()
-			if _G.StealBar then
-				_G.StealBar.Reset()
-			end
-			task.spawn(function()
-				if
-					not xpcall(function()
-						local flag4 = false
-						pcall(function()
-							if not v14.useFallback and #v14.hold > 0 then
-								for i, v15 in ipairs(v14.hold) do
-									task.spawn(function()
-										pcall(v15)
-									end)
-								end
-								flag4 = true
-							end
-						end)
-						local n13 = math.clamp((tonumber(Config.stealFreezePercent) or 85) / 100, 0.01, 0.99)
-						local n14, n15 = n13 >= 0.8 and 7 or 9.3, math.max(0.05, 1.35 * n13)
-						local n16 = math.max(0.05, 1.35 - n15)
-						local function fn49()
-							local character = localPlayer.Character
-							local humanoidRootPart, v15 =
-								character and (character:FindFirstChild("HumanoidRootPart")), fn46(arg, v14)
-							return humanoidRootPart and v15 and (humanoidRootPart.Position - v15).Magnitude or math.huge
-						end
-						local function fn50()
-							v14.ready = true
-							active = false
-							if _G.StealBar then
-								_G.StealBar.Reset()
-							end
-						end
-						local now = tick()
-						while active and Config.autoStealEnabled do
-							local n17 = tick() - now
-							if n17 >= n15 then
-								break
-							end
-							if not arg.Parent or not arg.Parent.Parent or fn49() > tbl17.StealRadius then
-								fn50()
-								return
-							end
-							if _G.StealBar then
-								_G.StealBar.SetState("STEALING")
-								_G.StealBar.SetProgress(n13 * math.clamp(n17 / n15, 0, 1))
-							end
-							task.wait()
-						end
-						if not active or not Config.autoStealEnabled then
-							v14.ready = true
-							active = false
-							if _G.StealBar then
-								_G.StealBar.Reset()
-							end
-							return
-						end
-						if _G.StealBar then
-							_G.StealBar.SetState("STEALING")
-							_G.StealBar.SetProgress(n13)
-						end
-						now = tick()
-						while active and Config.autoStealEnabled do
-							if not arg.Parent then
-								break
-							end
-							if tick() - now >= 1.6 then
-								active = false
-								if _G.StealBar then
-									_G.StealBar.Reset()
-								end
-								task.wait(0.12)
-								v14.ready = true
-								return
-							end
-							n15 = localPlayer.Character
-							local humanoidRootPart = n15 and (n15:FindFirstChild("HumanoidRootPart"))
-							if not humanoidRootPart then
-								task.wait()
-								continue
-							end
-							local v15 = fn46(arg, v14)
-							local magnitude = v15 and (humanoidRootPart.Position - v15).Magnitude or math.huge
-							if magnitude > tbl17.StealRadius then
-								fn50()
-								return
-							end
-							if magnitude <= n14 then
-								break
-							end
-							magnitude = fn43()
-							if magnitude and magnitude ~= arg then
-								v15 = fn46(magnitude, tbl29.Data[magnitude])
-								if v15 and (humanoidRootPart.Position - v15).Magnitude <= n14 then
-									local v16 = fn47(magnitude)
-									if v16.ready then
-										arg, v14, flag4 = magnitude, v16, true
-										if not v14.useFallback and #v14.hold > 0 then
-											for i, v17 in ipairs(v14.hold) do
-												task.spawn(function()
-													pcall(v17)
-												end)
-											end
-										end
-										break
-									end
-								end
-							end
-							if _G.StealBar then
-								_G.StealBar.SetProgress(n13)
-							end
-							task.wait()
-						end
-						if not active or not Config.autoStealEnabled then
-							v14.ready = true
-							active = false
-							if _G.StealBar then
-								_G.StealBar.Reset()
-							end
-							return
-						end
-						now = tick()
-						while active and Config.autoStealEnabled do
-							n14 = tick() - now
-							n15 = n13 + (1 - n13) * math.clamp(n14 / n16, 0, 1)
-							if not arg.Parent or fn49() > tbl17.StealRadius then
-								fn50()
-								return
-							end
-							if _G.StealBar then
-								_G.StealBar.SetState("STEALING")
-								_G.StealBar.SetProgress(n15)
-							end
-							if n14 >= n16 then
-								break
-							end
-							task.wait()
-						end
-						if not active or not Config.autoStealEnabled then
-							v14.ready = true
-							active = false
-							if _G.StealBar then
-								_G.StealBar.Reset()
-							end
-							return
-						end
-						local flag5 = false
-						if flag4 and not v14.useFallback and #v14.trigger > 0 then
-							for i, v15 in ipairs(v14.trigger) do
-								task.spawn(function()
-									pcall(v15)
-								end)
-							end
-							flag5 = true
-						end
-						if not flag5 then
-							if type(fireproximityprompt) == "function" then
-								pcall(function()
-									fireproximityprompt(arg)
-									flag5 = true
-								end)
-							end
-							if not flag5 then
-								pcall(function()
-									arg:InputHoldBegin()
-									task.wait(1.35)
-									arg:InputHoldEnd()
-									flag5 = true
-								end)
-							end
-						end
-						if _G.StealBar then
-							_G.StealBar.SetProgress(1)
-						end
-						pcall(function()
-							if _G.AutoCarrySpeed and _G.AutoCarrySpeed.WatchPickup then
-								_G.AutoCarrySpeed.WatchPickup(1.25)
-							end
-						end)
-						task.wait(0.12)
-						v14.ready = true
-						active = false
-						if _G.StealBar then
-							_G.StealBar.Reset()
-						end
-					end, function(arg2)
-						pcall(function()
-						end)
-					end)
-				then
-					v14.ready = true
-					active = false
-					if _G.StealBar then
-						_G.StealBar.Reset()
-					end
-				end
-			end)
-		end
-		fn39 = function()
-			if tbl30.autoSteal then
-				return
-			end
-			tbl30.autoSteal = RunService.Heartbeat:Connect(function()
-				if active and tick() - n12 > 6 then
-					active = false
-					for k, v14 in pairs(tbl29.Data) do
-						v14.ready = true
-					end
-					if _G.StealBar then
-						_G.StealBar.Reset()
-					end
-				end
-				if not Config.autoStealEnabled or active then
-					return
-				end
-				pcall(function()
-					local v14 = fn43()
-					if v14 then
-						fn48(v14)
-					end
-				end)
-			end)
-		end
-		fn40 = function()
-			if tbl30.autoSteal then
-				tbl30.autoSteal:Disconnect()
-				tbl30.autoSteal = nil
-			end
-			active = false
-			fn41()
-			if _G.StealBar then
-				_G.StealBar.Reset()
-			end
-		end
-	end
-	local flag4, flag5 = false, false
-	local function fn41()
-		if flag4 then
-			return
-		end
-		flag4 = true
-		task.spawn(function()
-			if not fn27() then
-				flag4 = false
-				return
-			end
-			flag5 = true
-			fn33()
-			task.spawn(function()
-				while flag5 do
-					task.wait(5)
-					if flag5 then
-						fn33()
-					end
-				end
-			end)
-		end)
-	end
-	local function fn42()
-		Config.autoStealVersion = "V2"
-		tbl21.AUTO_STEAL_ENABLED = true
-		fn41()
-		fn38()
-	end
-	local function fn43()
-		tbl21.AUTO_STEAL_ENABLED = false
-		autoSteal.active = false
-		autoSteal.phase = "idle"
-		if connection then
-			connection:Disconnect()
-			connection = nil
-		end
-		if _G.StealBar then
+			isStealing = false
 			_G.StealBar.Reset()
-		end
+		end)
 	end
-	fn41()
-	return { StartV1 = fn39, StopV1 = fn40, StartV2 = fn42, StopV2 = fn43, Telemetry = autoSteal }
+
+	local function startAutoSteal()
+		if autoConn then
+			return
+		end
+		autoConn = RunService.Heartbeat:Connect(function()
+			if not Config.autoStealEnabled or isStealing then
+				return
+			end
+			local ok, prompt, name = pcall(findNearestPrompt)
+			if ok and prompt then
+				executeSteal(prompt, name)
+			end
+		end)
+	end
+
+	local function stopAutoSteal()
+		if autoConn then
+			autoConn:Disconnect()
+			autoConn = nil
+		end
+		session = session + 1
+		isStealing = false
+		autoSteal.active = false
+		autoSteal.startTime = 0
+		autoSteal.phase = "idle"
+		_G.StealBar.Reset()
+	end
+
+	return {
+		StartV1 = startAutoSteal,
+		StopV1 = stopAutoSteal,
+		StartV2 = function()
+			Config.autoStealVersion = "V2"
+			startAutoSteal()
+		end,
+		StopV2 = stopAutoSteal,
+		Telemetry = autoSteal,
+	}
 end)()
 fn5 = function(autoStealVersion)
 	if autoStealVersion == "V1" or autoStealVersion == "V2" then
