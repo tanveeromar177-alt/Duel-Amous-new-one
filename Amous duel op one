@@ -9781,61 +9781,57 @@ tbl31 = {
 			uiStroke.Transparency = 0.46
 			return uiStroke
 		end
+		-- Power-button style toggle (OFF = dark + white icon, ON = white box + black icon)
 		function mkSwitch(arg, enabled, arg2)
+			local OFF_BG = Color3.fromRGB(18, 18, 20)
+			local ON_BG = Color3.fromRGB(255, 255, 255)
+			local OFF_ICON = Color3.fromRGB(240, 240, 245)
+			local ON_ICON = Color3.fromRGB(10, 10, 12)
+			local OFF_STROKE = Color3.fromRGB(150, 155, 165)
+			local ON_STROKE = Color3.fromRGB(220, 225, 235)
+
 			local frame2 = Instance.new("Frame", arg)
 			frame2.Name = "ModernToggle"
-			frame2.Size = UDim2.new(0, 46, 0, 24)
-			frame2.BackgroundColor3 = enabled and glass.accent or (glass.bg:Lerp(glass.panel, 0.58))
+			frame2.Size = UDim2.new(0, 30, 0, 30)
+			frame2.BackgroundColor3 = enabled and ON_BG or OFF_BG
 			frame2.BorderSizePixel = 0
-			mkCorner(frame2, 4)
-			local v42 = mkStroke(frame2, enabled and glass.accent2 or glass.border, 0.85)
-			v42.Transparency = enabled and 0.18 or 0.5
-			local uiGradient = Instance.new("UIGradient", frame2)
-			uiGradient.Name = "ModernToggleGradient"
-			uiGradient.Rotation = 0
-			uiGradient.Color = ColorSequence.new(glass.accent)
-			uiGradient.Enabled = enabled
-			local frame3 = Instance.new("Frame", frame2)
-			frame3.Name = "ModernToggleKnob"
-			frame3.Size = UDim2.new(0, 18, 0, 18)
-			frame3.Position = enabled and (UDim2.new(1, -21, 0, 3)) or (UDim2.new(0, 3, 0, 3))
-			frame3.BackgroundColor3 = enabled and (Config._theme.active and Config._theme.active.contrast or glass.bg)
-				or (glass.muted:Lerp(glass.text, 0.32))
-			frame3.BorderSizePixel = 0
-			mkCorner(frame3, 3)
-			local v43 = mkStroke(frame3, enabled and glass.text or glass.border, 0.65)
-			v43.Transparency = enabled and 0.45 or 0.62
-			-- white dash highlight removed
-			arg = Instance.new("TextButton", frame2)
-			arg.Size = UDim2.new(1, 0, 1, 0)
-			arg.BackgroundTransparency = 1
-			arg.Text = ""
-			arg.ZIndex = 10
+			mkCorner(frame2, 8)
+			local v42 = mkStroke(frame2, enabled and ON_STROKE or OFF_STROKE, 1.4)
+			v42.Transparency = enabled and 0.15 or 0.25
+
+			-- Power icon (Unicode power symbol)
+			local icon = Instance.new("TextLabel", frame2)
+			icon.Name = "PowerIcon"
+			icon.Size = UDim2.new(1, 0, 1, 0)
+			icon.BackgroundTransparency = 1
+			icon.Text = "⏻"
+			icon.TextColor3 = enabled and ON_ICON or OFF_ICON
+			icon.Font = Enum.Font.GothamBold
+			icon.TextSize = 16
+			icon.TextXAlignment = Enum.TextXAlignment.Center
+			icon.TextYAlignment = Enum.TextYAlignment.Center
+			icon.ZIndex = 5
+
+			local hit = Instance.new("TextButton", frame2)
+			hit.Size = UDim2.new(1, 0, 1, 0)
+			hit.BackgroundTransparency = 1
+			hit.Text = ""
+			hit.ZIndex = 10
+
 			local function fn72(enabled2)
-				uiGradient.Enabled = enabled2
-				TweenService:Create(
-					frame2,
-					glass.tween,
-					{ BackgroundColor3 = enabled2 and glass.accent or (glass.bg:Lerp(glass.panel, 0.58)) }
-				):Play()
-				TweenService:Create(frame3, glass.tween, {
-					Position = enabled2 and (UDim2.new(1, -21, 0, 3)) or (UDim2.new(0, 3, 0, 3)),
-					BackgroundColor3 = enabled2
-							and (Config._theme.active and Config._theme.active.contrast or glass.bg)
-						or (glass.muted:Lerp(glass.text, 0.32)),
+				TweenService:Create(frame2, TweenInfo.new(0.18, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+					BackgroundColor3 = enabled2 and ON_BG or OFF_BG,
 				}):Play()
-				TweenService:Create(
-					v42,
-					glass.tween,
-					{ Color = enabled2 and glass.accent2 or glass.border, Transparency = enabled2 and 0.18 or 0.5 }
-				):Play()
-				TweenService:Create(
-					v43,
-					glass.tween,
-					{ Color = enabled2 and glass.text or glass.border, Transparency = enabled2 and 0.45 or 0.62 }
-				):Play()
+				TweenService:Create(icon, TweenInfo.new(0.18), {
+					TextColor3 = enabled2 and ON_ICON or OFF_ICON,
+				}):Play()
+				TweenService:Create(v42, TweenInfo.new(0.18), {
+					Color = enabled2 and ON_STROKE or OFF_STROKE,
+					Transparency = enabled2 and 0.15 or 0.25,
+				}):Play()
 			end
-			arg.MouseButton1Click:Connect(function()
+
+			hit.MouseButton1Click:Connect(function()
 				local flag6 = not frame2:GetAttribute("state")
 				frame2:SetAttribute("state", flag6)
 				fn72(flag6)
@@ -10292,7 +10288,7 @@ tbl31 = {
 		end)
 		local frame4 = Instance.new("Frame", screenGui)
 		frame4.Name = "MinimizedFrame"
-		frame4.Size = UDim2.new(0, 52, 0, 52)
+		frame4.Size = UDim2.new(0, 68, 0, 68)
 		frame4.Position = fn4(tbl2.minimized)
 		frame4.BackgroundColor3 = Color3.fromRGB(18, 18, 22)
 		frame4.BackgroundTransparency = 0.05
@@ -10321,7 +10317,7 @@ tbl31 = {
 		-- logo image only (no text / open / brand)
 		local miniLogo = Instance.new("ImageLabel", frame4)
 		miniLogo.Name = "MinimizedLogo"
-		miniLogo.Size = UDim2.fromOffset(36, 36)
+		miniLogo.Size = UDim2.fromOffset(48, 48)
 		miniLogo.AnchorPoint = Vector2.new(0.5, 0.5)
 		miniLogo.Position = UDim2.new(0.5, 0, 0.5, 0)
 		miniLogo.BackgroundTransparency = 1
@@ -10369,7 +10365,7 @@ tbl31 = {
 		-- FORCE clean minimized: only logo image
 		local function forceCleanMinimized()
 			pcall(function()
-				frame4.Size = UDim2.new(0, 52, 0, 52)
+				frame4.Size = UDim2.new(0, 68, 0, 68)
 				frame4.BackgroundColor3 = Color3.fromRGB(18, 18, 22)
 				frame4.BackgroundTransparency = 0.05
 				for _, ch in ipairs(frame4:GetChildren()) do
@@ -10385,7 +10381,7 @@ tbl31 = {
 					logo.Name = "MinimizedLogo"
 					logo.Parent = frame4
 				end
-				logo.Size = UDim2.fromOffset(36, 36)
+				logo.Size = UDim2.fromOffset(48, 48)
 				logo.AnchorPoint = Vector2.new(0.5, 0.5)
 				logo.Position = UDim2.new(0.5, 0, 0.5, 0)
 				logo.BackgroundTransparency = 1
@@ -10405,8 +10401,8 @@ tbl31 = {
 				local pos = frame4.Position
 				local ax = pos.X.Scale * vp.X + pos.X.Offset
 				local ay = pos.Y.Scale * vp.Y + pos.Y.Offset
-				ax = math.clamp(ax, 4, math.max(4, vp.X - 56))
-				ay = math.clamp(ay, 4, math.max(4, vp.Y - 56))
+				ax = math.clamp(ax, 4, math.max(4, vp.X - 72))
+				ay = math.clamp(ay, 4, math.max(4, vp.Y - 72))
 				frame4.Position = UDim2.fromOffset(ax, ay)
 			end)
 		end
@@ -10526,7 +10522,7 @@ tbl31 = {
 							end
 							local cam = workspace.CurrentCamera
 							local vp = cam and cam.ViewportSize or Vector2.new(1280, 720)
-							local w, h = 52, 52
+							local w, h = 68, 68
 							local nx = position2.X.Offset + n18.X
 							local ny = position2.Y.Offset + n18.Y
 							-- clamp fully on screen (offset-based when scale is 0)
@@ -15874,6 +15870,54 @@ frame6.Visible = false
 				openBtn.MouseButton1Click:Connect(function()
 					if Config._toggleAntiBatMiniGui then
 						pcall(Config._toggleAntiBatMiniGui)
+					end
+				end)
+			end
+			makeGap(4)
+			-- Open Bypass (big box)
+			do
+				local openBtn = Instance.new("TextButton", v43)
+				openBtn.Name = "OpenBypassBox"
+				openBtn.Size = UDim2.new(1, 0, 0, 56)
+				openBtn.BorderSizePixel = 0
+				openBtn.LayoutOrder = LO()
+				openBtn.BackgroundColor3 = glass.panel
+				openBtn.BackgroundTransparency = 0.15
+				openBtn.Text = ""
+				openBtn.AutoButtonColor = false
+				openBtn.ZIndex = 5
+				mkCorner(openBtn, 12)
+				mkAnimStroke(openBtn, 1.2)
+				local accent = Instance.new("Frame", openBtn)
+				accent.Size = UDim2.new(0, 4, 0, 28)
+				accent.Position = UDim2.new(0, 10, 0.5, -14)
+				accent.BackgroundColor3 = glass.accent
+				accent.BorderSizePixel = 0
+				accent.ZIndex = 6
+				mkCorner(accent, 2)
+				local title = Instance.new("TextLabel", openBtn)
+				title.Size = UDim2.new(1, -30, 0, 22)
+				title.Position = UDim2.fromOffset(22, 8)
+				title.BackgroundTransparency = 1
+				title.Text = "Open Bypass"
+				title.TextColor3 = glass.text
+				title.Font = Enum.Font.GothamBold
+				title.TextSize = 14
+				title.TextXAlignment = Enum.TextXAlignment.Left
+				title.ZIndex = 6
+				local sub = Instance.new("TextLabel", openBtn)
+				sub.Size = UDim2.new(1, -30, 0, 16)
+				sub.Position = UDim2.fromOffset(22, 30)
+				sub.BackgroundTransparency = 1
+				sub.Text = "Click to open / close Bypass panel"
+				sub.TextColor3 = glass.muted
+				sub.Font = Enum.Font.GothamMedium
+				sub.TextSize = 10
+				sub.TextXAlignment = Enum.TextXAlignment.Left
+				sub.ZIndex = 6
+				openBtn.MouseButton1Click:Connect(function()
+					if Config._toggleBypassMiniGui then
+						pcall(Config._toggleBypassMiniGui)
 					end
 				end)
 			end
@@ -29628,14 +29672,15 @@ do
 		lastBoost = 0,
 	}
 	local C = {
-		bg = Color3.fromRGB(22, 12, 32),
-		card = Color3.fromRGB(38, 22, 52),
-		cardActive = Color3.fromRGB(50, 30, 70),
-		border = Color3.fromRGB(80, 50, 110),
-		text = Color3.fromRGB(255, 255, 255),
-		textSub = Color3.fromRGB(170, 150, 190),
-		accent = Color3.fromRGB(190, 80, 255),
-		switchOff = Color3.fromRGB(60, 40, 80),
+		bg = Color3.fromRGB(12, 12, 14),
+		card = Color3.fromRGB(28, 28, 32),
+		cardActive = Color3.fromRGB(42, 42, 48),
+		border = Color3.fromRGB(160, 165, 175),
+		text = Color3.fromRGB(230, 233, 240),
+		textSub = Color3.fromRGB(150, 155, 165),
+		accent = Color3.fromRGB(200, 205, 215),
+		switchOff = Color3.fromRGB(50, 50, 55),
+		silver = Color3.fromRGB(192, 197, 205),
 	}
 	local function startInf()
 		if AB.infThread then AB.infThread:Disconnect() end
@@ -29712,33 +29757,81 @@ do
 		gui.Parent = (gethui and gethui()) or CoreGui or localPlayer:FindFirstChild("PlayerGui")
 		local main = Instance.new("Frame", gui)
 		main.Name = "Main"
-		main.Size = UDim2.new(0, 200, 0, 120)
+		main.Size = UDim2.new(0, 210, 0, 128)
 		main.Position = UDim2.new(0.05, 0, 0.28, 0)
 		main.BackgroundColor3 = C.bg
 		main.BorderSizePixel = 0
 		main.Active = true
+		main.ClipsDescendants = true
 		Instance.new("UICorner", main).CornerRadius = UDim.new(0, 12)
 		local stroke = Instance.new("UIStroke", main)
 		stroke.Color = C.border
-		stroke.Thickness = 1.5
+		stroke.Thickness = 1.4
+		stroke.Transparency = 0.25
+		-- silver gradient stroke shine
+		local gStroke = Instance.new("UIGradient", stroke)
+		gStroke.Color = ColorSequence.new({
+			ColorSequenceKeypoint.new(0, Color3.fromRGB(140, 145, 155)),
+			ColorSequenceKeypoint.new(0.5, Color3.fromRGB(230, 233, 240)),
+			ColorSequenceKeypoint.new(1, Color3.fromRGB(140, 145, 155)),
+		})
+		-- Header
 		local title = Instance.new("TextLabel", main)
-		title.Size = UDim2.new(1, -16, 0, 22)
+		title.Name = "Title"
+		title.Size = UDim2.new(1, -48, 0, 24)
 		title.Position = UDim2.fromOffset(12, 8)
 		title.BackgroundTransparency = 1
 		title.Text = "Blyra Anti Bat"
-		title.TextColor3 = C.text
-		title.Font = Enum.Font.GothamBlack
+		title.TextColor3 = C.silver
+		title.Font = Enum.Font.GothamBold
 		title.TextSize = 14
 		title.TextXAlignment = Enum.TextXAlignment.Left
-		local row = Instance.new("Frame", main)
-		row.Size = UDim2.new(1, -24, 0, 48)
-		row.Position = UDim2.fromOffset(12, 40)
+		local tGrad = Instance.new("UIGradient", title)
+		tGrad.Color = ColorSequence.new({
+			ColorSequenceKeypoint.new(0, Color3.fromRGB(170, 175, 185)),
+			ColorSequenceKeypoint.new(0.45, Color3.fromRGB(245, 248, 255)),
+			ColorSequenceKeypoint.new(1, Color3.fromRGB(160, 165, 175)),
+		})
+		-- Minimize button
+		local minBtn = Instance.new("TextButton", main)
+		minBtn.Name = "MinBtn"
+		minBtn.Size = UDim2.fromOffset(24, 24)
+		minBtn.Position = UDim2.new(1, -32, 0, 8)
+		minBtn.BackgroundColor3 = C.card
+		minBtn.Text = "-"
+		minBtn.TextColor3 = C.silver
+		minBtn.Font = Enum.Font.GothamBold
+		minBtn.TextSize = 16
+		minBtn.AutoButtonColor = false
+		Instance.new("UICorner", minBtn).CornerRadius = UDim.new(0, 6)
+		local minStroke = Instance.new("UIStroke", minBtn)
+		minStroke.Color = C.border
+		minStroke.Transparency = 0.35
+		-- Content holder (hides when minimized)
+		local content = Instance.new("Frame", main)
+		content.Name = "Content"
+		content.Size = UDim2.new(1, 0, 1, -36)
+		content.Position = UDim2.fromOffset(0, 36)
+		content.BackgroundTransparency = 1
+		content.BorderSizePixel = 0
+		local row = Instance.new("Frame", content)
+		row.Size = UDim2.new(1, -24, 0, 52)
+		row.Position = UDim2.fromOffset(12, 4)
 		row.BackgroundColor3 = C.card
 		row.BorderSizePixel = 0
 		Instance.new("UICorner", row).CornerRadius = UDim.new(0, 8)
+		local rowStroke = Instance.new("UIStroke", row)
+		rowStroke.Color = C.border
+		rowStroke.Transparency = 0.4
+		local accentBar = Instance.new("Frame", row)
+		accentBar.Size = UDim2.new(0, 3, 0, 24)
+		accentBar.Position = UDim2.new(0, 8, 0.5, -12)
+		accentBar.BackgroundColor3 = C.silver
+		accentBar.BorderSizePixel = 0
+		Instance.new("UICorner", accentBar).CornerRadius = UDim.new(0, 2)
 		local abLabel = Instance.new("TextLabel", row)
-		abLabel.Size = UDim2.new(1, -60, 0, 16)
-		abLabel.Position = UDim2.fromOffset(12, 8)
+		abLabel.Size = UDim2.new(1, -70, 0, 16)
+		abLabel.Position = UDim2.fromOffset(18, 8)
 		abLabel.BackgroundTransparency = 1
 		abLabel.Text = "Anti Bat + Inf Jump"
 		abLabel.TextColor3 = C.text
@@ -29747,8 +29840,8 @@ do
 		abLabel.TextXAlignment = Enum.TextXAlignment.Left
 		local status = Instance.new("TextLabel", row)
 		status.Name = "Status"
-		status.Size = UDim2.new(1, -60, 0, 14)
-		status.Position = UDim2.fromOffset(12, 26)
+		status.Size = UDim2.new(1, -70, 0, 14)
+		status.Position = UDim2.fromOffset(18, 28)
 		status.BackgroundTransparency = 1
 		status.Text = "STATUS: DISABLED"
 		status.TextColor3 = C.textSub
@@ -29757,20 +29850,38 @@ do
 		status.TextXAlignment = Enum.TextXAlignment.Left
 		local sw = Instance.new("TextButton", row)
 		sw.Size = UDim2.fromOffset(40, 22)
-		sw.Position = UDim2.new(1, -48, 0.5, -11)
+		sw.Position = UDim2.new(1, -50, 0.5, -11)
 		sw.BackgroundColor3 = C.switchOff
 		sw.Text = ""
 		sw.AutoButtonColor = false
 		Instance.new("UICorner", sw).CornerRadius = UDim.new(1, 0)
+		local swStroke = Instance.new("UIStroke", sw)
+		swStroke.Color = C.border
+		swStroke.Transparency = 0.4
 		local knob = Instance.new("Frame", sw)
 		knob.Size = UDim2.fromOffset(18, 18)
 		knob.Position = UDim2.fromOffset(2, 2)
-		knob.BackgroundColor3 = Color3.new(1, 1, 1)
+		knob.BackgroundColor3 = Color3.fromRGB(230, 233, 240)
 		knob.BorderSizePixel = 0
 		Instance.new("UICorner", knob).CornerRadius = UDim.new(1, 0)
+		local minimized = false
+		local function setMinimized(on)
+			minimized = on == true
+			content.Visible = not minimized
+			if minimized then
+				main.Size = UDim2.new(0, 210, 0, 40)
+				minBtn.Text = "+"
+			else
+				main.Size = UDim2.new(0, 210, 0, 128)
+				minBtn.Text = "-"
+			end
+		end
+		minBtn.MouseButton1Click:Connect(function()
+			setMinimized(not minimized)
+		end)
 		local function paint()
 			status.Text = AB.active and "STATUS: ENABLED" or "STATUS: DISABLED"
-			status.TextColor3 = AB.active and C.accent or C.textSub
+			status.TextColor3 = AB.active and C.silver or C.textSub
 			row.BackgroundColor3 = AB.active and C.cardActive or C.card
 			sw.BackgroundColor3 = AB.active and C.accent or C.switchOff
 			knob.Position = AB.active and UDim2.new(1, -20, 0, 2) or UDim2.fromOffset(2, 2)
@@ -29785,7 +29896,7 @@ do
 				toggle()
 			end
 		end)
-		-- drag
+		-- drag (header area)
 		local dragging, dStart, pStart
 		main.InputBegan:Connect(function(inp)
 			if inp.UserInputType == Enum.UserInputType.MouseButton1 or inp.UserInputType == Enum.UserInputType.Touch then
@@ -29799,12 +29910,11 @@ do
 				local delta = inp.Position - dStart
 				local cam = workspace.CurrentCamera
 				local vp = cam and cam.ViewportSize or Vector2.new(1280, 720)
-				local nx = pStart.X.Offset + delta.X
-				local ny = pStart.Y.Offset + delta.Y
-				local ax = pStart.X.Scale * vp.X + nx
-				local ay = pStart.Y.Scale * vp.Y + ny
-				ax = math.clamp(ax, 4, math.max(4, vp.X - 200))
-				ay = math.clamp(ay, 4, math.max(4, vp.Y - 120))
+				local h = minimized and 40 or 128
+				local ax = pStart.X.Scale * vp.X + pStart.X.Offset + delta.X
+				local ay = pStart.Y.Scale * vp.Y + pStart.Y.Offset + delta.Y
+				ax = math.clamp(ax, 4, math.max(4, vp.X - 210))
+				ay = math.clamp(ay, 4, math.max(4, vp.Y - h))
 				main.Position = UDim2.fromOffset(ax, ay)
 			end
 		end)
@@ -29815,8 +29925,10 @@ do
 		end)
 		paint()
 		AB.gui = gui
+		AB.setMinimized = setMinimized
 		return gui
 	end
+
 	function Config._toggleAntiBatMiniGui()
 		local g = buildGui()
 		AB.visible = not AB.visible
@@ -29832,6 +29944,384 @@ do
 		end
 	end
 end
+
+
+-- ============================================================
+-- Embedded Bypass mini GUI (toggle from Visuals > Open Bypass)
+-- ============================================================
+do
+	local BP = {
+		enabled = false,
+		power = 100000,
+		mode = "PC",
+		toggleKey = Enum.KeyCode.V,
+		depth = 296,
+		spamDelay = 0.12,
+		running = false,
+		bomb = nil,
+		spamThread = nil,
+		gui = nil,
+		visible = false,
+		windowSize = UDim2.new(0, 230, 0, 135),
+	}
+	local UI = {
+		Background = Color3.fromRGB(10, 10, 10),
+		BackgroundFrame = Color3.fromRGB(25, 25, 25),
+		BackgroundButton = Color3.fromRGB(50, 50, 50),
+		TextPrimary = Color3.fromRGB(240, 240, 240),
+		TextAccent = Color3.fromRGB(200, 200, 200),
+		StrokeDefault = Color3.fromRGB(130, 130, 130),
+		ActiveStroke = Color3.fromRGB(255, 255, 255),
+		EnabledColor = Color3.fromRGB(255, 255, 255),
+	}
+	local TITLE_URL = "rbxassetid://112454424363488"
+	local function buildBomb(power)
+		local maintable = {}
+		local spammedtable = {}
+		table.insert(spammedtable, {})
+		local z = spammedtable[1]
+		for i = 1, BP.depth do
+			local tableins = {}
+			table.insert(z, tableins)
+			z = tableins
+		end
+		local maxRep = math.floor(power / (BP.depth + 2))
+		for i = 1, maxRep do
+			table.insert(maintable, spammedtable)
+		end
+		return maintable
+	end
+	local function stopBypass()
+		BP.running = false
+		if BP.spamThread then
+			pcall(task.cancel, BP.spamThread)
+		end
+		BP.bomb = nil
+		BP.spamThread = nil
+	end
+	local function startBypass(power)
+		stopBypass()
+		BP.running = true
+		BP.bomb = buildBomb(power)
+		BP.spamThread = task.spawn(function()
+			while BP.running do
+				if BP.bomb then
+					pcall(function()
+						game.RobloxReplicatedStorage.SetPlayerBlockList:FireServer(BP.bomb)
+					end)
+				end
+				task.wait(BP.spamDelay)
+			end
+		end)
+	end
+	local function corner(p, r)
+		local c = Instance.new("UICorner", p)
+		c.CornerRadius = UDim.new(0, r or 6)
+		return c
+	end
+	local function stroke(p, col, th)
+		local s = Instance.new("UIStroke", p)
+		s.Color = col or UI.StrokeDefault
+		s.Thickness = th or 1
+		return s
+	end
+	local function buildGui()
+		if BP.gui and BP.gui.Parent then
+			return BP.gui
+		end
+		local parent = (gethui and gethui()) or CoreGui or localPlayer:FindFirstChild("PlayerGui")
+		local old = parent and parent:FindFirstChild("BlyraBypassUI")
+		if old then pcall(function() old:Destroy() end) end
+		local screenGui = Instance.new("ScreenGui")
+		screenGui.Name = "BlyraBypassUI"
+		screenGui.ResetOnSpawn = false
+		screenGui.DisplayOrder = 121
+		screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+		pcall(function()
+			if syn and syn.protect_gui then syn.protect_gui(screenGui) end
+		end)
+		screenGui.Parent = parent
+		local mainFrame = Instance.new("Frame", screenGui)
+		mainFrame.Size = BP.windowSize
+		mainFrame.Position = UDim2.new(0.5, -115, 0.5, -65)
+		mainFrame.BackgroundColor3 = UI.Background
+		mainFrame.BackgroundTransparency = 0.1
+		mainFrame.Active = true
+		mainFrame.BorderSizePixel = 0
+		corner(mainFrame, 8)
+		local mainStroke = stroke(mainFrame, UI.StrokeDefault, 1.5)
+		-- drag
+		local dragging, dragStart, startPos
+		mainFrame.InputBegan:Connect(function(input)
+			if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+				dragging = true
+				dragStart = input.Position
+				startPos = mainFrame.Position
+			end
+		end)
+		UserInputService.InputChanged:Connect(function(input)
+			if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+				local delta = input.Position - dragStart
+				local cam = workspace.CurrentCamera
+				local vp = cam and cam.ViewportSize or Vector2.new(1280, 720)
+				local ax = startPos.X.Scale * vp.X + startPos.X.Offset + delta.X
+				local ay = startPos.Y.Scale * vp.Y + startPos.Y.Offset + delta.Y
+				ax = math.clamp(ax, 4, math.max(4, vp.X - 230))
+				ay = math.clamp(ay, 4, math.max(4, vp.Y - 40))
+				mainFrame.Position = UDim2.fromOffset(ax, ay)
+			end
+		end)
+		UserInputService.InputEnded:Connect(function(input)
+			if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+				dragging = false
+			end
+		end)
+		local titleBar = Instance.new("Frame", mainFrame)
+		titleBar.Size = UDim2.new(1, 0, 0, 30)
+		titleBar.BackgroundTransparency = 1
+		local titleImage = Instance.new("ImageLabel", titleBar)
+		titleImage.Size = UDim2.new(0, 80, 0, 25)
+		titleImage.Position = UDim2.new(0.5, -40, 0, 2)
+		titleImage.BackgroundTransparency = 1
+		titleImage.Image = TITLE_URL
+		titleImage.ScaleType = Enum.ScaleType.Fit
+		local minimizeBtn = Instance.new("TextButton", titleBar)
+		minimizeBtn.Size = UDim2.new(0, 18, 0, 18)
+		minimizeBtn.Position = UDim2.new(1, -22, 0, 6)
+		minimizeBtn.BackgroundColor3 = UI.BackgroundButton
+		minimizeBtn.Text = "-"
+		minimizeBtn.TextColor3 = UI.TextPrimary
+		minimizeBtn.Font = Enum.Font.GothamBold
+		minimizeBtn.TextSize = 12
+		minimizeBtn.AutoButtonColor = false
+		corner(minimizeBtn, 4)
+		local content = Instance.new("Frame", mainFrame)
+		content.Name = "Content"
+		content.Size = UDim2.new(1, -12, 0, 95)
+		content.Position = UDim2.new(0, 6, 0, 32)
+		content.BackgroundTransparency = 1
+		local layout = Instance.new("UIListLayout", content)
+		layout.Padding = UDim.new(0, 4)
+		-- Row 1
+		local row1 = Instance.new("Frame", content)
+		row1.Size = UDim2.new(1, 0, 0, 26)
+		row1.BackgroundColor3 = UI.BackgroundFrame
+		row1.BackgroundTransparency = 0.3
+		row1.BorderSizePixel = 0
+		corner(row1, 4)
+		stroke(row1, UI.StrokeDefault, 1)
+		local statusTxt = Instance.new("TextLabel", row1)
+		statusTxt.Size = UDim2.new(0.5, 0, 1, 0)
+		statusTxt.Position = UDim2.new(0, 8, 0, 0)
+		statusTxt.BackgroundTransparency = 1
+		statusTxt.Text = "BYPASS OFF"
+		statusTxt.TextColor3 = UI.TextPrimary
+		statusTxt.Font = Enum.Font.GothamBold
+		statusTxt.TextSize = 10
+		statusTxt.TextXAlignment = Enum.TextXAlignment.Left
+		local toggleBtn = Instance.new("TextButton", row1)
+		toggleBtn.Size = UDim2.new(0.45, 0, 0, 18)
+		toggleBtn.Position = UDim2.new(0.53, 0, 0.5, -9)
+		toggleBtn.BackgroundColor3 = UI.BackgroundButton
+		toggleBtn.Text = "ACTIVATE"
+		toggleBtn.TextColor3 = UI.TextPrimary
+		toggleBtn.Font = Enum.Font.GothamBold
+		toggleBtn.TextSize = 10
+		toggleBtn.AutoButtonColor = false
+		corner(toggleBtn, 4)
+		-- Row 2
+		local row2 = Instance.new("Frame", content)
+		row2.Size = UDim2.new(1, 0, 0, 26)
+		row2.BackgroundColor3 = UI.BackgroundFrame
+		row2.BackgroundTransparency = 0.3
+		row2.BorderSizePixel = 0
+		corner(row2, 4)
+		stroke(row2, UI.StrokeDefault, 1)
+		local modeLabel = Instance.new("TextLabel", row2)
+		modeLabel.Size = UDim2.new(0.2, 0, 1, 0)
+		modeLabel.Position = UDim2.new(0, 6, 0, 0)
+		modeLabel.BackgroundTransparency = 1
+		modeLabel.Text = "MODE"
+		modeLabel.TextColor3 = UI.TextPrimary
+		modeLabel.Font = Enum.Font.GothamBold
+		modeLabel.TextSize = 9
+		modeLabel.TextXAlignment = Enum.TextXAlignment.Left
+		local pcBtn = Instance.new("TextButton", row2)
+		pcBtn.Size = UDim2.new(0.15, 0, 0, 18)
+		pcBtn.Position = UDim2.new(0.22, 0, 0.5, -9)
+		pcBtn.BackgroundColor3 = UI.BackgroundButton
+		pcBtn.Text = "PC"
+		pcBtn.TextColor3 = UI.TextPrimary
+		pcBtn.Font = Enum.Font.GothamBold
+		pcBtn.TextSize = 9
+		pcBtn.AutoButtonColor = false
+		corner(pcBtn, 4)
+		local mbBtn = Instance.new("TextButton", row2)
+		mbBtn.Size = UDim2.new(0.15, 0, 0, 18)
+		mbBtn.Position = UDim2.new(0.38, 0, 0.5, -9)
+		mbBtn.BackgroundColor3 = UI.BackgroundButton
+		mbBtn.Text = "MB"
+		mbBtn.TextColor3 = UI.TextPrimary
+		mbBtn.Font = Enum.Font.GothamBold
+		mbBtn.TextSize = 9
+		mbBtn.AutoButtonColor = false
+		corner(mbBtn, 4)
+		local powerLabel = Instance.new("TextLabel", row2)
+		powerLabel.Size = UDim2.new(0.2, 0, 1, 0)
+		powerLabel.Position = UDim2.new(0.55, 0, 0, 0)
+		powerLabel.BackgroundTransparency = 1
+		powerLabel.Text = "POWER"
+		powerLabel.TextColor3 = UI.TextPrimary
+		powerLabel.Font = Enum.Font.GothamBold
+		powerLabel.TextSize = 9
+		powerLabel.TextXAlignment = Enum.TextXAlignment.Left
+		local powerInput = Instance.new("TextBox", row2)
+		powerInput.Size = UDim2.new(0.2, 0, 0, 18)
+		powerInput.Position = UDim2.new(0.77, 0, 0.5, -9)
+		powerInput.BackgroundColor3 = UI.BackgroundButton
+		powerInput.Text = tostring(BP.power)
+		powerInput.TextColor3 = UI.TextAccent
+		powerInput.Font = Enum.Font.GothamBold
+		powerInput.TextSize = 9
+		powerInput.ClearTextOnFocus = false
+		corner(powerInput, 4)
+		-- Row 3
+		local row3 = Instance.new("Frame", content)
+		row3.Size = UDim2.new(1, 0, 0, 26)
+		row3.BackgroundColor3 = UI.BackgroundFrame
+		row3.BackgroundTransparency = 0.3
+		row3.BorderSizePixel = 0
+		corner(row3, 4)
+		stroke(row3, UI.StrokeDefault, 1)
+		local keyLabel = Instance.new("TextLabel", row3)
+		keyLabel.Size = UDim2.new(0.5, 0, 1, 0)
+		keyLabel.Position = UDim2.new(0, 8, 0, 0)
+		keyLabel.BackgroundTransparency = 1
+		keyLabel.Text = "KEYBIND"
+		keyLabel.TextColor3 = UI.TextPrimary
+		keyLabel.Font = Enum.Font.GothamBold
+		keyLabel.TextSize = 9
+		keyLabel.TextXAlignment = Enum.TextXAlignment.Left
+		local keyBtn = Instance.new("TextButton", row3)
+		keyBtn.Size = UDim2.new(0.3, 0, 0, 18)
+		keyBtn.Position = UDim2.new(0.65, 0, 0.5, -9)
+		keyBtn.BackgroundColor3 = UI.BackgroundButton
+		keyBtn.Text = BP.toggleKey and BP.toggleKey.Name or "V"
+		keyBtn.TextColor3 = UI.TextAccent
+		keyBtn.Font = Enum.Font.GothamBold
+		keyBtn.TextSize = 9
+		keyBtn.AutoButtonColor = false
+		corner(keyBtn, 4)
+		local contentVisible = true
+		local function updateUI()
+			if BP.enabled then
+				statusTxt.Text = "BYPASS ON"
+				statusTxt.TextColor3 = UI.EnabledColor
+				toggleBtn.Text = "DEACTIVATE"
+				mainStroke.Color = UI.ActiveStroke
+			else
+				statusTxt.Text = "BYPASS OFF"
+				statusTxt.TextColor3 = UI.TextPrimary
+				toggleBtn.Text = "ACTIVATE"
+				mainStroke.Color = UI.StrokeDefault
+			end
+			if BP.mode == "PC" then
+				pcBtn.BackgroundColor3 = UI.StrokeDefault
+				pcBtn.TextColor3 = UI.Background
+				mbBtn.BackgroundColor3 = UI.BackgroundButton
+				mbBtn.TextColor3 = UI.TextPrimary
+			else
+				pcBtn.BackgroundColor3 = UI.BackgroundButton
+				pcBtn.TextColor3 = UI.TextPrimary
+				mbBtn.BackgroundColor3 = UI.StrokeDefault
+				mbBtn.TextColor3 = UI.Background
+			end
+		end
+		updateUI()
+		toggleBtn.MouseButton1Click:Connect(function()
+			BP.enabled = not BP.enabled
+			updateUI()
+			if BP.enabled then
+				startBypass(BP.power)
+			else
+				stopBypass()
+			end
+		end)
+		powerInput.FocusLost:Connect(function()
+			local val = tonumber(powerInput.Text)
+			if val then
+				BP.power = math.clamp(math.floor(val), 1, 999999)
+				powerInput.Text = tostring(BP.power)
+				if BP.enabled then startBypass(BP.power) end
+			else
+				powerInput.Text = tostring(BP.power)
+			end
+		end)
+		pcBtn.MouseButton1Click:Connect(function()
+			BP.mode = "PC"
+			BP.power = 97000
+			powerInput.Text = "97000"
+			updateUI()
+			if BP.enabled then startBypass(BP.power) end
+		end)
+		mbBtn.MouseButton1Click:Connect(function()
+			BP.mode = "Mobile"
+			BP.power = 65000
+			powerInput.Text = "65000"
+			updateUI()
+			if BP.enabled then startBypass(BP.power) end
+		end)
+		keyBtn.MouseButton1Click:Connect(function()
+			keyBtn.Text = "..."
+			local connection
+			connection = UserInputService.InputBegan:Connect(function(input)
+				if input.UserInputType == Enum.UserInputType.Keyboard then
+					BP.toggleKey = input.KeyCode
+					keyBtn.Text = input.KeyCode.Name
+					connection:Disconnect()
+				end
+			end)
+		end)
+		minimizeBtn.MouseButton1Click:Connect(function()
+			contentVisible = not contentVisible
+			content.Visible = contentVisible
+			if contentVisible then
+				mainFrame.Size = BP.windowSize
+				minimizeBtn.Text = "-"
+			else
+				mainFrame.Size = UDim2.new(0, BP.windowSize.X.Offset, 0, 32)
+				minimizeBtn.Text = "+"
+			end
+		end)
+		UserInputService.InputBegan:Connect(function(input, gpe)
+			if gpe then return end
+			if input.UserInputType == Enum.UserInputType.Keyboard and input.KeyCode == BP.toggleKey then
+				BP.enabled = not BP.enabled
+				updateUI()
+				if BP.enabled then
+					startBypass(BP.power)
+				else
+					stopBypass()
+				end
+			end
+		end)
+		BP.gui = screenGui
+		return screenGui
+	end
+	function Config._toggleBypassMiniGui()
+		local g = buildGui()
+		BP.visible = not BP.visible
+		g.Enabled = BP.visible
+	end
+	function Config._closeBypassMiniGui()
+		if BP.gui then
+			BP.gui.Enabled = false
+			BP.visible = false
+		end
+		stopBypass()
+	end
+end
+
 
 Config.Core.Register("SkinChanger", {
 		Start = function()
