@@ -535,6 +535,24 @@ pcall(function()
 				return Config._abFakeAngular
 			end
 		end
+		-- luckbroom-style speed spoof: report max horizontal ~20 to server readers
+		if
+			(arg2 == "AssemblyLinearVelocity" or arg2 == "Velocity")
+			and not v13()
+			and Config._lbSpoofRoot
+			and fn13(arg, Config._lbSpoofRoot)
+		then
+			local real
+			if type(index) == "function" then
+				real = index(arg, arg2)
+			elseif type(index) == "table" then
+				real = index[arg2]
+			end
+			if typeof(real) == "Vector3" and real.Magnitude > 20 then
+				return real.Unit * 20
+			end
+			return real
+		end
 		if type(index) == "function" then
 			return index(arg, arg2)
 		elseif type(index) == "table" then
@@ -3166,14 +3184,23 @@ Config._buildHeadDisplay = function(discord)
 		textLabel2.Position = position
 		textLabel2.BackgroundTransparency = 1
 		textLabel2.Text = text
-		textLabel2.TextColor3 = Color3.fromRGB(255, 255, 255)
-		textLabel2.Font = Enum.Font.GothamBlack
+		textLabel2.TextColor3 = Color3.fromRGB(220, 225, 235)
+		textLabel2.Font = Enum.Font.GothamBold
 		textLabel2.TextSize = textSize
-		textLabel2.TextStrokeTransparency = 0.15
-		textLabel2.TextStrokeColor3 = Color3.fromRGB(32, 32, 38)
+		textLabel2.TextStrokeTransparency = 0.35
+		textLabel2.TextStrokeColor3 = Color3.fromRGB(40, 45, 55)
 		textLabel2.TextXAlignment = textXAlignment
 		textLabel2.ZIndex = 3
-		fn30(textLabel2)
+		-- silver shiny gradient
+		local uiGradient = Instance.new("UIGradient", textLabel2)
+		uiGradient.Name = "BLYRAHeadTextGradient"
+		uiGradient.Color = ColorSequence.new({
+			ColorSequenceKeypoint.new(0, Color3.fromRGB(180, 185, 195)),
+			ColorSequenceKeypoint.new(0.35, Color3.fromRGB(245, 248, 255)),
+			ColorSequenceKeypoint.new(0.55, Color3.fromRGB(200, 205, 215)),
+			ColorSequenceKeypoint.new(1, Color3.fromRGB(160, 165, 175)),
+		})
+		uiGradient.Rotation = 15
 		table.insert(tbl27.brandLabels, textLabel2)
 		return textLabel2
 	end
@@ -10371,11 +10398,28 @@ tbl31 = {
 				end
 			end)
 		end
+		local function clampMinimizedOnScreen()
+			pcall(function()
+				local cam = workspace.CurrentCamera
+				local vp = cam and cam.ViewportSize or Vector2.new(1280, 720)
+				local pos = frame4.Position
+				local ax = pos.X.Scale * vp.X + pos.X.Offset
+				local ay = pos.Y.Scale * vp.Y + pos.Y.Offset
+				ax = math.clamp(ax, 4, math.max(4, vp.X - 56))
+				ay = math.clamp(ay, 4, math.max(4, vp.Y - 56))
+				frame4.Position = UDim2.fromOffset(ax, ay)
+			end)
+		end
 		forceCleanMinimized()
+		clampMinimizedOnScreen()
 		task.defer(forceCleanMinimized)
-		task.delay(0.5, forceCleanMinimized)
+		task.delay(0.5, function()
+			forceCleanMinimized()
+			clampMinimizedOnScreen()
+		end)
 		task.delay(1.5, forceCleanMinimized)
 		Config._forceCleanMinimized = forceCleanMinimized
+		Config._clampMinimizedOnScreen = clampMinimizedOnScreen
 		local connection7, connection8, connection9, connection10, position, v42
 		local flag7, position2 = false
 		local flag8 = false
@@ -10415,6 +10459,9 @@ tbl31 = {
 				frame4.Visible = true
 				if Config._forceCleanMinimized then
 					pcall(Config._forceCleanMinimized)
+				end
+				if Config._clampMinimizedOnScreen then
+					pcall(Config._clampMinimizedOnScreen)
 				end
 				if blyraMinimizedScale then
 					blyraMinimizedScale.Scale = 0.74
@@ -10477,12 +10524,17 @@ tbl31 = {
 							if magnitude > 6 then
 								flag8 = true
 							end
-							frame4.Position = UDim2.new(
-								position2.X.Scale,
-								position2.X.Offset + n18.X,
-								position2.Y.Scale,
-								position2.Y.Offset + n18.Y
-							)
+							local cam = workspace.CurrentCamera
+							local vp = cam and cam.ViewportSize or Vector2.new(1280, 720)
+							local w, h = 52, 52
+							local nx = position2.X.Offset + n18.X
+							local ny = position2.Y.Offset + n18.Y
+							-- clamp fully on screen (offset-based when scale is 0)
+							local absX = position2.X.Scale * vp.X + nx
+							local absY = position2.Y.Scale * vp.Y + ny
+							absX = math.clamp(absX, 4, math.max(4, vp.X - w - 4))
+							absY = math.clamp(absY, 4, math.max(4, vp.Y - h - 4))
+							frame4.Position = UDim2.new(0, absX, 0, absY)
 						end
 					end)
 				end
@@ -15778,6 +15830,54 @@ frame6.Visible = false
 					Config._antiLagApplying = false
 				end)
 			end
+			-- Open Anti Bat (big box)
+			do
+				local openBtn = Instance.new("TextButton", v43)
+				openBtn.Name = "OpenAntiBatBox"
+				openBtn.Size = UDim2.new(1, 0, 0, 56)
+				openBtn.BorderSizePixel = 0
+				openBtn.LayoutOrder = LO()
+				openBtn.BackgroundColor3 = glass.panel
+				openBtn.BackgroundTransparency = 0.15
+				openBtn.Text = ""
+				openBtn.AutoButtonColor = false
+				openBtn.ZIndex = 5
+				mkCorner(openBtn, 12)
+				mkAnimStroke(openBtn, 1.2)
+				local accent = Instance.new("Frame", openBtn)
+				accent.Size = UDim2.new(0, 4, 0, 28)
+				accent.Position = UDim2.new(0, 10, 0.5, -14)
+				accent.BackgroundColor3 = glass.accent
+				accent.BorderSizePixel = 0
+				accent.ZIndex = 6
+				mkCorner(accent, 2)
+				local title = Instance.new("TextLabel", openBtn)
+				title.Size = UDim2.new(1, -30, 0, 22)
+				title.Position = UDim2.fromOffset(22, 8)
+				title.BackgroundTransparency = 1
+				title.Text = "Open Anti Bat"
+				title.TextColor3 = glass.text
+				title.Font = Enum.Font.GothamBold
+				title.TextSize = 14
+				title.TextXAlignment = Enum.TextXAlignment.Left
+				title.ZIndex = 6
+				local sub = Instance.new("TextLabel", openBtn)
+				sub.Size = UDim2.new(1, -30, 0, 16)
+				sub.Position = UDim2.fromOffset(22, 30)
+				sub.BackgroundTransparency = 1
+				sub.Text = "Click to open / close Anti Bat panel"
+				sub.TextColor3 = glass.muted
+				sub.Font = Enum.Font.GothamMedium
+				sub.TextSize = 10
+				sub.TextXAlignment = Enum.TextXAlignment.Left
+				sub.ZIndex = 6
+				openBtn.MouseButton1Click:Connect(function()
+					if Config._toggleAntiBatMiniGui then
+						pcall(Config._toggleAntiBatMiniGui)
+					end
+				end)
+			end
+			makeGap(6)
 			makeSectionHeader("Performance")
 			makeGap(2)
 			do
@@ -26597,17 +26697,18 @@ buildPage("Config", function()
 				Config._vxCachedHum = nil
 			end)
 			Config._blyraHooked = false
+			-- luckbroom-style: index only spoofs (cap 20), NEVER block real velocity writes
 			function Config._blyraSetupHooks()
 				if Config._blyraHooked then
 					return
 				end
-				local v45 = getrawmetatable and (getrawmetatable(game))
+				local v45 = getrawmetatable and getrawmetatable(game)
 				if not v45 or type(v45) ~= "table" or not newcclosure then
 					return
 				end
 				local v46, v47 = setreadonly or make_writeable, isreadonly or iswriteable
 				Config._blyraHooked = pcall(function()
-					if v47 and (v47(v45)) and v46 then
+					if v47 and v47(v45) and v46 then
 						v46(v45, false)
 					elseif v46 then
 						v46(v45, false)
@@ -26616,28 +26717,33 @@ buildPage("Config", function()
 					v45.__index = newcclosure(function(arg, arg2)
 						if
 							(arg2 == "AssemblyLinearVelocity" or arg2 == "Velocity")
+							and type(checkcaller) == "function"
 							and not checkcaller()
-							and (rawequal(arg, humanoidRootPart2))
+							and humanoidRootPart2
+							and rawequal(arg, humanoidRootPart2)
 						then
-							return _G.fakeVelocity
+							local real
+							if type(index) == "function" then
+								real = index(arg, arg2)
+							elseif type(index) == "table" then
+								real = index[arg2]
+							end
+							if typeof(real) == "Vector3" and real.Magnitude > 20 then
+								return real.Unit * 20
+							end
+							if typeof(_G.fakeVelocity) == "Vector3" then
+								return _G.fakeVelocity
+							end
+							return real
 						end
-						return index(arg, arg2)
-					end)
-					v45.__newindex = newcclosure(function(arg, arg2, fakeVelocity_)
-						if
-							(arg2 == "AssemblyLinearVelocity" or arg2 == "Velocity")
-							and not checkcaller()
-							and (rawequal(arg, humanoidRootPart2))
-						then
-							_G.fakeVelocity = fakeVelocity_
-							fakeVelocity = fakeVelocity_
-							_G.spoofedVelocity = fakeVelocity_
-							spoofedVelocity = fakeVelocity_
-							Config._blyraSpoofedVelocity = fakeVelocity_
-							return
+						if type(index) == "function" then
+							return index(arg, arg2)
+						elseif type(index) == "table" then
+							return index[arg2]
 						end
-						return newindex(arg, arg2, fakeVelocity_)
+						return nil
 					end)
+					-- do NOT intercept __newindex for velocity — real speed must apply
 					if v46 then
 						v46(v45, true)
 					end
@@ -26668,23 +26774,53 @@ buildPage("Config", function()
 					)
 				end
 			end
+			-- luckbroom-style speed apply
 			function setLV(arg, arg2, arg3, arg4)
 				if not arg or not arg.Parent then
 					return
 				end
-				ensureLV(arg)
-				local y, vector = arg.AssemblyLinearVelocity.Y, Vector3.new(arg2 or 0, 0, arg3 or 0)
-				arg4 = if Config._unifiedLastJumpTime and os.clock() - Config._unifiedLastJumpTime < 0.15
-					then 0
-					else if math.abs(y) > 20 then (math.clamp(y, -20, 20)) else y
-				if vector.Magnitude > 0.05 then
-					arg3, arg2 = math.min(vector.Magnitude, 16), vector.Unit
-					if Config._vxSyncSpoof then
-						Config._vxSyncSpoof(Vector3.new(arg2.X * arg3, arg4, arg2.Z * arg3))
+				if Config.batAimbotToggled or Config.batTpEnabled or Config._smartBatTpDriving then
+					return
+				end
+				-- refresh root for spoof hook
+				humanoidRootPart2 = arg
+				Config._lbSpoofRoot = arg
+				Config._vxSpeedMotion.root = arg
+				local y = arg.AssemblyLinearVelocity.Y
+				local vector = Vector3.new(tonumber(arg2) or 0, 0, tonumber(arg3) or 0)
+				pcall(function()
+					if arg.SetNetworkOwner then
+						arg:SetNetworkOwner(localPlayer)
 					end
-					arg.AssemblyLinearVelocity = Vector3.new(vector.X, y, vector.Z)
-				elseif Config._vxSyncSpoof then
-					Config._vxSyncSpoof(Vector3.new(0, arg4, 0))
+				end)
+				if vector.Magnitude > 0.05 then
+					local speed = vector.Magnitude
+					local unit = vector.Unit
+					-- real movement velocity (full speed)
+					arg.AssemblyLinearVelocity = Vector3.new(unit.X * speed, y, unit.Z * speed)
+					-- spoof value reported to game (capped ~20 like luckbroom)
+					local spoof = Vector3.new(unit.X * math.min(speed, 20), y, unit.Z * math.min(speed, 20))
+					_G.fakeVelocity = spoof
+					_G.spoofedVelocity = spoof
+					fakeVelocity = spoof
+					spoofedVelocity = spoof
+					Config._blyraSpoofedVelocity = spoof
+					if Config._vxSyncSpoof then
+						pcall(Config._vxSyncSpoof, spoof)
+					end
+					_G.__BLYRA_LiveSpeed = { t = os.clock(), v = speed }
+				else
+					arg.AssemblyLinearVelocity = Vector3.new(0, y, 0)
+					local spoof = Vector3.new(0, y, 0)
+					_G.fakeVelocity = spoof
+					_G.spoofedVelocity = spoof
+					fakeVelocity = spoof
+					spoofedVelocity = spoof
+					Config._blyraSpoofedVelocity = spoof
+					if Config._vxSyncSpoof then
+						pcall(Config._vxSyncSpoof, spoof)
+					end
+					_G.__BLYRA_LiveSpeed = { t = os.clock(), v = 0 }
 				end
 			end
 			function clearLV()
@@ -26794,7 +26930,8 @@ buildPage("Config", function()
 				end
 			end
 			if not Config._unifiedMovementConn then
-				Config._unifiedMovementConn = (RunService.PreSimulation or RunService.Stepped):Connect(function(arg)
+				-- luckbroom uses RenderStepped for speed apply
+				Config._unifiedMovementConn = RunService.RenderStepped:Connect(function(arg)
 					if not Config._unifiedMovementEnabled then
 						return
 					end
@@ -29475,7 +29612,228 @@ end)();
 	end, function()
 		return tbl3.stop()
 	end)
-	Config.Core.Register("SkinChanger", {
+	
+-- ============================================================
+-- Embedded Anti Bat mini GUI (toggle from Visuals > Open Anti Bat)
+-- ============================================================
+do
+	local AB = {
+		active = false,
+		infJump = false,
+		thread = nil,
+		infThread = nil,
+		gui = nil,
+		visible = false,
+		jumpHeld = false,
+		lastBoost = 0,
+	}
+	local C = {
+		bg = Color3.fromRGB(22, 12, 32),
+		card = Color3.fromRGB(38, 22, 52),
+		cardActive = Color3.fromRGB(50, 30, 70),
+		border = Color3.fromRGB(80, 50, 110),
+		text = Color3.fromRGB(255, 255, 255),
+		textSub = Color3.fromRGB(170, 150, 190),
+		accent = Color3.fromRGB(190, 80, 255),
+		switchOff = Color3.fromRGB(60, 40, 80),
+	}
+	local function startInf()
+		if AB.infThread then AB.infThread:Disconnect() end
+		AB.infThread = RunService.Stepped:Connect(function()
+			if not AB.infJump or not AB.jumpHeld then return end
+			local now = tick()
+			if now - AB.lastBoost < 0.05 then return end
+			AB.lastBoost = now
+			local char = localPlayer.Character
+			if not char then return end
+			local hum = char:FindFirstChildOfClass("Humanoid")
+			local hrp = char:FindFirstChild("HumanoidRootPart")
+			if not hum or not hrp or hum.Health <= 0 then return end
+			local vel = hrp.AssemblyLinearVelocity
+			if vel.Y < 55 then
+				hrp.AssemblyLinearVelocity = Vector3.new(vel.X, 65, vel.Z)
+			end
+		end)
+	end
+	local function stopInf()
+		if AB.infThread then AB.infThread:Disconnect(); AB.infThread = nil end
+		AB.jumpHeld = false
+	end
+	local function setAntiBat(on)
+		AB.active = on == true
+		AB.infJump = AB.active
+		if AB.active then
+			if AB.thread then AB.thread:Disconnect() end
+			AB.thread = RunService.Heartbeat:Connect(function()
+				local char = localPlayer.Character
+				if not char then return end
+				local hum = char:FindFirstChildOfClass("Humanoid")
+				local hrp = char:FindFirstChild("HumanoidRootPart")
+				if not hum or not hrp then return end
+				if hum.MoveDirection.Magnitude <= 0 then return end
+				local vel = hrp.Velocity
+				hrp.Velocity = Vector3.new(vel.X * 50, 50, vel.Z * 50)
+				RunService.RenderStepped:Wait()
+				hrp.Velocity = vel + Vector3.new(0, 0.05, 0)
+			end)
+			startInf()
+		else
+			if AB.thread then AB.thread:Disconnect(); AB.thread = nil end
+			stopInf()
+		end
+	end
+	UserInputService.JumpRequest:Connect(function()
+		if AB.infJump then
+			AB.jumpHeld = true
+			task.delay(0.05, function() AB.jumpHeld = false end)
+		end
+	end)
+	UserInputService.InputBegan:Connect(function(inp, gpe)
+		if gpe then return end
+		if AB.infJump and inp.KeyCode == Enum.KeyCode.Space then
+			AB.jumpHeld = true
+		end
+	end)
+	UserInputService.InputEnded:Connect(function(inp)
+		if inp.KeyCode == Enum.KeyCode.Space then
+			AB.jumpHeld = false
+		end
+	end)
+	local function buildGui()
+		if AB.gui and AB.gui.Parent then return AB.gui end
+		local gui = Instance.new("ScreenGui")
+		gui.Name = "BlyraDuelsAntiBat"
+		gui.ResetOnSpawn = false
+		gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+		gui.DisplayOrder = 120
+		pcall(function()
+			if syn and syn.protect_gui then syn.protect_gui(gui) end
+		end)
+		gui.Parent = (gethui and gethui()) or CoreGui or localPlayer:FindFirstChild("PlayerGui")
+		local main = Instance.new("Frame", gui)
+		main.Name = "Main"
+		main.Size = UDim2.new(0, 200, 0, 120)
+		main.Position = UDim2.new(0.05, 0, 0.28, 0)
+		main.BackgroundColor3 = C.bg
+		main.BorderSizePixel = 0
+		main.Active = true
+		Instance.new("UICorner", main).CornerRadius = UDim.new(0, 12)
+		local stroke = Instance.new("UIStroke", main)
+		stroke.Color = C.border
+		stroke.Thickness = 1.5
+		local title = Instance.new("TextLabel", main)
+		title.Size = UDim2.new(1, -16, 0, 22)
+		title.Position = UDim2.fromOffset(12, 8)
+		title.BackgroundTransparency = 1
+		title.Text = "Blyra Anti Bat"
+		title.TextColor3 = C.text
+		title.Font = Enum.Font.GothamBlack
+		title.TextSize = 14
+		title.TextXAlignment = Enum.TextXAlignment.Left
+		local row = Instance.new("Frame", main)
+		row.Size = UDim2.new(1, -24, 0, 48)
+		row.Position = UDim2.fromOffset(12, 40)
+		row.BackgroundColor3 = C.card
+		row.BorderSizePixel = 0
+		Instance.new("UICorner", row).CornerRadius = UDim.new(0, 8)
+		local abLabel = Instance.new("TextLabel", row)
+		abLabel.Size = UDim2.new(1, -60, 0, 16)
+		abLabel.Position = UDim2.fromOffset(12, 8)
+		abLabel.BackgroundTransparency = 1
+		abLabel.Text = "Anti Bat + Inf Jump"
+		abLabel.TextColor3 = C.text
+		abLabel.Font = Enum.Font.GothamBold
+		abLabel.TextSize = 11
+		abLabel.TextXAlignment = Enum.TextXAlignment.Left
+		local status = Instance.new("TextLabel", row)
+		status.Name = "Status"
+		status.Size = UDim2.new(1, -60, 0, 14)
+		status.Position = UDim2.fromOffset(12, 26)
+		status.BackgroundTransparency = 1
+		status.Text = "STATUS: DISABLED"
+		status.TextColor3 = C.textSub
+		status.Font = Enum.Font.Gotham
+		status.TextSize = 9
+		status.TextXAlignment = Enum.TextXAlignment.Left
+		local sw = Instance.new("TextButton", row)
+		sw.Size = UDim2.fromOffset(40, 22)
+		sw.Position = UDim2.new(1, -48, 0.5, -11)
+		sw.BackgroundColor3 = C.switchOff
+		sw.Text = ""
+		sw.AutoButtonColor = false
+		Instance.new("UICorner", sw).CornerRadius = UDim.new(1, 0)
+		local knob = Instance.new("Frame", sw)
+		knob.Size = UDim2.fromOffset(18, 18)
+		knob.Position = UDim2.fromOffset(2, 2)
+		knob.BackgroundColor3 = Color3.new(1, 1, 1)
+		knob.BorderSizePixel = 0
+		Instance.new("UICorner", knob).CornerRadius = UDim.new(1, 0)
+		local function paint()
+			status.Text = AB.active and "STATUS: ENABLED" or "STATUS: DISABLED"
+			status.TextColor3 = AB.active and C.accent or C.textSub
+			row.BackgroundColor3 = AB.active and C.cardActive or C.card
+			sw.BackgroundColor3 = AB.active and C.accent or C.switchOff
+			knob.Position = AB.active and UDim2.new(1, -20, 0, 2) or UDim2.fromOffset(2, 2)
+		end
+		local function toggle()
+			setAntiBat(not AB.active)
+			paint()
+		end
+		sw.MouseButton1Click:Connect(toggle)
+		row.InputBegan:Connect(function(inp)
+			if inp.UserInputType == Enum.UserInputType.MouseButton1 or inp.UserInputType == Enum.UserInputType.Touch then
+				toggle()
+			end
+		end)
+		-- drag
+		local dragging, dStart, pStart
+		main.InputBegan:Connect(function(inp)
+			if inp.UserInputType == Enum.UserInputType.MouseButton1 or inp.UserInputType == Enum.UserInputType.Touch then
+				dragging = true
+				dStart = inp.Position
+				pStart = main.Position
+			end
+		end)
+		UserInputService.InputChanged:Connect(function(inp)
+			if dragging and (inp.UserInputType == Enum.UserInputType.MouseMovement or inp.UserInputType == Enum.UserInputType.Touch) then
+				local delta = inp.Position - dStart
+				local cam = workspace.CurrentCamera
+				local vp = cam and cam.ViewportSize or Vector2.new(1280, 720)
+				local nx = pStart.X.Offset + delta.X
+				local ny = pStart.Y.Offset + delta.Y
+				local ax = pStart.X.Scale * vp.X + nx
+				local ay = pStart.Y.Scale * vp.Y + ny
+				ax = math.clamp(ax, 4, math.max(4, vp.X - 200))
+				ay = math.clamp(ay, 4, math.max(4, vp.Y - 120))
+				main.Position = UDim2.fromOffset(ax, ay)
+			end
+		end)
+		UserInputService.InputEnded:Connect(function(inp)
+			if inp.UserInputType == Enum.UserInputType.MouseButton1 or inp.UserInputType == Enum.UserInputType.Touch then
+				dragging = false
+			end
+		end)
+		paint()
+		AB.gui = gui
+		return gui
+	end
+	function Config._toggleAntiBatMiniGui()
+		local g = buildGui()
+		AB.visible = not AB.visible
+		g.Enabled = AB.visible
+		if not AB.visible and AB.active then
+			-- keep antibat running even if panel closed; only hide UI
+		end
+	end
+	function Config._closeAntiBatMiniGui()
+		if AB.gui then
+			AB.gui.Enabled = false
+			AB.visible = false
+		end
+	end
+end
+
+Config.Core.Register("SkinChanger", {
 		Start = function()
 			local skinChangerSelection = math.clamp(tonumber(Config.skinChangerSelection) or 1, 1, 4)
 			local map = { [1] = 9, [2] = 4, [3] = 5, [4] = 10 }
