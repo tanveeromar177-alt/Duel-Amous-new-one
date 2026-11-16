@@ -3794,10 +3794,22 @@ local function fn33()
 	local ok, result = pcall(function()
 		return HttpService:JSONEncode(tbl32)
 	end)
+	pcall(function()
+		if _G.__BLYRA_FS and _G.__BLYRA_FS.makefolder then
+			_G.__BLYRA_FS.makefolder("blyra")
+		elseif type(makefolder) == "function" then
+			makefolder("blyra")
+		end
+	end)
 	if ok and result then
-		pcall(function()
+		local wOk, wErr = pcall(function()
 			writefile_("blyra/BlyraConfig.json", result)
 		end)
+		if not wOk then
+			pcall(function()
+				writefile("blyra/BlyraConfig.json", result)
+			end)
+		end
 	else
 		tbl32.toggleKeybinds = nil
 		local ok2, result2 = pcall(function()
@@ -4117,23 +4129,34 @@ local function fn39()
 	if not isfile_("blyra/BlyraConfig.json") then
 		return true
 	end
-	local data = tbl[1][6][tbl[1][3]]
+	local data = nil
+	pcall(function()
+		if type(tbl) == "table" and tbl[1] and tbl[1][6] and tbl[1][3] then
+			data = tbl[1][6][tbl[1][3]]
+			tbl[1][6][tbl[1][3]] = nil
+		end
+	end)
 	local v23 = data
-	tbl[1][6][tbl[1][3]] = nil
 	if type(v23) ~= "table" then
 		local ok, result = pcall(readfile_, "blyra/BlyraConfig.json")
 		if not ok or type(result) ~= "string" or result == "" then
 			return false
 		end
-		if not pcall(function()
-			data = HttpService:JSONDecode(result)
-		end) or type(v23) ~= "table" then
+		local decoded = nil
+		local decOk = pcall(function()
+			decoded = HttpService:JSONDecode(result)
+		end)
+		if not decOk or type(decoded) ~= "table" then
 			return false
 		end
+		v23 = decoded
 	end
 	local tbl35 = {
 		v3FillDuration = "number",
 		popupScale = "number",
+		floatScale = "number",
+		uiScale = "number",
+		stealBarScale = "number",
 		billboardScale = "number",
 		musicVolume = "number",
 		musicCurrentSong = "number",
@@ -4299,13 +4322,25 @@ local function fn39()
 		end
 	end
 	if v23.uiScale then
-		Config.uiScale = v23.uiScale
+		Config.uiScale = math.clamp(tonumber(v23.uiScale) or 1, 0.5, 1.25)
+		task.defer(function()
+			pcall(function()
+				if Config._applyMainUIScale then
+					Config._applyMainUIScale(Config.uiScale, false)
+				end
+			end)
+		end)
 	end
 	if v23.popupScale ~= nil then
 		Config.popupScale = v23.popupScale
 	end
 	if v23.floatScale ~= nil then
-		Config.floatScale = v23.floatScale
+		Config.floatScale = math.clamp(tonumber(v23.floatScale) or 0.7, 0.4, 1.5)
+		pcall(function()
+			if type(fn8) == "function" then
+				fn8(Config.floatScale)
+			end
+		end)
 	end
 	if v23.stealBarScale ~= nil then
 		Config.stealBarScale = math.clamp(tonumber(v23.stealBarScale) or 1, 0.5, 2)
@@ -4320,10 +4355,10 @@ local function fn39()
 		Config.fontStyle = v23.fontStyle
 	end
 	if v23.billboardScale ~= nil then
-		Config.billboardScale = 0.75
+		Config.billboardScale = math.clamp(tonumber(v23.billboardScale) or 1, 0.5, 2)
 	end
 	if v23.statsBarEnabled ~= nil then
-		Config.statsBarEnabled = false
+		Config.statsBarEnabled = v23.statsBarEnabled == true
 	end
 	if v23.openPopups ~= nil then
 		Config._openPopups = v23.openPopups
@@ -9852,6 +9887,11 @@ tbl31 = {
 				frame2:SetAttribute("state", flag6)
 				fn72(flag6)
 				arg2(flag6)
+				pcall(function()
+					if type(fn34) == "function" then
+						fn34()
+					end
+				end)
 			end)
 			frame2:SetAttribute("state", enabled)
 			return frame2, fn72
