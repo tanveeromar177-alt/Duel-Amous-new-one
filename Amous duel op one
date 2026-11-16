@@ -21627,7 +21627,7 @@ laggerPopupToggleSync.Visible = false
 			makeGap(6)
 			buildMovementFeatures()
 			makeGap(6)
-			makeSectionHeader("Camera")
+			makeSectionHeader("Visual")
 			makeGap(2)
 			do
 				local flag14, frame6 = Config.duelAntiDieEnabled == true, Instance.new("Frame", v43)
