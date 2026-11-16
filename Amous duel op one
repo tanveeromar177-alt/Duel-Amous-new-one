@@ -2571,7 +2571,7 @@ local function fn23()
 	tbl25.Size = flag4 and (udim22(70, 16)) or (udim22(80, 44))
 	tbl25.Position = flag4 and (udim22(14, 7)) or (udim22(52, 0))
 	tbl25.BackgroundTransparency = 1
-	tbl25.Text = "STEAL"
+	tbl25.Text = "CARRY"
 	tbl25.TextColor3 = flag4 and (color(205, 205, 214)) or (color(255, 255, 255))
 	tbl25.Font = gothamBold
 	tbl25.TextSize = flag4 and 8 or 14
@@ -3191,22 +3191,14 @@ Config._buildHeadDisplay = function(discord)
 		textLabel2.TextStrokeColor3 = Color3.fromRGB(40, 45, 55)
 		textLabel2.TextXAlignment = textXAlignment
 		textLabel2.ZIndex = 3
-		-- silver shiny gradient
-		local uiGradient = Instance.new("UIGradient", textLabel2)
-		uiGradient.Name = "BLYRAHeadTextGradient"
-		uiGradient.Color = ColorSequence.new({
-			ColorSequenceKeypoint.new(0, Color3.fromRGB(180, 185, 195)),
-			ColorSequenceKeypoint.new(0.35, Color3.fromRGB(245, 248, 255)),
-			ColorSequenceKeypoint.new(0.55, Color3.fromRGB(200, 205, 215)),
-			ColorSequenceKeypoint.new(1, Color3.fromRGB(160, 165, 175)),
-		})
-		uiGradient.Rotation = 15
+		-- no shiny gradient — plain silver/white text
+		textLabel2.TextColor3 = Color3.fromRGB(230, 233, 240)
 		table.insert(tbl27.brandLabels, textLabel2)
 		return textLabel2
 	end
 	discord = createTextLabel("discord.gg/", 20, UDim2.new(0.5, -107, 0, 0), 100, Enum.TextXAlignment.Right)
 	createTextLabel("v", 20, UDim2.new(0.5, -7, 0, 0), 14, Enum.TextXAlignment.Center)
-	createTextLabel("x7hub", 20, UDim2.new(0.5, 7, 0, 0), 80, Enum.TextXAlignment.Left)
+	createTextLabel("blyra", 20, UDim2.new(0.5, 7, 0, 0), 80, Enum.TextXAlignment.Left)
 	createTextLabel = Instance.new("Frame", frame)
 	createTextLabel.Size = UDim2.new(0.85, 0, 0, 1)
 	createTextLabel.AnchorPoint = Vector2.new(0.5, 0)
@@ -6329,40 +6321,41 @@ tbl31 = {
 					local generation, billboardGui = tbl40.generation, Instance.new("BillboardGui")
 					billboardGui.Name = "BLYRA_WARNING_E01"
 					billboardGui.Adornee = head
-					billboardGui.Size = UDim2.fromOffset(252, 56)
-					billboardGui.StudsOffset = Vector3.new(0, 4.95, 0)
+					billboardGui.Size = UDim2.fromOffset(110, 32)
+					billboardGui.StudsOffset = Vector3.new(0, 3.2, 0)
 					billboardGui.AlwaysOnTop = true
 					billboardGui.LightInfluence = 0
 					billboardGui.MaxDistance = 150
 					billboardGui.Parent = head
 					tbl40.board = billboardGui
 					character2 = Instance.new("Frame", billboardGui)
-					character2.Size = UDim2.fromOffset(252, 56)
-					character2.BackgroundColor3 = Color3.fromRGB(22, 2, 7)
-					character2.BackgroundTransparency = 0.35
+					character2.Size = UDim2.fromOffset(110, 32)
+					character2.BackgroundColor3 = Color3.fromRGB(10, 10, 12)
+					character2.BackgroundTransparency = 0
 					character2.BorderSizePixel = 0
 					tbl40.scale = Instance.new("UIScale", character2)
 					Config._setWarningE01Scale(Config.warningE01Scale)
-					Instance.new("UICorner", character2).CornerRadius = UDim.new(0, 10)
+					Instance.new("UICorner", character2).CornerRadius = UDim.new(0, 6)
 					local uiStroke = Instance.new("UIStroke", character2)
-					uiStroke.Color = Color3.fromRGB(232, 31, 58)
-					uiStroke.Thickness = 1.15
-					uiStroke.Transparency = 0.28
+					uiStroke.Color = Color3.fromRGB(180, 185, 195)
+					uiStroke.Thickness = 1.2
+					uiStroke.Transparency = 0
 					head = Instance.new("TextLabel", character2)
-					head.Size = UDim2.new(1, 0, 0, 22)
+					head.Size = UDim2.new(1, 0, 0, 12)
+					head.Position = UDim2.fromOffset(0, 2)
 					head.BackgroundTransparency = 1
 					head.Text = "WARNING E01"
 					head.Font = Enum.Font.GothamBold
-					head.TextSize = 13
-					head.TextColor3 = Color3.fromRGB(255, 90, 100)
+					head.TextSize = 8
+					head.TextColor3 = Color3.fromRGB(255, 255, 255)
 					local textLabel2 = Instance.new("TextLabel", character2)
-					textLabel2.Size = UDim2.new(1, 0, 0, 30)
-					textLabel2.Position = UDim2.fromOffset(0, 23)
+					textLabel2.Size = UDim2.new(1, 0, 0, 16)
+					textLabel2.Position = UDim2.fromOffset(0, 13)
 					textLabel2.BackgroundTransparency = 1
 					textLabel2.Text = "SAFE IN 3.00s"
-					textLabel2.Font = Enum.Font.GothamMedium
-					textLabel2.TextSize = 18
-					textLabel2.TextColor3 = Color3.fromRGB(255, 100, 110)
+					textLabel2.Font = Enum.Font.GothamBold
+					textLabel2.TextSize = 11
+					textLabel2.TextColor3 = Color3.fromRGB(255, 255, 255)
 					local now = os.clock()
 					tbl40.timer = RunService.RenderStepped:Connect(function()
 						if generation ~= tbl40.generation then
@@ -6375,17 +6368,16 @@ tbl31 = {
 						local n18 = math.max(0, 3 - (os.clock() - now))
 						if n18 > 0 then
 							textLabel2.Text = string.format("SAFE IN %.2fs", n18)
-							if n18 < 1 then
-								textLabel2.TextColor3 = Color3.fromRGB(255, 203, 72)
-								uiStroke.Color = Color3.fromRGB(240, 145, 40)
-							end
+							-- stay white / silver (no color change)
+							textLabel2.TextColor3 = Color3.fromRGB(255, 255, 255)
+							uiStroke.Color = Color3.fromRGB(180, 185, 195)
 							return
 						end
 						tbl40.timer:Disconnect()
 						tbl40.timer = nil
 						textLabel2.Text = "SAFE TO STEAL"
-						textLabel2.TextColor3 = Color3.fromRGB(73, 255, 145)
-						uiStroke.Color = Color3.fromRGB(42, 218, 112)
+						textLabel2.TextColor3 = Color3.fromRGB(255, 255, 255)
+						uiStroke.Color = Color3.fromRGB(180, 185, 195)
 						task.delay(1.5, function()
 							if generation == tbl40.generation then
 								tbl40.clear()
@@ -6397,7 +6389,7 @@ tbl31 = {
 			function Config._setWarningE01Scale(arg)
 				Config.warningE01Scale = math.clamp(tonumber(arg) or 1, 0.5, 2.5)
 				if tbl40.board and tbl40.board.Parent then
-					tbl40.board.Size = UDim2.fromOffset(252 * Config.warningE01Scale, 56 * Config.warningE01Scale)
+					tbl40.board.Size = UDim2.fromOffset(110 * Config.warningE01Scale, 32 * Config.warningE01Scale)
 					if tbl40.scale then
 						tbl40.scale.Scale = Config.warningE01Scale
 					end
@@ -9529,7 +9521,7 @@ tbl31 = {
 										or arg.Text == "discord.gg/blyrahub"
 										or arg.Text == "discord.gg/"
 										or arg.Text == "v"
-										or arg.Text == "x7hub"
+										or arg.Text == "blyra"
 										or arg == tbl27.speed
 									then "brand"
 									else (Config._theme.nearest(
@@ -10814,8 +10806,9 @@ tbl31 = {
 			character.AnchorPoint = Vector2.new(0.5, 1)
 			character.Position = UDim2.new(0.5, 0, 1, -2)
 			character.BackgroundColor3 = glass.accent2
-			character.BackgroundTransparency = 0.68
+			character.BackgroundTransparency = 1
 			character.BorderSizePixel = 0
+			character.Visible = false
 			character.ZIndex = 13
 			mkCorner(character, 2)
 			tbl48[v43] = { btn = textButton, label = tabLbl, indicator = character, activeBg = i }
@@ -10835,7 +10828,7 @@ tbl31 = {
 					v44.activeBg.BackgroundColor3 = Color3.fromRGB(45, 45, 52)
 					v44.activeBg.BackgroundTransparency = flag9 and 0 or 1
 					v44.indicator.BackgroundColor3 = flag9 and glass.accent2 or glass.border
-					v44.indicator.BackgroundTransparency = flag9 and 0 or 0.68
+					v44.indicator.BackgroundTransparency = 1; v44.indicator.Visible = false
 				end
 				for k, v44 in pairs(tbl47) do
 					v44.Visible = k == v43
@@ -10856,7 +10849,7 @@ tbl31 = {
 			v43.activeBg.BackgroundColor3 = Color3.fromRGB(45, 45, 52)
 			v43.activeBg.BackgroundTransparency = character and 0 or 1
 			v43.indicator.BackgroundColor3 = character and glass.accent2 or glass.border
-			v43.indicator.BackgroundTransparency = character and 0 or 0.68
+			v43.indicator.BackgroundTransparency = 1; v43.indicator.Visible = false
 		end
 		Config._searchPages = tbl47
 		Config._searchTabSwitch = function(tabName)
@@ -10878,7 +10871,7 @@ tbl31 = {
 				v44.activeBg.BackgroundColor3 = Color3.fromRGB(45, 45, 52)
 				v44.activeBg.BackgroundTransparency = flag9 and 0 or 1
 				v44.indicator.BackgroundColor3 = flag9 and glass.accent2 or glass.border
-				v44.indicator.BackgroundTransparency = flag9 and 0 or 0.68
+				v44.indicator.BackgroundTransparency = 1; v44.indicator.Visible = false
 			end
 			for k, v44 in pairs(tbl47) do
 				v44.Visible = k == tabName
@@ -11766,7 +11759,7 @@ tbl31 = {
 			text.Size = UDim2.new(0, 48, 0, 11)
 			text.Position = UDim2.new(1, -55, 0, 5)
 			text.BackgroundTransparency = 1
-			text.Text = "STEAL"
+			text.Text = "CARRY"
 			text.TextColor3 = glass.muted
 			text.Font = Enum.Font.GothamBold
 			text.TextSize = 7
@@ -13048,7 +13041,7 @@ frame9.Visible = false
 		end
 		setModeActiveFunc = setModeActive
 		function buildSpeedSection()
-			makeSectionHeader("Speed")
+			makeSectionHeader("Player Speed")
 			makeGap(2)
 			local frame6, textLabel2
 			Config.speedMethod = "V2"
@@ -13135,7 +13128,7 @@ frame9.Visible = false
 			carryStealBox = textLabel2
 		end
 		function buildAutoSection()
-			makeSectionHeader("Auto")
+			makeSectionHeader("Play")
 			makeGap(1)
 			local Frame = fn9("Frame", v43, {
 				Size = UDim2.new(1, 0, 0, 0),
@@ -13461,7 +13454,7 @@ frame9.Visible = false
 					textLabel2.Size = UDim2.new(1, -74, 1, 0)
 					textLabel2.Position = UDim2.new(0, 14, 0, 0)
 					textLabel2.BackgroundTransparency = 1
-					textLabel2.Text = "Radio"
+					textLabel2.Text = "Radius"
 					textLabel2.TextColor3 = Color3.fromRGB(200, 200, 200)
 					textLabel2.Font = Enum.Font.GothamBold
 					textLabel2.TextSize = 12
@@ -13591,7 +13584,7 @@ frame9.Visible = false
 			makeGap(1)
 		end
 		function buildMovementFeatures()
-			makeSectionHeader("Main")
+			makeSectionHeader("Help")
 			makeGap(2)
 			local textLabel2 = Config._makeSettingsRow()
 			local textLabel3 = Instance.new("TextLabel", textLabel2)
@@ -13901,29 +13894,34 @@ frame9.Visible = false
 					local billboardGui = Instance.new("BillboardGui")
 					billboardGui.Name = "RagCountdownBillboard"
 					billboardGui.Adornee = humanoidRootPart2
-					billboardGui.Size = UDim2.new(0, 84, 0, 42)
-					billboardGui.StudsOffset = Vector3.new(0, 2.5, 0)
+					billboardGui.Size = UDim2.new(0, 52, 0, 28)
+					billboardGui.StudsOffset = Vector3.new(0, 2.2, 0)
 					billboardGui.AlwaysOnTop = true
 					billboardGui.Parent = playerGui2
 					v45 = billboardGui
-					local textLabel5 = Instance.new("TextLabel")
+					-- solid black panel + silver border
+					local panel = Instance.new("Frame", billboardGui)
+					panel.Size = UDim2.fromScale(1, 1)
+					panel.BackgroundColor3 = Color3.fromRGB(10, 10, 12)
+					panel.BackgroundTransparency = 0
+					panel.BorderSizePixel = 0
+					Instance.new("UICorner", panel).CornerRadius = UDim.new(0, 6)
+					local pStroke = Instance.new("UIStroke", panel)
+					pStroke.Color = Color3.fromRGB(180, 185, 195)
+					pStroke.Thickness = 1.2
+					pStroke.Transparency = 0
+					local textLabel5 = Instance.new("TextLabel", panel)
 					textLabel5.Size = UDim2.fromScale(1, 1)
 					textLabel5.BackgroundTransparency = 1
-					textLabel5.Font = Enum.Font.GothamBlack
+					textLabel5.Font = Enum.Font.GothamBold
 					textLabel5.TextScaled = true
 					textLabel5.TextColor3 = Color3.fromRGB(255, 255, 255)
-					textLabel5.TextStrokeColor3 = Color3.new(0, 0, 0)
-					textLabel5.TextStrokeTransparency = 0
-					textLabel5.Parent = billboardGui
+					textLabel5.TextStrokeTransparency = 1
+					textLabel5.ZIndex = 2
 					task.spawn(function()
 						local function fn83()
-							pcall(function()
-								local currentThemePalette = Config._currentThemePalette
-									or Config._theme and Config._theme.active
-								textLabel5.TextColor3 = currentThemePalette
-										and (currentThemePalette.accent or currentThemePalette.text)
-									or (Color3.fromRGB(255, 255, 255))
-							end)
+							-- fixed white text, no theme colors
+							textLabel5.TextColor3 = Color3.fromRGB(255, 255, 255)
 						end
 						local n21 = tonumber(arg) or 2.5
 						while v46 == n20 and billboardGui.Parent and n21 > 0 do
@@ -14045,7 +14043,7 @@ frame9.Visible = false
 				textLabel5.Size = UDim2.new(1, -54, 1, 0)
 				textLabel5.Position = UDim2.new(0, 14, 0, 0)
 				textLabel5.BackgroundTransparency = 1
-				textLabel5.Text = "Ragdoll Timer"
+				textLabel5.Text = "Ragdoll Counter"
 				textLabel5.TextColor3 = ragdollTimerEnabled and glass.text or glass.muted
 				textLabel5.Font = Enum.Font.GothamBold
 				textLabel5.TextSize = 12
@@ -14129,48 +14127,43 @@ frame9.Visible = false
 					screenGui2.Parent = playerGui2
 					local frame7 = Instance.new("Frame", screenGui2)
 					frame7.Name = "EnemyRagdollOverlay"
-					frame7.Size = UDim2.fromOffset(104, 50)
+					frame7.Size = UDim2.fromOffset(64, 34)
 					frame7.AnchorPoint = Vector2.new(0.5, 0.5)
 					frame7.BackgroundTransparency = 1
 					frame7.BorderSizePixel = 0
 					frame7.Visible = false
 					frame7.ZIndex = 1000
 					frame6 = Instance.new("Frame", frame7)
-					frame6.Size = UDim2.new(1, -8, 1, -8)
-					frame6.Position = UDim2.fromOffset(4, 4)
-					frame6.BackgroundColor3 = Color3.fromRGB(12, 13, 17)
-					frame6.BackgroundTransparency = 0.16
+					frame6.Size = UDim2.new(1, 0, 1, 0)
+					frame6.Position = UDim2.fromOffset(0, 0)
+					frame6.BackgroundColor3 = Color3.fromRGB(10, 10, 12)
+					frame6.BackgroundTransparency = 0
 					frame6.BorderSizePixel = 0
 					frame6.ZIndex = 1001
-					Instance.new("UICorner", frame6).CornerRadius = UDim.new(0, 11)
-					name = Config._currentThemePalette or Config._theme and Config._theme.active
-					local accent, accent2, uiStroke2 =
-						name and (name.accent or name.text) or (Color3.fromRGB(232, 69, 79)),
-						name and (name.accent2 or name.accent) or (Color3.fromRGB(184, 105, 255)),
-						Instance.new("UIStroke", frame6)
-					uiStroke2.Color = arg4 == "medusa" and accent2 or accent
-					uiStroke2.Transparency = 0.18
+					Instance.new("UICorner", frame6).CornerRadius = UDim.new(0, 6)
+					local uiStroke2 = Instance.new("UIStroke", frame6)
+					uiStroke2.Color = Color3.fromRGB(180, 185, 195)
+					uiStroke2.Transparency = 0
 					uiStroke2.Thickness = 1.2
 					local textLabel5 = Instance.new("TextLabel", frame6)
-					textLabel5.Size = UDim2.new(1, 0, 0, 14)
-					textLabel5.Position = UDim2.fromOffset(0, 3)
+					textLabel5.Size = UDim2.new(1, 0, 0, 11)
+					textLabel5.Position = UDim2.fromOffset(0, 2)
 					textLabel5.BackgroundTransparency = 1
 					textLabel5.Text = arg4 == "medusa" and "MEDUSA" or "RAGDOLL"
 					textLabel5.Font = Enum.Font.GothamBold
 					textLabel5.TextSize = 7
-					textLabel5.TextColor3 = arg4 == "medusa" and accent2 or accent
+					textLabel5.TextColor3 = Color3.fromRGB(255, 255, 255)
 					textLabel5.TextStrokeTransparency = 1
 					textLabel5.ZIndex = 1002
 					local textLabel6 = Instance.new("TextLabel", frame6)
-					textLabel6.Size = UDim2.new(1, -8, 0, 25)
-					textLabel6.Position = UDim2.fromOffset(4, 14)
+					textLabel6.Size = UDim2.new(1, -4, 0, 18)
+					textLabel6.Position = UDim2.fromOffset(2, 12)
 					textLabel6.BackgroundTransparency = 1
-					textLabel6.Font = Enum.Font.GothamBlack
+					textLabel6.Font = Enum.Font.GothamBold
 					textLabel6.TextScaled = false
-					textLabel6.TextSize = 19
-					textLabel6.TextColor3 = arg4 == "medusa" and accent2 or accent
-					textLabel6.TextStrokeColor3 = Color3.new(0, 0, 0)
-					textLabel6.TextStrokeTransparency = 0.38
+					textLabel6.TextSize = 14
+					textLabel6.TextColor3 = Color3.fromRGB(255, 255, 255)
+					textLabel6.TextStrokeTransparency = 1
 					textLabel6.ZIndex = 1002
 					local tbl55 = { gui = screenGui2, token = 1, effectType = arg4 }
 					tbl54[arg] = tbl55
@@ -14200,28 +14193,13 @@ frame9.Visible = false
 					end)
 					task.spawn(function()
 						local function fn84()
-							pcall(function()
-								local currentThemePalette, accent22, accent3 = Config._currentThemePalette
-									or Config._theme and Config._theme.active
-								if currentThemePalette then
-									accent22, accent3 =
-										currentThemePalette.accent2 or currentThemePalette.accent,
-										currentThemePalette.accent or currentThemePalette.text
-								end
-								if arg4 == "medusa" then
-									if accent22 then
-										textLabel6.TextColor3 = accent22
-									else
-										textLabel6.TextColor3 = Color3.fromRGB(184, 105, 255)
-									end
-								elseif accent3 then
-									textLabel6.TextColor3 = accent3
-								else
-									textLabel6.TextColor3 = Color3.fromRGB(255, 72, 82)
-								end
-								textLabel5.TextColor3 = textLabel6.TextColor3
-								uiStroke2.Color = textLabel6.TextColor3
-							end)
+							-- fixed black/silver + white text (no theme colors)
+							textLabel5.TextColor3 = Color3.fromRGB(255, 255, 255)
+							textLabel6.TextColor3 = Color3.fromRGB(255, 255, 255)
+							uiStroke2.Color = Color3.fromRGB(180, 185, 195)
+							uiStroke2.Transparency = 0
+							frame6.BackgroundTransparency = 0
+							frame6.BackgroundColor3 = Color3.fromRGB(10, 10, 12)
 						end
 						local character2 = arg3
 						while
@@ -14448,7 +14426,7 @@ frame9.Visible = false
 				textLabel5.Size = UDim2.new(1, -54, 1, 0)
 				textLabel5.Position = UDim2.new(0, 14, 0, 0)
 				textLabel5.BackgroundTransparency = 1
-				textLabel5.Text = "Enemy Ragdoll Timer"
+				textLabel5.Text = "Enemy Rag Counter"
 				textLabel5.TextColor3 = enemyRagdollTimerEnabled and glass.text or glass.muted
 				textLabel5.Font = Enum.Font.GothamBold
 				textLabel5.TextSize = 12
@@ -15145,7 +15123,7 @@ uiListLayout.Visible = false
 					Config.Core.Call("BatTP", "Stop")
 				end
 			end
-			makeSectionHeader("Utility")
+			makeSectionHeader("Drop")
 			makeGap(2)
 			makeGap(2)
 			function setLagger(arg)
@@ -15649,7 +15627,7 @@ frame6.Visible = false
 				end
 			end
 			makeGap(2)
-			makeSectionHeader("Player")
+			makeSectionHeader("Lock")
 			makeGap(2)
 			makeGap(2)
 			local flag14, connection14, v45, humanoidRootPart2, humanoid2, fn82 = false
@@ -15950,7 +15928,7 @@ frame6.Visible = false
 				end)
 			end
 			makeGap(6)
-			makeSectionHeader("Performance")
+			makeSectionHeader("World")
 			makeGap(2)
 			do
 				local antiLagEnabled, frame6 = Config.antiLagEnabled or false, Instance.new("Frame", v43)
@@ -15965,7 +15943,7 @@ frame6.Visible = false
 				textLabel2.Size = UDim2.new(0, 110, 1, 0)
 				textLabel2.Position = UDim2.new(0, 14, 0, 0)
 				textLabel2.BackgroundTransparency = 1
-				textLabel2.Text = "Anti Lag"
+				textLabel2.Text = "Low Graphic"
 				textLabel2.TextColor3 = antiLagEnabled and glass.text or glass.muted
 				textLabel2.Font = Enum.Font.GothamBold
 				textLabel2.TextSize = 12
@@ -16027,7 +16005,7 @@ frame6.Visible = false
 				textLabel2.Size = UDim2.new(0, 110, 1, 0)
 				textLabel2.Position = UDim2.new(0, 14, 0, 0)
 				textLabel2.BackgroundTransparency = 1
-				textLabel2.Text = "Potato Graphics"
+				textLabel2.Text = "Ultra Low Quality"
 				textLabel2.TextColor3 = potatoGraphicsEnabled and glass.text or glass.muted
 				textLabel2.Font = Enum.Font.GothamBold
 				textLabel2.TextSize = 12
@@ -16061,7 +16039,7 @@ frame6.Visible = false
 				end
 			end
 			makeGap(2)
-			makeSectionHeader("Visual")
+			makeSectionHeader("Camera")
 			makeGap(2)
 			do
 				local v45 = Lighting
@@ -16804,7 +16782,7 @@ frame6.Visible = false
 				mkCorner(frame8, 10)
 				mkAnimStroke(frame8, 1)
 				Config._mkSlider(frame8, {
-					label = "Camera Fov Edit",
+					label = "Camera Fov",
 					min = 60,
 					max = 200,
 					step = 1,
@@ -16961,7 +16939,7 @@ frame6.Visible = false
 				mkCorner(uiListLayout, 10)
 				mkAnimStroke(uiListLayout, 1)
 				Config._mkSlider(uiListLayout, {
-					label = "Stretched Rez Edit",
+					label = "Stretched Rez",
 					min = 70,
 					max = 179,
 					step = 1,
@@ -17281,7 +17259,7 @@ frame6.Visible = false
 				end
 			end
 			makeGap(2)
-			makeSectionHeader("Skin & Board")
+			makeSectionHeader("Skins")
 			makeGap(2)
 			do
 				local tbl53 = {
@@ -17407,7 +17385,7 @@ frame6.Visible = false
 				titleLbl.Size = UDim2.new(1, -56, 1, 0)
 				titleLbl.Position = UDim2.new(0, 16, 0, 0)
 				titleLbl.BackgroundTransparency = 1
-				titleLbl.Text = "Appearance"
+				titleLbl.Text = "Scale"
 				titleLbl.TextColor3 = glass.text
 				titleLbl.Font = Enum.Font.GothamBold
 				titleLbl.TextSize = 15
@@ -18884,7 +18862,7 @@ frame6.Visible = false
 		end
 		function buildSettingsSection()
 			makeGap(8)
-			makeSectionHeader("Safety")
+			makeSectionHeader("Safe")
 			makeGap(2)
 			local function fn82(text, arg, arg2)
 				local flag14, frame6 = Config[arg] == true, Instance.new("Frame", v43)
@@ -18934,20 +18912,8 @@ frame6.Visible = false
 			safeMode = fn82("Safe Mode", "safeModeEnabled", function()
 				Config.dropBrainrotMode = false
 			end)
-			makeGap(2)
-			Config._syncWarningE01Toggle = fn82("WARNING E01", "warningE01Enabled", function(arg)
-				Config._setWarningE01Enabled(arg)
-			end)
-			makeGap(2)
-			Config._warningE01SizeBox = makeInputRow("WARNING E01 Size (0.5-2.5)", Config.warningE01Scale, function(arg)
-				Config._setWarningE01Scale(arg)
-				if Config._warningE01SizeBox then
-					Config._warningE01SizeBox.Text = tostring(Config.warningE01Scale)
-				end
-				fn34()
-			end)
 			makeGap(8)
-			makeSectionHeader("Appearance")
+			makeSectionHeader("Scale")
 			makeGap(2)
 			uiScaleBox = makeInputRow("UI Scale", Config.uiScale, function(uiScale2)
 				if uiScale2 >= 0.5 and uiScale2 <= 1.25 then
@@ -19007,7 +18973,7 @@ frame6.Visible = false
 				end)
 			end
 			makeGap(8)
-			makeSectionHeader("Floating Buttons")
+			makeSectionHeader("Mobile Button Size")
 			makeGap(2)
 			do
 				local frame6 = Instance.new("Frame", v43)
@@ -19019,7 +18985,7 @@ frame6.Visible = false
 				textLabel2.Size = UDim2.new(0, 80, 1, 0)
 				textLabel2.Position = UDim2.new(0, 14, 0, 0)
 				textLabel2.BackgroundTransparency = 1
-				textLabel2.Text = "Float Size"
+				textLabel2.Text = "Button Size"
 				textLabel2.TextColor3 = Color3.fromRGB(200, 200, 200)
 				textLabel2.Font = Enum.Font.GothamBold
 				textLabel2.TextSize = 12
@@ -19290,13 +19256,13 @@ frame6.Visible = false
 				textLabel2.Size = UDim2.new(0, 110, 1, 0)
 				textLabel2.Position = UDim2.new(0, 14, 0, 0)
 				textLabel2.BackgroundTransparency = 1
-				textLabel2.Text = lockButtonsEnabled and "Unlock Buttons" or "Lock Buttons"
+				textLabel2.Text = lockButtonsEnabled and "Unlock UI" or "Lock UI"
 				textLabel2.TextColor3 = lockButtonsEnabled and glass.text or glass.muted
 				textLabel2.Font = Enum.Font.GothamBold
 				textLabel2.TextSize = 12
 				textLabel2.TextXAlignment = Enum.TextXAlignment.Left
 				local function fn83(arg)
-					textLabel2.Text = arg and "Unlock Buttons" or "Lock Buttons"
+					textLabel2.Text = arg and "Unlock UI" or "Lock UI"
 					textLabel2.TextColor3 = arg and glass.text or glass.muted
 					TweenService
 						:Create(
@@ -19787,7 +19753,7 @@ frame6.Visible = false
 					textLabel2.Size = UDim2.new(1, -122, 0, 24)
 					textLabel2.Position = UDim2.new(0, 14, 0, 6)
 					textLabel2.BackgroundTransparency = 1
-					textLabel2.Text = "Floating Buttons"
+					textLabel2.Text = "Mobile Button Size"
 					textLabel2.TextColor3 = glass.text
 					textLabel2.Font = Enum.Font.GothamBold
 					textLabel2.TextSize = 12
@@ -21661,7 +21627,7 @@ laggerPopupToggleSync.Visible = false
 			makeGap(6)
 			buildMovementFeatures()
 			makeGap(6)
-			makeSectionHeader("Extras")
+			makeSectionHeader("Camera")
 			makeGap(2)
 			do
 				local flag14, frame6 = Config.duelAntiDieEnabled == true, Instance.new("Frame", v43)
@@ -21722,7 +21688,7 @@ laggerPopupToggleSync.Visible = false
 				textLabel2.Size = UDim2.new(1, -54, 1, 0)
 				textLabel2.Position = UDim2.new(0, 14, 0, 0)
 				textLabel2.BackgroundTransparency = 1
-				textLabel2.Text = "Auto Death Reset"
+				textLabel2.Text = "Reset On Die"
 				textLabel2.TextColor3 = autoDeathResetEnabled and glass.text or glass.muted
 				textLabel2.Font = Enum.Font.GothamBold
 				textLabel2.TextSize = 12
@@ -21955,7 +21921,7 @@ buildPage("Keys", function()
 		end, nil), function() local v = tbl12[id]; return v and v.value end)
 	end
 
-	makeSectionHeader("Speed")
+	makeSectionHeader("Player Speed")
 	makeGap(2)
 	bind12("Normal Speed Key", "Normal")
 	bind12("Custom Speed Key", "Carry")
@@ -21964,7 +21930,7 @@ buildPage("Keys", function()
 	bind11("Lagger Carry Speed Key", "lagger")
 	makeGap(6)
 
-	makeSectionHeader("Auto")
+	makeSectionHeader("Play")
 	makeGap(2)
 	bind11("Auto Play", "autoPlay")
 	bind11("TP Down", "tpDown")
@@ -22000,7 +21966,8 @@ buildPage("Keys", function()
 	hint.Size = UDim2.new(1, 0, 0, 36)
 	hint.BackgroundTransparency = 1
 	hint.LayoutOrder = LO()
-	hint.Text = "Click a slot, then press a keyboard or controller button. ESC cancels; X or Backspace clears."
+	hint.Text = ""
+	hint.Visible = false
 	hint.TextColor3 = Color3.fromRGB(100, 100, 100)
 	hint.Font = Enum.Font.Gotham
 	hint.TextSize = 10
@@ -22465,7 +22432,7 @@ buildPage("Config", function()
 				fn82(character, "Anti Ragdoll"),
 				fn82(uiGradient2, "Bat Counter"),
 				fn82(uiGradient2, "Insta Reset"),
-				fn82(character, "Auto Death Reset"),
+				fn82(character, "Reset On Die"),
 				fn82(character, "Anti Die"),
 			}
 			frame3 = uiGradient - #tbl45 - 1
@@ -22478,8 +22445,8 @@ buildPage("Config", function()
 			textButton = {
 				fn82(character, "Player Anim"),
 				fn82(character, "Player Anim Mode"),
-				fn82(character, "Ragdoll Timer"),
-				fn82(character, "Enemy Ragdoll Timer"),
+				fn82(character, "Ragdoll Counter"),
+				fn82(character, "Enemy Rag Counter"),
 			}
 			for i, v45 in ipairs(textButton) do
 				if v45 then
