@@ -9358,6 +9358,11 @@ tbl31 = {
 			Config._theme.tweenCache = setmetatable({}, { __mode = "k" })
 		end
 		function Config._theme.applyObject(arg, arg2, arg3)
+			-- protect search + tab labels from theme overwrite
+			if arg and (arg.Name == "TabLabel" or arg.Name == "ActiveBg" or arg.Name == "BLYRA_SearchBar"
+				or arg.Name == "SearchInput" or arg.Name == "SearchIcon") then
+				return
+			end
 			local flag6, flag7, statsBarRoot =
 				false,
 				Config._theme.index == 9 and tbl27.sg ~= nil and (arg:IsDescendantOf(tbl27.sg)),
@@ -10132,40 +10137,44 @@ tbl31 = {
 		local flag6, frame3 = false
 		local textButton
 		local textBox = Instance.new("TextBox")
-		-- Search bar (before minimize)
+		-- Search bar (left of top bar, high contrast)
 		local searchHolder = Instance.new("Frame", uiGradient)
 		searchHolder.Name = "BLYRA_SearchBar"
-		searchHolder.Size = UDim2.new(0, 160, 0, 28)
-		searchHolder.Position = UDim2.new(1, -200, 0.5, -14)
-		searchHolder.BackgroundColor3 = glass.panel
-		searchHolder.BackgroundTransparency = 0.12
+		searchHolder.Size = UDim2.new(0, 150, 0, 30)
+		searchHolder.Position = UDim2.new(0, 12, 0.5, -15)
+		searchHolder.BackgroundColor3 = Color3.fromRGB(28, 28, 34)
+		searchHolder.BackgroundTransparency = 0
 		searchHolder.BorderSizePixel = 0
-		searchHolder.ZIndex = 12
+		searchHolder.ZIndex = 60
+		searchHolder:SetAttribute("BlyraNoTheme", true)
 		mkCorner(searchHolder, 8)
-		mkStroke(searchHolder, glass.border, 0.8)
+		local searchStroke = mkStroke(searchHolder, Color3.fromRGB(120, 120, 130), 1)
+		searchStroke.Transparency = 0.3
 		local searchIcon = Instance.new("TextLabel", searchHolder)
-		searchIcon.Size = UDim2.fromOffset(22, 28)
+		searchIcon.Name = "SearchIcon"
+		searchIcon.Size = UDim2.fromOffset(24, 30)
 		searchIcon.Position = UDim2.fromOffset(4, 0)
 		searchIcon.BackgroundTransparency = 1
-		searchIcon.Text = "Q"
-		searchIcon.TextColor3 = glass.muted
+		searchIcon.Text = "S"
+		searchIcon.TextColor3 = Color3.fromRGB(200, 200, 210)
 		searchIcon.Font = Enum.Font.GothamBold
-		searchIcon.TextSize = 11
-		searchIcon.ZIndex = 13
+		searchIcon.TextSize = 12
+		searchIcon.ZIndex = 61
 		local searchBox = Instance.new("TextBox", searchHolder)
 		searchBox.Name = "SearchInput"
-		searchBox.Size = UDim2.new(1, -28, 1, 0)
-		searchBox.Position = UDim2.fromOffset(24, 0)
+		searchBox.Size = UDim2.new(1, -30, 1, 0)
+		searchBox.Position = UDim2.fromOffset(26, 0)
 		searchBox.BackgroundTransparency = 1
 		searchBox.ClearTextOnFocus = false
-		searchBox.PlaceholderText = "Search..."
-		searchBox.PlaceholderColor3 = glass.muted
+		searchBox.PlaceholderText = "Search toggles..."
+		searchBox.PlaceholderColor3 = Color3.fromRGB(140, 140, 150)
 		searchBox.Text = ""
-		searchBox.TextColor3 = glass.text
+		searchBox.TextColor3 = Color3.fromRGB(240, 240, 245)
 		searchBox.Font = Enum.Font.GothamMedium
-		searchBox.TextSize = 11
+		searchBox.TextSize = 12
 		searchBox.TextXAlignment = Enum.TextXAlignment.Left
-		searchBox.ZIndex = 13
+		searchBox.ZIndex = 61
+		searchBox.TextTruncate = Enum.TextTruncate.AtEnd
 		Config._searchBox = searchBox
 		Config._applyFeatureSearch = function(query)
 			query = string.lower(tostring(query or ""):gsub("^%s+", ""):gsub("%s+$", ""))
@@ -10680,7 +10689,7 @@ tbl31 = {
 			i.Name = "ActiveBg"
 			i.Size = UDim2.new(1, 0, 1, 0)
 			i.Position = UDim2.new(0, 0, 0, 0)
-			i.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+			i.BackgroundColor3 = Color3.fromRGB(45, 45, 52)
 			i.BackgroundTransparency = 1
 			i.BorderSizePixel = 0
 			i.ZIndex = 11
@@ -10690,11 +10699,15 @@ tbl31 = {
 			tabLbl.Size = UDim2.new(1, 0, 1, 0)
 			tabLbl.BackgroundTransparency = 1
 			tabLbl.Text = tbl46[v43] or v43
-			tabLbl.TextColor3 = glass.muted
+			tabLbl.TextColor3 = Color3.fromRGB(160, 160, 170)
+			tabLbl.TextTransparency = 0
 			tabLbl.Font = Enum.Font.GothamBold
-			tabLbl.TextSize = 9
+			tabLbl.TextSize = 11
 			tabLbl.TextXAlignment = Enum.TextXAlignment.Center
-			tabLbl.ZIndex = 14
+			tabLbl.ZIndex = 20
+			tabLbl:SetAttribute("BlyraNoTheme", true)
+			textButton:SetAttribute("BlyraNoTheme", true)
+			i:SetAttribute("BlyraNoTheme", true)
 			character = Instance.new("Frame", textButton)
 			character.Name = "Indicator"
 			character.Size = UDim2.new(0.64, 0, 0, 3)
@@ -10715,11 +10728,12 @@ tbl31 = {
 					local flag9 = k == v43
 					local lbl = v44.label
 					if lbl then
-						lbl.TextColor3 = flag9 and Color3.new(0, 0, 0) or glass.muted
+						lbl.TextColor3 = flag9 and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(160, 160, 170)
+						lbl.TextTransparency = 0
 					end
-					v44.btn.TextColor3 = flag9 and Color3.new(0, 0, 0) or glass.muted
-					v44.activeBg.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-					v44.activeBg.BackgroundTransparency = flag9 and 0.05 or 1
+					v44.btn.TextColor3 = flag9 and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(160, 160, 170)
+					v44.activeBg.BackgroundColor3 = Color3.fromRGB(45, 45, 52)
+					v44.activeBg.BackgroundTransparency = flag9 and 0 or 1
 					v44.indicator.BackgroundColor3 = flag9 and glass.accent2 or glass.border
 					v44.indicator.BackgroundTransparency = flag9 and 0 or 0.68
 				end
@@ -10735,11 +10749,12 @@ tbl31 = {
 		for k, v43 in pairs(tbl48) do
 			character = k == str3
 			if v43.label then
-				v43.label.TextColor3 = character and Color3.new(0, 0, 0) or glass.muted
+				v43.label.TextColor3 = character and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(160, 160, 170)
+				v43.label.TextTransparency = 0
 			end
-			v43.btn.TextColor3 = character and Color3.new(0, 0, 0) or glass.muted
-			v43.activeBg.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-			v43.activeBg.BackgroundTransparency = character and 0.05 or 1
+			v43.btn.TextColor3 = character and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(160, 160, 170)
+			v43.activeBg.BackgroundColor3 = Color3.fromRGB(45, 45, 52)
+			v43.activeBg.BackgroundTransparency = character and 0 or 1
 			v43.indicator.BackgroundColor3 = character and glass.accent2 or glass.border
 			v43.indicator.BackgroundTransparency = character and 0 or 0.68
 		end
@@ -10756,11 +10771,12 @@ tbl31 = {
 			for k, v44 in pairs(tbl48) do
 				local flag9 = k == tabName
 				if v44.label then
-					v44.label.TextColor3 = flag9 and Color3.new(0, 0, 0) or glass.muted
+					v44.label.TextColor3 = flag9 and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(160, 160, 170)
+					v44.label.TextTransparency = 0
 				end
-				v44.btn.TextColor3 = flag9 and Color3.new(0, 0, 0) or glass.muted
-				v44.activeBg.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-				v44.activeBg.BackgroundTransparency = flag9 and 0.05 or 1
+				v44.btn.TextColor3 = flag9 and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(160, 160, 170)
+				v44.activeBg.BackgroundColor3 = Color3.fromRGB(45, 45, 52)
+				v44.activeBg.BackgroundTransparency = flag9 and 0 or 1
 				v44.indicator.BackgroundColor3 = flag9 and glass.accent2 or glass.border
 				v44.indicator.BackgroundTransparency = flag9 and 0 or 0.68
 			end
