@@ -2493,8 +2493,8 @@ local function fn23()
 	Frame.Size = flag4 and (udim22(372, 54)) or (udim22(440, 44))
 	Frame.Position = position or (flag4 and (udim2(0.5, -186, 1, -134)) or (udim2(0.5, -220, 1, -124)))
 	Frame.AnchorPoint = Vector2.zero
-	Frame.BackgroundColor3 = color(22, 22, 26)
-	Frame.BackgroundTransparency = flag4 and 0.22 or 0.4
+	Frame.BackgroundColor3 = color(8, 8, 10)
+	Frame.BackgroundTransparency = flag4 and 0.1 or 0.18
 	Frame.BorderSizePixel = 0
 	Frame.Active = true
 	Frame.Visible = true
@@ -2516,9 +2516,9 @@ local function fn23()
 		end
 	end
 	position = new("UIStroke", Frame)
-	position.Color = color(190, 190, 200)
-	position.Thickness = flag4 and 0.8 or 0.6
-	position.Transparency = 0.55
+	position.Color = color(192, 192, 200)
+	position.Thickness = flag4 and 1 or 0.8
+	position.Transparency = 0.3
 	local ImageLabel = new("ImageLabel", Frame)
 	ImageLabel.Name = "StealBarBackground"
 	ImageLabel.Size = UDim2.fromScale(1, 1)
@@ -2572,7 +2572,7 @@ local function fn23()
 	tbl25.Position = flag4 and (udim22(14, 7)) or (udim22(52, 0))
 	tbl25.BackgroundTransparency = 1
 	tbl25.Text = "CARRY"
-	tbl25.TextColor3 = flag4 and (color(205, 205, 214)) or (color(255, 255, 255))
+	tbl25.TextColor3 = color(205, 205, 214)
 	tbl25.Font = gothamBold
 	tbl25.TextSize = flag4 and 8 or 14
 	tbl25.TextXAlignment = Enum.TextXAlignment.Left
@@ -2582,8 +2582,8 @@ local function fn23()
 	position.Name = "StealDivider"
 	position.Size = flag4 and (udim22(1, 34)) or (udim22(1, 22))
 	position.Position = flag4 and (udim22(88, 10)) or (udim2(0, 248, 0.5, -11))
-	position.BackgroundColor3 = color(200, 200, 210)
-	position.BackgroundTransparency = flag4 and 0.62 or 0.4
+	position.BackgroundColor3 = color(192, 192, 200)
+	position.BackgroundTransparency = flag4 and 0.5 or 0.3
 	position.BorderSizePixel = 0
 	position.ZIndex = 305
 	position = new("TextLabel", Frame)
@@ -2638,8 +2638,8 @@ local function fn23()
 	position.Name = "BLYRAStealTrack"
 	position.Size = flag4 and (udim22(258, 15)) or (udim22(240, 32))
 	position.Position = flag4 and (udim22(101, 8)) or (udim2(0, 4, 0.5, -16))
-	position.BackgroundColor3 = color(40, 40, 45)
-	position.BackgroundTransparency = flag4 and 0.08 or 0.4
+	position.BackgroundColor3 = color(28, 28, 32)
+	position.BackgroundTransparency = flag4 and 0.08 or 0.25
 	position.BorderSizePixel = 0
 	position.ClipsDescendants = true
 	position.ZIndex = 302
@@ -2647,18 +2647,13 @@ local function fn23()
 	local Frame3 = new("Frame", position)
 	Frame3.Name = "StealFill"
 	Frame3.Size = udim2(0, 0, 1, 0)
-	Frame3.BackgroundColor3 = accent
+	Frame3.BackgroundColor3 = color2(1, 1, 1)
 	Frame3.BorderSizePixel = 0
 	Frame3.ClipsDescendants = true
 	Frame3.ZIndex = 303
 	new("UICorner", Frame3).CornerRadius = udim(1, 0)
 	local UIGradient = new("UIGradient", Frame3)
-	UIGradient.Color = ColorSequence.new({
-		new2(0, v18),
-		new2(0.38, accent),
-		new2(0.68, accent:Lerp(color2(1, 1, 1), 0.34)),
-		new2(1, v18),
-	})
+	UIGradient.Color = ColorSequence.new(color2(1, 1, 1))
 	UIGradient.Rotation = -10
 	Frame3.BackgroundTransparency = 0
 	udim22 = new("Frame", Frame3)
@@ -2788,19 +2783,12 @@ local function fn23()
 				TextLabel.Text = deltaTime
 			end
 			currentThemePalette = Config._currentThemePalette
-			deltaTime = currentThemePalette and currentThemePalette.accent or accent
+			-- progress fill is always pure white (no theme tint, no grey gradient ends)
+			deltaTime = color2(1, 1, 1)
 			if v19 ~= deltaTime then
 				v19 = deltaTime
-				currentThemePalette, flag6 =
-					color2(deltaTime.R * 0.55, deltaTime.G * 0.55, deltaTime.B * 0.55),
-					deltaTime:Lerp(color2(1, 1, 1), 0.34)
-				colorSequence = ColorSequence.new({
-					new2(0, currentThemePalette),
-					new2(0.38, deltaTime),
-					new2(0.68, flag6),
-					new2(1, currentThemePalette),
-				})
-				colorSequence2 = ColorSequence.new(color2(1, 1, 1), flag6)
+				colorSequence = ColorSequence.new(deltaTime)
+				colorSequence2 = ColorSequence.new(deltaTime)
 			end
 			Frame3.BackgroundColor3 = deltaTime
 			Frame3.BackgroundTransparency = 0
@@ -3175,7 +3163,7 @@ Config._buildHeadDisplay = function(discord)
 	end
 	local frame2 = Instance.new("Frame", frame)
 	frame2.Size = UDim2.new(1, 0, 0, 32)
-	frame2.Position = UDim2.new(0, 20, 0, 0)
+	frame2.Position = UDim2.new(0, 0, 0, 0)
 	frame2.BackgroundTransparency = 1
 	frame2.ZIndex = 3
 	local function createTextLabel(text, textSize, position, arg, textXAlignment)
@@ -3197,6 +3185,7 @@ Config._buildHeadDisplay = function(discord)
 		return textLabel2
 	end
 	discord = createTextLabel(".gg/blyra", 20, UDim2.new(0.5, 0, 0, 0), 120, Enum.TextXAlignment.Center)
+	discord.AnchorPoint = Vector2.new(0.5, 0)
 	createTextLabel = Instance.new("Frame", frame)
 	createTextLabel.Size = UDim2.new(0.85, 0, 0, 1)
 	createTextLabel.AnchorPoint = Vector2.new(0.5, 0)
@@ -9456,25 +9445,26 @@ tbl31 = {
 			end
 			statsBarRoot = Config._stealBarRoot
 			if statsBarRoot and statsBarRoot.Parent and (arg == statsBarRoot or (arg:IsDescendantOf(statsBarRoot))) then
+				-- Auto Steal bar: fixed black / silver look, white progress fill (independent of theme palette)
 				if arg:IsA("UIStroke") then
-					fn70(arg, { Color = arg2.statsAccent or arg2.accent2 })
+					fn70(arg, { Color = Color3.fromRGB(192, 192, 200) })
 				elseif arg:IsA("TextLabel") then
-					if arg.Name == "StealFpsLabel" or arg.Name == "StealPingLabel" then
-						fn70(arg, { TextColor3 = arg2.statsMuted or arg2.muted })
+					if arg.Name == "StealFpsLabel" or arg.Name == "StealPingLabel" or arg.Name == "StealStatus" then
+						fn70(arg, { TextColor3 = Color3.fromRGB(205, 205, 214) })
 					else
-						fn70(arg, { TextColor3 = arg2.statsText or arg2.text })
+						fn70(arg, { TextColor3 = Color3.fromRGB(255, 255, 255) })
 					end
 				elseif arg:IsA("Frame") then
 					if arg == statsBarRoot then
-						fn70(arg, { BackgroundColor3 = arg2.statsBg or arg2.panel })
+						fn70(arg, { BackgroundColor3 = Color3.fromRGB(8, 8, 10) })
 					elseif arg.Name == "StealBarImageShade" then
-						fn70(arg, { BackgroundColor3 = arg2.bg })
+						fn70(arg, { BackgroundColor3 = Color3.fromRGB(8, 8, 10) })
 					elseif arg.Name == "BLYRAStealTrack" then
-						fn70(arg, { BackgroundColor3 = arg2.bg:Lerp(Color3.new(0, 0, 0), 0.35) })
+						fn70(arg, { BackgroundColor3 = Color3.fromRGB(28, 28, 32) })
 					elseif arg.Name == "StealDivider" then
-						fn70(arg, { BackgroundColor3 = arg2.statsAccent or arg2.accent2 })
+						fn70(arg, { BackgroundColor3 = Color3.fromRGB(192, 192, 200) })
 					elseif arg.Name == "StealFill" then
-						fn70(arg, { BackgroundColor3 = arg2.accent })
+						fn70(arg, { BackgroundColor3 = Color3.new(1, 1, 1) })
 					elseif arg.Name == "StealGloss" then
 						fn70(arg, { BackgroundColor3 = Color3.new(1, 1, 1) })
 					end
@@ -30956,15 +30946,17 @@ Config.carrySpeed = Config.carrySpeed or 16
 _G.BLYRA_LOADED = true
 
 
+
+
 -- ============================================================
--- MONEY Auto Steal + Steal Bar UI (from message-2) override
+-- WindHub / Blyra Auto Grab steal bar UI + MONEY auto steal logic
 -- ============================================================
 task.spawn(function()
-	task.wait(0.5)
+	task.wait(0.4)
 	local Players = game:GetService("Players")
 	local RunService = game:GetService("RunService")
-	local TS = game:GetService("TweenService")
 	local UIS = game:GetService("UserInputService")
+	local Stats = game:GetService("Stats")
 	local LP = Players.LocalPlayer
 
 	local Steal = {
@@ -30981,7 +30973,7 @@ task.spawn(function()
 	local isStealing = false
 	local stealStartTime = nil
 	local autoConn = nil
-	local progressFill, progressPct, spFrame, shadow
+	local progressValue = 0
 
 	local function isMyPlotByName(plotName)
 		local plots = workspace:FindFirstChild("Plots")
@@ -31020,15 +31012,16 @@ task.spawn(function()
 								local att = sp:FindFirstChild("PromptAttachment")
 								if att then
 									for _, pr in ipairs(att:GetChildren()) do
-										if pr:IsA("ProximityPrompt") and pr.ActionText and pr.ActionText:find("Steal") then
+										if pr:IsA("ProximityPrompt") and pr.ActionText and tostring(pr.ActionText):find("Steal") then
 											found = pr
 										end
 									end
 								end
 								if not found then
 									for _, pr in ipairs(sp:GetDescendants()) do
-										if pr:IsA("ProximityPrompt") and pr.ActionText and pr.ActionText:find("Steal") then
+										if pr:IsA("ProximityPrompt") and pr.ActionText and tostring(pr.ActionText):find("Steal") then
 											found = pr
+											break
 										end
 									end
 								end
@@ -31052,10 +31045,6 @@ task.spawn(function()
 		local part = prompt.Parent
 		if part and part:IsA("Attachment") then part = part.Parent end
 		if part and part:IsA("BasePart") then return (part.Position - root.Position).Magnitude end
-		local ok, cf = pcall(function()
-			return prompt.Parent and prompt.Parent.WorldPosition
-		end)
-		if ok and cf then return (cf - root.Position).Magnitude end
 		return math.huge
 	end
 
@@ -31064,12 +31053,14 @@ task.spawn(function()
 		if not Steal.Data[prompt] then
 			Steal.Data[prompt] = { hold = {}, trigger = {}, ready = true }
 			if getconnections then
-				for _, c in ipairs(getconnections(prompt.PromptButtonHoldBegan)) do
-					if c.Function then table.insert(Steal.Data[prompt].hold, c.Function) end
-				end
-				for _, c in ipairs(getconnections(prompt.Triggered)) do
-					if c.Function then table.insert(Steal.Data[prompt].trigger, c.Function) end
-				end
+				pcall(function()
+					for _, c in ipairs(getconnections(prompt.PromptButtonHoldBegan)) do
+						if c.Function then table.insert(Steal.Data[prompt].hold, c.Function) end
+					end
+					for _, c in ipairs(getconnections(prompt.Triggered)) do
+						if c.Function then table.insert(Steal.Data[prompt].trigger, c.Function) end
+					end
+				end)
 			end
 		end
 		local data = Steal.Data[prompt]
@@ -31109,10 +31100,7 @@ task.spawn(function()
 
 	local function stopAutoSteal()
 		Steal.AutoStealEnabled = false
-		if autoConn then
-			autoConn:Disconnect()
-			autoConn = nil
-		end
+		if autoConn then autoConn:Disconnect(); autoConn = nil end
 		isStealing = false
 	end
 
@@ -31120,19 +31108,6 @@ task.spawn(function()
 	_G._MoneyStartAutoSteal = startAutoSteal
 	_G._MoneyStopAutoSteal = stopAutoSteal
 
-	-- Hook Config.autoStealEnabled via existing setters if possible
-	local oldSet = rawget(getfenv and getfenv(0) or {}, "setAutoSteal")
-	pcall(function()
-		if type(setAutoSteal) == "function" then
-			local orig = setAutoSteal
-			setAutoSteal = function(on)
-				if on then startAutoSteal() else stopAutoSteal() end
-				pcall(orig, false) -- stop old system
-			end
-		end
-	end)
-
-	-- Poll Config for toggle
 	task.spawn(function()
 		local last = false
 		while true do
@@ -31141,9 +31116,7 @@ task.spawn(function()
 			if on ~= last then
 				last = on
 				if on then
-					pcall(function()
-						if type(fn6) == "function" then fn6() end -- stop old
-					end)
+					pcall(function() if type(fn6) == "function" then fn6() end end)
 					startAutoSteal()
 				else
 					stopAutoSteal()
@@ -31152,16 +31125,22 @@ task.spawn(function()
 		end
 	end)
 
-	-- MONEY Steal Bar UI
+	-- destroy old bars
 	pcall(function()
-		for _, name in ipairs({ "MiroStealBar", "MoveeStealBar", "StealProgressScreenGui", "BlyraMoneyStealBar" }) do
-			local a = (typeof(CoreGui) == "Instance" and CoreGui:FindFirstChild(name)) or LP.PlayerGui:FindFirstChild(name)
+		for _, name in ipairs({ "MiroStealBar", "MoveeStealBar", "StealProgressScreenGui", "BlyraMoneyStealBar", "BlyraAutoGrabBar" }) do
+			local a = LP.PlayerGui:FindFirstChild(name)
 			if a then a:Destroy() end
+			if typeof(CoreGui) == "Instance" then
+				local b = CoreGui:FindFirstChild(name)
+				if b then b:Destroy() end
+			end
 		end
+		if Config._stealBarRoot then Config._stealBarRoot.Visible = false end
 	end)
 
+	local parent = (gethui and gethui()) or LP:WaitForChild("PlayerGui")
 	local gui = Instance.new("ScreenGui")
-	gui.Name = "BlyraMoneyStealBar"
+	gui.Name = "BlyraAutoGrabBar"
 	gui.ResetOnSpawn = false
 	gui.DisplayOrder = 200
 	gui.IgnoreGuiInset = true
@@ -31169,146 +31148,170 @@ task.spawn(function()
 	pcall(function()
 		if syn and syn.protect_gui then syn.protect_gui(gui) end
 	end)
-	gui.Parent = (gethui and gethui()) or LP:WaitForChild("PlayerGui")
+	gui.Parent = parent
 
-	local RED = Color3.fromRGB(255, 40, 40)
-	local DARK = Color3.fromRGB(10, 10, 12)
+	local Y = Instance.new("Frame", gui)
+	Y.Name = "BarHost"
+	Y.AnchorPoint = Vector2.new(0.5, 1)
+	Y.Position = UDim2.new(0.5, 0, 1, -70)
+	Y.Size = UDim2.new(0, 238, 0, 59)
+	Y.BackgroundTransparency = 1
+	Y.BorderSizePixel = 0
+	Y.ZIndex = 500
+	Y.Active = true
+	Y.Visible = true
 
-	shadow = Instance.new("Frame", gui)
-	shadow.Name = "PillShadow"
-	shadow.Size = UDim2.new(0, 316, 0, 38)
-	shadow.AnchorPoint = Vector2.new(0.5, 1)
-	shadow.BackgroundColor3 = RED
-	shadow.BackgroundTransparency = 0.85
-	shadow.BorderSizePixel = 0
-	shadow.ZIndex = 299
-	Instance.new("UICorner", shadow).CornerRadius = UDim.new(0, 8)
+	local BAR_TEXT = Color3.fromRGB(205, 208, 216)
+	local BAR_LINE = Color3.fromRGB(120, 124, 132)
+	local BAR_SILVER = Color3.fromRGB(192, 196, 204)
+	local BAR_LOGO_ASSET = 112454424363488
+	local BAR_IDLE_TEXT = "BLYRA HUB"
+	local ZB = 500
+	local Qi = Color3.fromRGB(255, 255, 255)
 
-	spFrame = Instance.new("Frame", gui)
-	spFrame.Name = "StealProgressGui"
-	spFrame.Size = UDim2.new(0, 300, 0, 32)
-	spFrame.Position = UDim2.new(0.5, 0, 1, -90)
-	spFrame.AnchorPoint = Vector2.new(0.5, 1)
-	spFrame.BackgroundColor3 = DARK
-	spFrame.BorderSizePixel = 0
-	spFrame.Active = true
-	spFrame.ZIndex = 300
-	spFrame.ClipsDescendants = true
-	Instance.new("UICorner", spFrame).CornerRadius = UDim.new(0, 6)
-
-	local border = Instance.new("UIStroke", spFrame)
-	border.Color = Color3.fromRGB(255, 255, 255)
-	border.Thickness = 2
-	local borderGrad = Instance.new("UIGradient", border)
-	borderGrad.Color = ColorSequence.new({
-		ColorSequenceKeypoint.new(0, Color3.fromRGB(60, 0, 0)),
-		ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255, 50, 50)),
-		ColorSequenceKeypoint.new(1, Color3.fromRGB(60, 0, 0)),
-	})
-
-	local spFill = Instance.new("Frame", spFrame)
-	spFill.Name = "ProgressFill"
-	spFill.Size = UDim2.new(0, 0, 1, -6)
-	spFill.Position = UDim2.new(0, 3, 0, 3)
-	spFill.BackgroundColor3 = RED
-	spFill.BorderSizePixel = 0
-	spFill.ZIndex = 301
-	spFill.ClipsDescendants = true
-	Instance.new("UICorner", spFill).CornerRadius = UDim.new(0, 4)
-	local fg = Instance.new("UIGradient", spFill)
-	fg.Color = ColorSequence.new({
-		ColorSequenceKeypoint.new(0, Color3.fromRGB(110, 0, 0)),
-		ColorSequenceKeypoint.new(0.6, Color3.fromRGB(220, 0, 0)),
-		ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 90, 90)),
-	})
-	fg.Rotation = 90
-
-	local shine = Instance.new("Frame", spFrame)
-	shine.Name = "Shine"
-	shine.Size = UDim2.new(0.25, 0, 1, 0)
-	shine.Position = UDim2.new(-0.5, 0, 0, 0)
-	shine.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-	shine.BackgroundTransparency = 0.88
-	shine.BorderSizePixel = 0
-	shine.ZIndex = 302
-	shine.Rotation = 20
-	task.spawn(function()
-		while shine.Parent do
-			shine.Position = UDim2.new(-0.5, 0, 0, 0)
-			TS:Create(shine, TweenInfo.new(1.4, Enum.EasingStyle.Linear), { Position = UDim2.new(1.5, 0, 0, 0) }):Play()
-			task.wait(1.6)
-		end
-	end)
-
-	local tag = Instance.new("TextLabel", spFrame)
-	tag.Size = UDim2.new(0, 60, 1, 0)
-	tag.Position = UDim2.new(0, 10, 0, 0)
-	tag.BackgroundTransparency = 1
-	tag.Text = "MONEY"
-	tag.TextColor3 = Color3.fromRGB(255, 255, 255)
-	tag.TextTransparency = 0.35
-	tag.Font = Enum.Font.GothamBlack
-	tag.TextSize = 11
-	tag.TextXAlignment = Enum.TextXAlignment.Left
-	tag.ZIndex = 304
-
-	local spPct = Instance.new("TextLabel", spFrame)
-	spPct.Size = UDim2.new(1, -28, 1, 0)
-	spPct.Position = UDim2.new(0, 14, 0, 0)
-	spPct.BackgroundTransparency = 1
-	spPct.Text = "UNREADY"
-	spPct.TextColor3 = Color3.fromRGB(255, 255, 255)
-	spPct.Font = Enum.Font.GothamBlack
-	spPct.TextSize = 15
-	spPct.TextStrokeTransparency = 0.4
-	spPct.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
-	spPct.ZIndex = 305
-
-	progressFill = spFill
-	progressPct = spPct
-
-	-- Hide old bar if present
+	local Root = Instance.new("Frame")
+	Root.Name = "StealBarRoot"
+	Root.BackgroundColor3 = Color3.fromRGB(12, 12, 14)
+	Root.BackgroundTransparency = 0.04
+	Root.BorderSizePixel = 0
+	Root.Size = UDim2.new(0, 340, 0, 84)
+	Root.Position = UDim2.new(0, 0, 0, 0)
+	Root.ZIndex = ZB + 50
+	Root.Parent = Y
+	local rs = Instance.new("UIScale")
+	rs.Name = "WindBarBaseScale"
+	rs.Scale = 0.7
+	rs.Parent = Root
+	-- apply stealBarScale from config
+	local outerScale = Instance.new("UIScale")
+	outerScale.Scale = math.clamp(tonumber(Config and Config.stealBarScale) or 1, 0.5, 2)
+	outerScale.Parent = Y
 	pcall(function()
-		if Config._stealBarRoot then Config._stealBarRoot.Visible = false end
-		if v16 then v16.Enabled = false end
+		Config._applyStealBarScale = function(arg)
+			Config.stealBarScale = math.clamp(tonumber(arg) or 1, 0.5, 2)
+			outerScale.Scale = Config.stealBarScale
+		end
 	end)
+	Instance.new("UICorner", Root).CornerRadius = UDim.new(0, 14)
+	local rootStroke = Instance.new("UIStroke", Root)
+	rootStroke.Color = BAR_SILVER
+	rootStroke.Thickness = 1.5
+	rootStroke.Transparency = 0.3
+	local shade = Instance.new("UIGradient", Root)
+	shade.Color = ColorSequence.new(Color3.fromRGB(26, 26, 29), Color3.fromRGB(8, 8, 10))
+	shade.Rotation = 90
 
-	local lastPct, spin = 0, 0
-	RunService.RenderStepped:Connect(function(dt)
-		if not spFrame or not spFrame.Parent then return end
-		spin = (spin + dt * 120) % 360
-		borderGrad.Rotation = spin
-		local pct = 0
-		if isStealing and stealStartTime then
-			pct = math.clamp((tick() - stealStartTime) / 0.5, 0, 1)
-		elseif Steal.AutoStealEnabled then
-			pct = (findNearestPrompt() and 1 or 0)
-		end
-		lastPct = lastPct + (pct - lastPct) * 0.2
-		local f = math.clamp(lastPct, 0, 1)
-		spFill.Size = UDim2.new(f, -6 * f, 1, -6)
-		if lastPct >= 0.87 then
-			spPct.Text = "READY"
-			spPct.TextColor3 = Color3.fromRGB(120, 255, 140)
-		else
-			spPct.Text = "UNREADY"
-			spPct.TextColor3 = Color3.fromRGB(255, 255, 255)
-		end
-	end)
+	local function corner(parent, r)
+		local c = Instance.new("UICorner", parent)
+		c.CornerRadius = UDim.new(0, r)
+	end
+	local function stroke(parent, color, thickness, transparency)
+		local st = Instance.new("UIStroke", parent)
+		st.Color = color
+		st.Thickness = thickness
+		st.Transparency = transparency or 0
+	end
+	local function frame(name, parent, pos, size, color, z)
+		local f = Instance.new("Frame", parent)
+		f.Name = name
+		f.BackgroundColor3 = color
+		f.BorderSizePixel = 0
+		f.Position = pos
+		f.Size = size
+		f.ZIndex = ZB + z
+		return f
+	end
+	local function label(name, parent, str, color, textSize, align)
+		local t = Instance.new("TextLabel", parent)
+		t.Name = name
+		t.BackgroundTransparency = 1
+		t.Font = Enum.Font.GothamBold
+		t.Text = str
+		t.TextColor3 = color
+		t.TextSize = textSize
+		t.TextXAlignment = align or Enum.TextXAlignment.Left
+		t.ZIndex = ZB + 56
+		return t
+	end
+	local function inline(name, parent, str, order)
+		local t = label(name, parent, str, BAR_TEXT, 9)
+		t.AutomaticSize = Enum.AutomaticSize.X
+		t.Size = UDim2.new(0, 0, 1, 0)
+		t.LayoutOrder = order
+		return t
+	end
+
+	local logoFrame = Instance.new("Frame", Root)
+	logoFrame.Name = "StealLogo"
+	logoFrame.BackgroundTransparency = 1
+	logoFrame.ClipsDescendants = true
+	logoFrame.Position = UDim2.new(0, 14, 0, 8)
+	logoFrame.Size = UDim2.new(0, 74, 0, 30)
+	logoFrame.ZIndex = ZB + 56
+	local logo = Instance.new("ImageLabel", logoFrame)
+	logo.BackgroundTransparency = 1
+	logo.AnchorPoint = Vector2.new(0.5, 0.5)
+	logo.Position = UDim2.new(0.5, 0, 0.5, 0)
+	logo.Size = UDim2.new(1, 0, 1, 0)
+	logo.ScaleType = Enum.ScaleType.Fit
+	logo.ZIndex = ZB + 57
+	logo.Image = "rbxthumb://type=Asset&id=" .. tostring(BAR_LOGO_ASSET) .. "&w=420&h=420"
+
+	local statusLbl = label("Status", Root, BAR_IDLE_TEXT, BAR_TEXT, 12)
+	statusLbl.Position = UDim2.new(0, 96, 0, 10)
+	statusLbl.Size = UDim2.new(1, -180, 0, 22)
+
+	local pctLbl = label("Percent", Root, "0%", Qi, 16, Enum.TextXAlignment.Right)
+	pctLbl.AnchorPoint = Vector2.new(1, 0.5)
+	pctLbl.Position = UDim2.new(1, -18, 0, 23)
+	pctLbl.Size = UDim2.new(0, 70, 0, 28)
+
+	local track = frame("ProgressTrack", Root, UDim2.new(0, 18, 0, 42), UDim2.new(1, -36, 0, 10), Color3.fromRGB(4, 4, 6), 52)
+	track.BackgroundTransparency = 0.1
+	corner(track, 5)
+	stroke(track, Color3.fromRGB(170, 174, 182), 1, 0.45)
+	local fill = Instance.new("Frame", track)
+	fill.Name = "Fill"
+	fill.BackgroundColor3 = Qi
+	fill.BorderSizePixel = 0
+	fill.Size = UDim2.new(0, 0, 1, 0)
+	fill.ZIndex = ZB + 53
+	corner(fill, 5)
+
+	local function column(name, pos, size, align)
+		local col = Instance.new("Frame", Root)
+		col.Name = name
+		col.BackgroundTransparency = 1
+		col.Position = pos
+		col.Size = size
+		col.ZIndex = ZB + 55
+		local list = Instance.new("UIListLayout", col)
+		list.FillDirection = Enum.FillDirection.Horizontal
+		list.HorizontalAlignment = align
+		list.VerticalAlignment = Enum.VerticalAlignment.Center
+		list.Padding = UDim.new(0, 4)
+		return col
+	end
+	local colPing = column("PingColumn", UDim2.new(0, 18, 0, 57), UDim2.new(0.32, -26, 0, 20), Enum.HorizontalAlignment.Left)
+	local colRadius = column("RadiusColumn", UDim2.new(0.32, 8, 0, 57), UDim2.new(0.32, -16, 0, 20), Enum.HorizontalAlignment.Center)
+	local colFps = column("FpsColumn", UDim2.new(0.64, 8, 0, 57), UDim2.new(0.36, -26, 0, 20), Enum.HorizontalAlignment.Right)
+	inline("PingCaption", colPing, "PING", 1)
+	local pingLbl = inline("PingLabel", colPing, "--", 2)
+	local radiusLbl = inline("RadiusLabel", colRadius, "RADIUS 55", 1)
+	inline("FpsCaption", colFps, "FPS", 1)
+	local fpsLbl = inline("FpsLabel", colFps, "--", 2)
+	local d2 = frame("StealDivider2", Root, UDim2.new(0.32, 0, 0, 60), UDim2.new(0, 1, 0, 14), BAR_LINE, 52)
+	d2.BackgroundTransparency = 0.15
+	local d3 = frame("StealDivider3", Root, UDim2.new(0.64, 0, 0, 60), UDim2.new(0, 1, 0, 14), BAR_LINE, 52)
+	d3.BackgroundTransparency = 0.15
 
 	-- drag
-	local btn = Instance.new("TextButton", spFrame)
-	btn.Size = UDim2.new(1, 0, 1, 0)
-	btn.BackgroundTransparency = 1
-	btn.Text = ""
-	btn.ZIndex = 310
-	local dragging, dragStart, startPos, wasDragged
-	btn.InputBegan:Connect(function(inp)
+	local dragging, dragStart, startPos
+	Y.InputBegan:Connect(function(inp)
 		if inp.UserInputType == Enum.UserInputType.MouseButton1 or inp.UserInputType == Enum.UserInputType.Touch then
 			dragging = true
-			wasDragged = false
 			dragStart = inp.Position
-			startPos = spFrame.Position
+			startPos = Y.Position
 		end
 	end)
 	UIS.InputChanged:Connect(function(inp)
@@ -31316,14 +31319,7 @@ task.spawn(function()
 		if inp.UserInputType == Enum.UserInputType.MouseMovement or inp.UserInputType == Enum.UserInputType.Touch then
 			local dx = inp.Position.X - dragStart.X
 			local dy = inp.Position.Y - dragStart.Y
-			if math.abs(dx) > 5 or math.abs(dy) > 5 then wasDragged = true end
-			local cam = workspace.CurrentCamera
-			local vp = cam and cam.ViewportSize or Vector2.new(1000, 1000)
-			local sz = spFrame.AbsoluteSize
-			local px = startPos.X.Scale * vp.X
-			local newX = math.clamp(px + startPos.X.Offset + dx, sz.X / 2, vp.X - sz.X / 2)
-			local newY = math.clamp(startPos.Y.Scale * vp.Y + startPos.Y.Offset + dy, sz.Y, vp.Y)
-			spFrame.Position = UDim2.new(startPos.X.Scale, newX - px, startPos.Y.Scale, newY - startPos.Y.Scale * vp.Y)
+			Y.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + dx, startPos.Y.Scale, startPos.Y.Offset + dy)
 		end
 	end)
 	UIS.InputEnded:Connect(function(inp)
@@ -31331,38 +31327,59 @@ task.spawn(function()
 			dragging = false
 		end
 	end)
-	local function updateShadow()
-		local p = spFrame.Position
-		shadow.Position = UDim2.new(p.X.Scale, p.X.Offset, p.Y.Scale, p.Y.Offset + 3)
-		shadow.AnchorPoint = spFrame.AnchorPoint
-	end
-	spFrame:GetPropertyChangedSignal("Position"):Connect(updateShadow)
-	updateShadow()
+
+	local displayProgress = 0
+	local fpsAcc, fpsFrames, fpsVal = 0, 0, 0
+	RunService.RenderStepped:Connect(function(dt)
+		fpsAcc += dt
+		fpsFrames += 1
+		if fpsAcc >= 0.5 then
+			fpsVal = math.floor(fpsFrames / fpsAcc + 0.5)
+			fpsAcc, fpsFrames = 0, 0
+			fpsLbl.Text = tostring(fpsVal)
+		end
+		local ping = 0
+		pcall(function()
+			ping = math.floor(Stats.Network.ServerStatsItem["Data Ping"]:GetValue())
+		end)
+		pingLbl.Text = tostring(ping) .. "ms"
+		radiusLbl.Text = "RADIUS " .. tostring(math.floor(Steal.StealRadius))
+
+		local target = 0
+		if isStealing and stealStartTime then
+			target = math.clamp((tick() - stealStartTime) / 0.5, 0, 1)
+		elseif Steal.AutoStealEnabled and findNearestPrompt() then
+			target = math.max(target, 0.15)
+		end
+		displayProgress = displayProgress + (target - displayProgress) * math.min(1, (dt or 0.016) * 12)
+		if math.abs(displayProgress - target) < 0.005 then displayProgress = target end
+		fill.Size = UDim2.new(displayProgress, 0, 1, 0)
+		local pct = math.floor(displayProgress * 100 + 0.5)
+		pctLbl.Text = tostring(pct) .. "%"
+		if pct >= 100 then
+			statusLbl.Text = "STOLEN!"
+		elseif pct > 0 or isStealing then
+			statusLbl.Text = "STEALING..."
+		else
+			statusLbl.Text = BAR_IDLE_TEXT
+		end
+		-- show when auto steal on or progress
+		Y.Visible = Steal.AutoStealEnabled or displayProgress > 0.01 or isStealing
+	end)
 
 	_G.StealBar = {
 		SetProgress = function(p)
-			lastPct = math.clamp(tonumber(p) or 0, 0, 1)
+			displayProgress = math.clamp(tonumber(p) or 0, 0, 1)
 		end,
 		SetState = function() end,
 		Reset = function()
-			lastPct = 0
+			displayProgress = 0
 			isStealing = false
 		end,
 	}
 	_G._CursedSetProgressBarVisible = function(v)
-		spFrame.Visible = v
-		shadow.Visible = v
+		Y.Visible = v == true
 	end
-
-	-- apply scale from config
-	pcall(function()
-		local sc = Instance.new("UIScale", spFrame)
-		sc.Scale = math.clamp(tonumber(Config.stealBarScale) or 1, 0.5, 2)
-		Config._applyStealBarScale = function(arg)
-			Config.stealBarScale = math.clamp(tonumber(arg) or 1, 0.5, 2)
-			sc.Scale = Config.stealBarScale
-		end
-	end)
 
 	if Config and Config.autoStealEnabled then
 		startAutoSteal()
