@@ -1,3 +1,4 @@
+
 local tbl = {
 	[1] = { [3] = 1, [6] = { {} } },
 	[2] = {
@@ -9762,13 +9763,7 @@ tbl31 = {
 			mkCorner(frame3, 3)
 			local v43 = mkStroke(frame3, enabled and glass.text or glass.border, 0.65)
 			v43.Transparency = enabled and 0.45 or 0.62
-			arg = Instance.new("Frame", frame3)
-			arg.Size = UDim2.new(0.58, 0, 0.25, 0)
-			arg.Position = UDim2.new(0.21, 0, 0.13, 0)
-			arg.BackgroundColor3 = Color3.new(1, 1, 1)
-			arg.BackgroundTransparency = 0.58
-			arg.BorderSizePixel = 0
-			mkCorner(arg, 2)
+			-- white dash highlight removed
 			arg = Instance.new("TextButton", frame2)
 			arg.Size = UDim2.new(1, 0, 1, 0)
 			arg.BackgroundTransparency = 1
@@ -10138,6 +10133,98 @@ tbl31 = {
 		local flag6, frame3 = false
 		local textButton
 		local textBox = Instance.new("TextBox")
+		-- Search bar (before minimize)
+		local searchHolder = Instance.new("Frame", uiGradient)
+		searchHolder.Name = "BLYRA_SearchBar"
+		searchHolder.Size = UDim2.new(0, 160, 0, 28)
+		searchHolder.Position = UDim2.new(1, -200, 0.5, -14)
+		searchHolder.BackgroundColor3 = glass.panel
+		searchHolder.BackgroundTransparency = 0.12
+		searchHolder.BorderSizePixel = 0
+		searchHolder.ZIndex = 12
+		mkCorner(searchHolder, 8)
+		mkStroke(searchHolder, glass.border, 0.8)
+		local searchIcon = Instance.new("TextLabel", searchHolder)
+		searchIcon.Size = UDim2.fromOffset(22, 28)
+		searchIcon.Position = UDim2.fromOffset(4, 0)
+		searchIcon.BackgroundTransparency = 1
+		searchIcon.Text = "Q"
+		searchIcon.TextColor3 = glass.muted
+		searchIcon.Font = Enum.Font.GothamBold
+		searchIcon.TextSize = 11
+		searchIcon.ZIndex = 13
+		local searchBox = Instance.new("TextBox", searchHolder)
+		searchBox.Name = "SearchInput"
+		searchBox.Size = UDim2.new(1, -28, 1, 0)
+		searchBox.Position = UDim2.fromOffset(24, 0)
+		searchBox.BackgroundTransparency = 1
+		searchBox.ClearTextOnFocus = false
+		searchBox.PlaceholderText = "Search..."
+		searchBox.PlaceholderColor3 = glass.muted
+		searchBox.Text = ""
+		searchBox.TextColor3 = glass.text
+		searchBox.Font = Enum.Font.GothamMedium
+		searchBox.TextSize = 11
+		searchBox.TextXAlignment = Enum.TextXAlignment.Left
+		searchBox.ZIndex = 13
+		Config._searchBox = searchBox
+		Config._applyFeatureSearch = function(query)
+			query = string.lower(tostring(query or ""):gsub("^%s+", ""):gsub("%s+$", ""))
+			local pages = Config._searchPages
+			if type(pages) ~= "table" then
+				return
+			end
+			local firstMatchTab = nil
+			for tabName, scroll in pairs(pages) do
+				if scroll and scroll:IsA("ScrollingFrame") then
+					for _, child in ipairs(scroll:GetChildren()) do
+						if child:IsA("GuiObject") and not child:IsA("UIListLayout") and not child:IsA("UIPadding") then
+							if query == "" then
+								child.Visible = true
+							else
+								local match = false
+								local hasLabel = false
+								local function check(obj)
+									if obj:IsA("TextLabel") or obj:IsA("TextButton") or obj:IsA("TextBox") then
+										local t = tostring(obj.Text or "")
+										if t ~= "" and t ~= "ON" and t ~= "OFF" and t ~= "v" and #t > 1 then
+											hasLabel = true
+											if string.find(string.lower(t), query, 1, true) then
+												match = true
+											end
+										end
+									end
+								end
+								check(child)
+								for _, d in ipairs(child:GetDescendants()) do
+									check(d)
+									if match then
+										break
+									end
+								end
+								if not hasLabel then
+									child.Visible = false
+								else
+									child.Visible = match
+									if match and not firstMatchTab then
+										firstMatchTab = tabName
+									end
+								end
+							end
+						end
+					end
+				end
+			end
+			if query ~= "" and firstMatchTab and type(Config._searchTabSwitch) == "function" then
+				pcall(Config._searchTabSwitch, firstMatchTab)
+			end
+		end
+		searchBox:GetPropertyChangedSignal("Text"):Connect(function()
+			pcall(Config._applyFeatureSearch, searchBox.Text)
+		end)
+		searchBox.FocusLost:Connect(function()
+			pcall(Config._applyFeatureSearch, searchBox.Text)
+		end)
 		local textButton2 = Instance.new("TextButton", uiGradient)
 		textButton2.Size = UDim2.new(0, 28, 0, 28)
 		textButton2.Position = UDim2.new(1, -32, 0.5, -14)
@@ -10583,7 +10670,7 @@ tbl31 = {
 			textButton.Size = UDim2.new(frame3, -5, 1, -8)
 			textButton.Position = UDim2.new((i - 1) * frame3, 3, 0, 4)
 			textButton.BackgroundTransparency = 1
-			textButton.Text = tbl46[v43] or v43
+			textButton.Text = ""
 			textButton.TextColor3 = glass.muted
 			textButton.Font = Enum.Font.GothamBold
 			textButton.TextSize = 9
@@ -10594,11 +10681,21 @@ tbl31 = {
 			i.Name = "ActiveBg"
 			i.Size = UDim2.new(1, 0, 1, 0)
 			i.Position = UDim2.new(0, 0, 0, 0)
-			i.BackgroundColor3 = glass.accent
+			i.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 			i.BackgroundTransparency = 1
 			i.BorderSizePixel = 0
 			i.ZIndex = 11
 			mkCorner(i, 8)
+			local tabLbl = Instance.new("TextLabel", textButton)
+			tabLbl.Name = "TabLabel"
+			tabLbl.Size = UDim2.new(1, 0, 1, 0)
+			tabLbl.BackgroundTransparency = 1
+			tabLbl.Text = tbl46[v43] or v43
+			tabLbl.TextColor3 = glass.muted
+			tabLbl.Font = Enum.Font.GothamBold
+			tabLbl.TextSize = 9
+			tabLbl.TextXAlignment = Enum.TextXAlignment.Center
+			tabLbl.ZIndex = 14
 			character = Instance.new("Frame", textButton)
 			character.Name = "Indicator"
 			character.Size = UDim2.new(0.64, 0, 0, 3)
@@ -10609,7 +10706,7 @@ tbl31 = {
 			character.BorderSizePixel = 0
 			character.ZIndex = 13
 			mkCorner(character, 2)
-			tbl48[v43] = { btn = textButton, indicator = character, activeBg = i }
+			tbl48[v43] = { btn = textButton, label = tabLbl, indicator = character, activeBg = i }
 			textButton.MouseButton1Click:Connect(function()
 				if str3 == v43 then
 					return
@@ -10617,9 +10714,13 @@ tbl31 = {
 				str3 = v43
 				for k, v44 in pairs(tbl48) do
 					local flag9 = k == v43
-					v44.btn.TextColor3 = flag9 and Color3.fromRGB(18, 18, 22) or glass.muted
-					v44.activeBg.BackgroundColor3 = glass.accent
-					v44.activeBg.BackgroundTransparency = flag9 and 0.08 or 1
+					local lbl = v44.label
+					if lbl then
+						lbl.TextColor3 = flag9 and Color3.new(0, 0, 0) or glass.muted
+					end
+					v44.btn.TextColor3 = flag9 and Color3.new(0, 0, 0) or glass.muted
+					v44.activeBg.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+					v44.activeBg.BackgroundTransparency = flag9 and 0.05 or 1
 					v44.indicator.BackgroundColor3 = flag9 and glass.accent2 or glass.border
 					v44.indicator.BackgroundTransparency = flag9 and 0 or 0.68
 				end
@@ -10634,11 +10735,39 @@ tbl31 = {
 		end
 		for k, v43 in pairs(tbl48) do
 			character = k == str3
-			v43.btn.TextColor3 = character and Color3.fromRGB(18, 18, 22) or glass.muted
-			v43.activeBg.BackgroundColor3 = glass.accent
-			v43.activeBg.BackgroundTransparency = character and 0.08 or 1
+			if v43.label then
+				v43.label.TextColor3 = character and Color3.new(0, 0, 0) or glass.muted
+			end
+			v43.btn.TextColor3 = character and Color3.new(0, 0, 0) or glass.muted
+			v43.activeBg.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+			v43.activeBg.BackgroundTransparency = character and 0.05 or 1
 			v43.indicator.BackgroundColor3 = character and glass.accent2 or glass.border
 			v43.indicator.BackgroundTransparency = character and 0 or 0.68
+		end
+		Config._searchPages = tbl47
+		Config._searchTabSwitch = function(tabName)
+			if not tabName or str3 == tabName then
+				return
+			end
+			local pack = tbl48[tabName]
+			if not pack then
+				return
+			end
+			str3 = tabName
+			for k, v44 in pairs(tbl48) do
+				local flag9 = k == tabName
+				if v44.label then
+					v44.label.TextColor3 = flag9 and Color3.new(0, 0, 0) or glass.muted
+				end
+				v44.btn.TextColor3 = flag9 and Color3.new(0, 0, 0) or glass.muted
+				v44.activeBg.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+				v44.activeBg.BackgroundTransparency = flag9 and 0.05 or 1
+				v44.indicator.BackgroundColor3 = flag9 and glass.accent2 or glass.border
+				v44.indicator.BackgroundTransparency = flag9 and 0 or 0.68
+			end
+			for k, v44 in pairs(tbl47) do
+				v44.Visible = k == tabName
+			end
 		end
 		function saveUIPositions()
 			if not frame or not frame.Parent then
@@ -26400,6 +26529,7 @@ buildPage("Config", function()
 				Config._unifiedCanJump = true
 			end
 			function Config._unifiedApplyJumpVelocity()
+				-- Rosey Hub Inf Jump style
 				if not Config.infJumpEnabled then
 					return
 				end
@@ -26419,23 +26549,23 @@ buildPage("Config", function()
 					return
 				end
 				local character2 = localPlayer.Character
-				local parent, parent2 =
-					humanoid2 and humanoid2.Parent and humanoid2 or character2 and (character2:FindFirstChildOfClass(
-						"Humanoid"
-					)),
-					humanoidRootPart2 and humanoidRootPart2.Parent and humanoidRootPart2
-						or character2 and (character2:FindFirstChild("HumanoidRootPart"))
-				if not character2 or not parent or not parent2 or parent.Health <= 0 then
+				if not character2 then
+					return
+				end
+				local hum = character2:FindFirstChildOfClass("Humanoid")
+				local hrp = character2:FindFirstChild("HumanoidRootPart")
+				if not hum or not hrp or hum.Health <= 0 then
 					return
 				end
 				Config._unifiedCanJump = false
 				Config._unifiedLastJumpTime = os.clock()
 				Config._unifiedLastInfJump = os.clock()
-				parent, character2 = tonumber(Config.jumpPower) or 50, parent2.AssemblyLinearVelocity
+				local vel = hrp.AssemblyLinearVelocity
+				local boost = 55
 				if Config._vxSyncSpoof then
-					Config._vxSyncSpoof(Vector3.new(character2.X, 0, character2.Z))
+					Config._vxSyncSpoof(Vector3.new(vel.X, 0, vel.Z))
 				end
-				parent2.AssemblyLinearVelocity = Vector3.new(character2.X, parent, character2.Z)
+				hrp.AssemblyLinearVelocity = Vector3.new(vel.X, boost, vel.Z)
 				task.delay(0.08, function()
 					Config._unifiedCanJump = true
 				end)
