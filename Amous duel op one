@@ -9781,36 +9781,60 @@ tbl31 = {
 			uiStroke.Transparency = 0.46
 			return uiStroke
 		end
-		-- Power-button style toggle (OFF = dark + white icon, ON = white box + black icon)
+		-- OFF / ON toggle with sliding kanta (knob)
 		function mkSwitch(arg, enabled, arg2)
-			local OFF_BG = Color3.fromRGB(18, 18, 20)
-			local ON_BG = Color3.fromRGB(255, 255, 255)
-			local OFF_ICON = Color3.fromRGB(240, 240, 245)
-			local ON_ICON = Color3.fromRGB(10, 10, 12)
-			local OFF_STROKE = Color3.fromRGB(150, 155, 165)
-			local ON_STROKE = Color3.fromRGB(220, 225, 235)
+			local TRACK_OFF = Color3.fromRGB(32, 32, 36)
+			local TRACK_ON = Color3.fromRGB(55, 55, 62)
+			local KNOB = Color3.fromRGB(240, 242, 248)
+			local LABEL_DIM = Color3.fromRGB(120, 122, 130)
+			local LABEL_ON = Color3.fromRGB(255, 255, 255)
 
 			local frame2 = Instance.new("Frame", arg)
 			frame2.Name = "ModernToggle"
-			frame2.Size = UDim2.new(0, 30, 0, 30)
-			frame2.BackgroundColor3 = enabled and ON_BG or OFF_BG
+			frame2.Size = UDim2.new(0, 72, 0, 26)
+			frame2.BackgroundColor3 = enabled and TRACK_ON or TRACK_OFF
 			frame2.BorderSizePixel = 0
-			mkCorner(frame2, 8)
-			local v42 = mkStroke(frame2, enabled and ON_STROKE or OFF_STROKE, 1.4)
-			v42.Transparency = enabled and 0.15 or 0.25
+			mkCorner(frame2, 6)
+			local stroke = mkStroke(frame2, Color3.fromRGB(140, 145, 155), 1)
+			stroke.Transparency = 0.35
 
-			-- Power icon (Unicode power symbol)
-			local icon = Instance.new("TextLabel", frame2)
-			icon.Name = "PowerIcon"
-			icon.Size = UDim2.new(1, 0, 1, 0)
-			icon.BackgroundTransparency = 1
-			icon.Text = "⏻"
-			icon.TextColor3 = enabled and ON_ICON or OFF_ICON
-			icon.Font = Enum.Font.GothamBold
-			icon.TextSize = 16
-			icon.TextXAlignment = Enum.TextXAlignment.Center
-			icon.TextYAlignment = Enum.TextYAlignment.Center
-			icon.ZIndex = 5
+			-- OFF label (left)
+			local offLbl = Instance.new("TextLabel", frame2)
+			offLbl.Name = "OffLabel"
+			offLbl.Size = UDim2.new(0, 28, 1, 0)
+			offLbl.Position = UDim2.fromOffset(4, 0)
+			offLbl.BackgroundTransparency = 1
+			offLbl.Text = "OFF"
+			offLbl.Font = Enum.Font.GothamBold
+			offLbl.TextSize = 9
+			offLbl.TextColor3 = enabled and LABEL_DIM or LABEL_ON
+			offLbl.TextXAlignment = Enum.TextXAlignment.Center
+			offLbl.ZIndex = 4
+
+			-- ON label (right)
+			local onLbl = Instance.new("TextLabel", frame2)
+			onLbl.Name = "OnLabel"
+			onLbl.Size = UDim2.new(0, 28, 1, 0)
+			onLbl.Position = UDim2.new(1, -32, 0, 0)
+			onLbl.BackgroundTransparency = 1
+			onLbl.Text = "ON"
+			onLbl.Font = Enum.Font.GothamBold
+			onLbl.TextSize = 9
+			onLbl.TextColor3 = enabled and LABEL_ON or LABEL_DIM
+			onLbl.TextXAlignment = Enum.TextXAlignment.Center
+			onLbl.ZIndex = 4
+
+			-- Kanta / knob (slides left=OFF, right=ON)
+			local knob = Instance.new("Frame", frame2)
+			knob.Name = "ModernToggleKnob"
+			knob.Size = UDim2.new(0, 20, 0, 20)
+			knob.Position = enabled and UDim2.new(1, -23, 0.5, -10) or UDim2.new(0, 3, 0.5, -10)
+			knob.BackgroundColor3 = KNOB
+			knob.BorderSizePixel = 0
+			knob.ZIndex = 6
+			mkCorner(knob, 5)
+			local knobStroke = mkStroke(knob, Color3.fromRGB(180, 185, 195), 0.8)
+			knobStroke.Transparency = 0.3
 
 			local hit = Instance.new("TextButton", frame2)
 			hit.Size = UDim2.new(1, 0, 1, 0)
@@ -9820,14 +9844,16 @@ tbl31 = {
 
 			local function fn72(enabled2)
 				TweenService:Create(frame2, TweenInfo.new(0.18, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-					BackgroundColor3 = enabled2 and ON_BG or OFF_BG,
+					BackgroundColor3 = enabled2 and TRACK_ON or TRACK_OFF,
 				}):Play()
-				TweenService:Create(icon, TweenInfo.new(0.18), {
-					TextColor3 = enabled2 and ON_ICON or OFF_ICON,
+				TweenService:Create(knob, TweenInfo.new(0.18, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+					Position = enabled2 and UDim2.new(1, -23, 0.5, -10) or UDim2.new(0, 3, 0.5, -10),
 				}):Play()
-				TweenService:Create(v42, TweenInfo.new(0.18), {
-					Color = enabled2 and ON_STROKE or OFF_STROKE,
-					Transparency = enabled2 and 0.15 or 0.25,
+				TweenService:Create(offLbl, TweenInfo.new(0.15), {
+					TextColor3 = enabled2 and LABEL_DIM or LABEL_ON,
+				}):Play()
+				TweenService:Create(onLbl, TweenInfo.new(0.15), {
+					TextColor3 = enabled2 and LABEL_ON or LABEL_DIM,
 				}):Play()
 			end
 
@@ -10268,17 +10294,19 @@ tbl31 = {
 			pcall(Config._applyFeatureSearch, searchBox.Text)
 		end)
 		local textButton2 = Instance.new("TextButton", uiGradient)
+		textButton2.Name = "MinimizeBtn"
+		textButton2:SetAttribute("BlyraNoTheme", true)
 		textButton2.Size = UDim2.new(0, 28, 0, 28)
 		textButton2.Position = UDim2.new(1, -32, 0.5, -14)
-		textButton2.BackgroundColor3 = glass.panel
-		textButton2.BackgroundTransparency = 0.18
-		textButton2.Text = "_"
+		-- no silver box / no stroke design — plain text only
+		textButton2.BackgroundTransparency = 1
+		textButton2.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+		textButton2.BorderSizePixel = 0
+		textButton2.Text = "—"
 		textButton2.TextColor3 = glass.muted
 		textButton2.Font = Enum.Font.GothamBold
-		textButton2.TextSize = 16
+		textButton2.TextSize = 18
 		textButton2.AutoButtonColor = false
-		mkCorner(textButton2, 8)
-		mkStroke(textButton2, glass.border, 0.8)
 		textButton2.ZIndex = 12
 		textButton2.MouseEnter:Connect(function()
 			textButton2.TextColor3 = glass.text
@@ -13250,7 +13278,7 @@ frame9.Visible = false
 					end
 					fn34()
 				end)
-				v45.Position = UDim2.new(1, -50, 0.5, -12)
+				v45.Position = UDim2.new(1, -80, 0.5, -13)
 				function Config._syncAutoTPDownSwitch(arg)
 					flag14 = arg == true
 					v46(flag14)
@@ -13308,7 +13336,7 @@ frame9.Visible = false
 						end
 						fn34()
 					end)
-					v46.Position = UDim2.new(1, -50, 0.5, -12)
+					v46.Position = UDim2.new(1, -80, 0.5, -13)
 					function setAutoSteal(arg)
 						autoStealEnabled = arg
 						v47(arg)
@@ -13406,7 +13434,7 @@ frame9.Visible = false
 						end
 						fn34()
 					end)
-					v46.Position = UDim2.new(1, -50, 0.5, -12)
+					v46.Position = UDim2.new(1, -80, 0.5, -13)
 					function Config._syncAutoStealStopWhenHit(arg)
 						autoStealStopWhenHit = arg == true
 						Config.autoStealStopWhenHit = autoStealStopWhenHit
@@ -13549,7 +13577,7 @@ frame9.Visible = false
 					fn82(autoCarrySpeedEnabled2)
 					fn34()
 				end)
-				v45.Position = UDim2.new(1, -50, 0.5, -12)
+				v45.Position = UDim2.new(1, -80, 0.5, -13)
 				function tbl35.setAutoCarryOnSteal(arg)
 					autoCarrySpeedEnabled = arg == true
 					Config.autoCarrySpeedEnabled = autoCarrySpeedEnabled
@@ -13659,7 +13687,7 @@ frame9.Visible = false
 					fn82()
 					fn34()
 				end)
-				v45.Position = UDim2.new(1, -50, 0.5, -12)
+				v45.Position = UDim2.new(1, -80, 0.5, -13)
 				function setUnwalk(arg)
 					playerAnimEnabled = arg
 					v46(arg)
@@ -13800,7 +13828,7 @@ frame9.Visible = false
 					fn81(infJumpEnabled2)
 					fn34()
 				end)
-				v45.Position = UDim2.new(1, -50, 0.5, -12)
+				v45.Position = UDim2.new(1, -80, 0.5, -13)
 				function setInfJump(arg)
 					infJumpEnabled = arg
 					v46(arg)
@@ -14039,7 +14067,7 @@ frame9.Visible = false
 					setRagdollTimer(ragdollTimerEnabled2)
 					fn34()
 				end)
-				v46.Position = UDim2.new(1, -50, 0.5, -12)
+				v46.Position = UDim2.new(1, -80, 0.5, -13)
 				function setRagdollTimer(arg)
 					ragdollTimerEnabled = arg
 					v47(arg)
@@ -14442,7 +14470,7 @@ frame9.Visible = false
 					setEnemyRagdollTimer(enemyRagdollTimerEnabled2)
 					fn34()
 				end)
-				v45.Position = UDim2.new(1, -50, 0.5, -12)
+				v45.Position = UDim2.new(1, -80, 0.5, -13)
 				function setEnemyRagdollTimer(arg)
 					enemyRagdollTimerEnabled = arg == true
 					Config.enemyRagdollTimerEnabled = enemyRagdollTimerEnabled
@@ -14505,7 +14533,7 @@ frame9.Visible = false
 						pcall(fn34)
 					end)
 					if sw then
-						sw.Position = UDim2.new(1, -50, 0.5, -12)
+						sw.Position = UDim2.new(1, -80, 0.5, -13)
 					end
 				end)
 				function Config._syncMirrorTpDown(on)
@@ -14755,7 +14783,7 @@ uiListLayout.Visible = false
 					):Play()
 					fn34()
 				end).Position =
-					UDim2.new(1, -50, 0.5, -12)
+					UDim2.new(1, -80, 0.5, -13)
 			end
 			do
 				local frame7 = Instance.new("Frame", frame6)
@@ -14872,7 +14900,7 @@ uiListLayout.Visible = false
 					textLabel2.TextColor3 = batCounterEnabled2 and glass.text or glass.muted
 					fn34()
 				end)
-				v45.Position = UDim2.new(1, -50, 0.5, -12)
+				v45.Position = UDim2.new(1, -80, 0.5, -13)
 				function setBatCounter(arg)
 					batCounterEnabled = arg
 					v46(arg)
@@ -15089,7 +15117,7 @@ uiListLayout.Visible = false
 					end
 					fn34()
 				end)
-				v45.Position = UDim2.new(1, -50, 0.5, -12)
+				v45.Position = UDim2.new(1, -80, 0.5, -13)
 				function Config._syncBatTpNoCollision(arg)
 					batTpNoCollision = arg == true
 					Config.batTpNoCollision = batTpNoCollision
@@ -15785,7 +15813,7 @@ frame6.Visible = false
 					end
 					fn34()
 				end)
-				v46.Position = UDim2.new(1, -50, 0.5, -12)
+				v46.Position = UDim2.new(1, -80, 0.5, -13)
 				function Config._sbaSetEnabled(silentBatAim2)
 					silentBatAim = silentBatAim2
 					Config.silentBatAim = silentBatAim2
@@ -15970,7 +15998,7 @@ frame6.Visible = false
 					end)
 					fn34()
 				end)
-				v45.Position = UDim2.new(1, -50, 0.5, -12)
+				v45.Position = UDim2.new(1, -80, 0.5, -13)
 				function setAntiLag(antiLagEnabled2, arg)
 					antiLagEnabled = antiLagEnabled2
 					Config.antiLagEnabled = antiLagEnabled2
@@ -16025,7 +16053,7 @@ frame6.Visible = false
 					end
 					fn34()
 				end)
-				v45.Position = UDim2.new(1, -50, 0.5, -12)
+				v45.Position = UDim2.new(1, -80, 0.5, -13)
 				function setPotato(arg)
 					potatoGraphicsEnabled = arg
 					v46(arg)
@@ -16591,7 +16619,7 @@ frame6.Visible = false
 					textLabel2.TextColor3 = purpleSkyEnabled and glass.text or glass.muted
 					fn34()
 				end)
-				frame8.Position = UDim2.new(1, -50, 0.5, -12)
+				frame8.Position = UDim2.new(1, -80, 0.5, -13)
 				frame8 = Instance.new("Frame", frame6)
 				frame8.Size = UDim2.new(1, 0, 0, 34)
 				frame8.LayoutOrder = 2
@@ -16766,7 +16794,7 @@ frame6.Visible = false
 					end
 					fn34()
 				end)
-				frame8.Position = UDim2.new(1, -50, 0.5, -12)
+				frame8.Position = UDim2.new(1, -80, 0.5, -13)
 				frame8 = Instance.new("Frame", frame6)
 				frame8.Size = UDim2.new(1, 0, 0, 40)
 				frame8.BorderSizePixel = 0
@@ -16923,7 +16951,7 @@ frame6.Visible = false
 					end
 					fn34()
 				end)
-				textLabel3.Position = UDim2.new(1, -50, 0.5, -12)
+				textLabel3.Position = UDim2.new(1, -80, 0.5, -13)
 				uiListLayout = Instance.new("Frame", frame6)
 				uiListLayout.Size = UDim2.new(1, 0, 0, 40)
 				uiListLayout.BorderSizePixel = 0
@@ -17032,7 +17060,7 @@ frame6.Visible = false
 					end
 					fn34()
 				end)
-				v45.Position = UDim2.new(1, -50, 0.5, -12)
+				v45.Position = UDim2.new(1, -80, 0.5, -13)
 				function setEspBox(arg)
 					espBoxEnabled_2 = arg == true
 					espBoxEnabled_ = espBoxEnabled_2
@@ -17100,7 +17128,7 @@ frame6.Visible = false
 					applyChoice()
 					fn34()
 				end)
-				v45.Position = UDim2.new(1, -50, 0.5, -12)
+				v45.Position = UDim2.new(1, -80, 0.5, -13)
 				uiListLayout = Instance.new("Frame", frame6)
 				uiListLayout.Size = UDim2.new(1, 0, 0, 40)
 				uiListLayout.BorderSizePixel = 0
@@ -17193,7 +17221,7 @@ frame6.Visible = false
 					end
 					fn34()
 				end)
-				v45.Position = UDim2.new(1, -50, 0.5, -12)
+				v45.Position = UDim2.new(1, -80, 0.5, -13)
 				function Config._setEspPlayer(espPlayerEnabled2)
 					espPlayerEnabled = espPlayerEnabled2
 					Config.espPlayerEnabled = espPlayerEnabled2
@@ -17245,7 +17273,7 @@ frame6.Visible = false
 					end
 					fn34()
 				end)
-				v45.Position = UDim2.new(1, -50, 0.5, -12)
+				v45.Position = UDim2.new(1, -80, 0.5, -13)
 				function tbl3.setToggle(arg)
 					espInfoEnabled2 = arg
 					v46(arg)
@@ -18898,7 +18926,7 @@ frame6.Visible = false
 				text, v45 = mkSwitch(frame6, flag14, function(arg3)
 					fn83(arg3, true)
 				end)
-				text.Position = UDim2.new(1, -50, 0.5, -12)
+				text.Position = UDim2.new(1, -80, 0.5, -13)
 				return function(arg3)
 					fn83(arg3, false)
 				end
@@ -19242,7 +19270,7 @@ frame6.Visible = false
 					applyStackButtonsVisible(arg)
 					fn34()
 				end)
-				v45.Position = UDim2.new(1, -50, 0.5, -12)
+				v45.Position = UDim2.new(1, -80, 0.5, -13)
 				function setHideButtonsToggle(arg)
 					flag14 = arg
 					v46(arg)
@@ -19285,7 +19313,7 @@ frame6.Visible = false
 					fn83(lockButtonsEnabled2)
 					fn34()
 				end)
-				v45.Position = UDim2.new(1, -50, 0.5, -12)
+				v45.Position = UDim2.new(1, -80, 0.5, -13)
 				function Config._syncLockButtons()
 					lockButtonsEnabled = Config.lockButtonsEnabled == true
 					v46(lockButtonsEnabled)
@@ -21673,7 +21701,7 @@ laggerPopupToggleSync.Visible = false
 					end
 					fn34()
 				end)
-				v45.Position = UDim2.new(1, -50, 0.5, -12)
+				v45.Position = UDim2.new(1, -80, 0.5, -13)
 				function Config._syncDuelAntiDieToggle(arg)
 					flag14 = arg == true
 					v46(flag14)
@@ -21715,7 +21743,7 @@ laggerPopupToggleSync.Visible = false
 					end
 					fn34()
 				end)
-				v46.Position = UDim2.new(1, -50, 0.5, -12)
+				v46.Position = UDim2.new(1, -80, 0.5, -13)
 				function setAutoResetH0(autoDeathResetEnabled2)
 					autoDeathResetEnabled = autoDeathResetEnabled2
 					Config.autoDeathResetEnabled = autoDeathResetEnabled2
@@ -21776,7 +21804,7 @@ laggerPopupToggleSync.Visible = false
 					textLabel2.TextColor3 = antiRagdollEnabled2 and glass.text or glass.muted
 					fn34()
 				end)
-				v45.Position = UDim2.new(1, -50, 0.5, -12)
+				v45.Position = UDim2.new(1, -80, 0.5, -13)
 				function setAntiRag(arg)
 					antiRagdollEnabled = arg
 					v46(arg)
@@ -21851,7 +21879,7 @@ laggerPopupToggleSync.Visible = false
 					end
 					fn34()
 				end)
-				v45.Position = UDim2.new(1, -50, 0.5, -12)
+				v45.Position = UDim2.new(1, -80, 0.5, -13)
 				function setMedusaCounter(medusaCounterEnabled2)
 					medusaCounterEnabled = medusaCounterEnabled2
 					Config.medusaCounterEnabled = medusaCounterEnabled2
@@ -29850,7 +29878,7 @@ do
 		status.TextXAlignment = Enum.TextXAlignment.Left
 		local sw = Instance.new("TextButton", row)
 		sw.Size = UDim2.fromOffset(40, 22)
-		sw.Position = UDim2.new(1, -50, 0.5, -11)
+		sw.Position = UDim2.new(1, -80, 0.5, -13)
 		sw.BackgroundColor3 = C.switchOff
 		sw.Text = ""
 		sw.AutoButtonColor = false
