@@ -10339,6 +10339,43 @@ tbl31 = {
 			TweenService:Create(frame4, TweenInfo.new(0.12), { BackgroundTransparency = 0.1 }):Play()
 			TweenService:Create(uiStroke, TweenInfo.new(0.12), { Transparency = 0.3 }):Play()
 		end)
+		-- FORCE clean minimized: only logo image
+		local function forceCleanMinimized()
+			pcall(function()
+				frame4.Size = UDim2.new(0, 52, 0, 52)
+				frame4.BackgroundColor3 = Color3.fromRGB(18, 18, 22)
+				frame4.BackgroundTransparency = 0.05
+				for _, ch in ipairs(frame4:GetChildren()) do
+					if ch.Name == "MinimizedBrand" or ch.Name == "MinimizedSub" or ch.Name == "MinimizedOpen"
+						or ch.Name == "MinimizedAccent" or (ch:IsA("TextLabel") and ch.Name ~= "MinimizedLogo") then
+						ch:Destroy()
+					end
+				end
+				local logo = frame4:FindFirstChild("MinimizedLogo")
+				if not logo or not logo:IsA("ImageLabel") then
+					if logo then logo:Destroy() end
+					logo = Instance.new("ImageLabel")
+					logo.Name = "MinimizedLogo"
+					logo.Parent = frame4
+				end
+				logo.Size = UDim2.fromOffset(36, 36)
+				logo.AnchorPoint = Vector2.new(0.5, 0.5)
+				logo.Position = UDim2.new(0.5, 0, 0.5, 0)
+				logo.BackgroundTransparency = 1
+				logo.BorderSizePixel = 0
+				logo.Image = "rbxassetid://112454424363488"
+				logo.ScaleType = Enum.ScaleType.Fit
+				logo.ZIndex = 22
+				if logo:IsA("TextLabel") then
+					logo:Destroy()
+				end
+			end)
+		end
+		forceCleanMinimized()
+		task.defer(forceCleanMinimized)
+		task.delay(0.5, forceCleanMinimized)
+		task.delay(1.5, forceCleanMinimized)
+		Config._forceCleanMinimized = forceCleanMinimized
 		local connection7, connection8, connection9, connection10, position, v42
 		local flag7, position2 = false
 		local flag8 = false
@@ -10376,6 +10413,9 @@ tbl31 = {
 			if arg then
 				frame.Visible = true
 				frame4.Visible = true
+				if Config._forceCleanMinimized then
+					pcall(Config._forceCleanMinimized)
+				end
 				if blyraMinimizedScale then
 					blyraMinimizedScale.Scale = 0.74
 					TweenService:Create(
@@ -14370,11 +14410,13 @@ frame9.Visible = false
 			do
 				local mirrorOn = Config.mirrorTpDownEnabled == true
 				local row = Instance.new("Frame", v43)
+				row.Name = "MirrorTpDownRow"
 				row.Size = UDim2.new(1, 0, 0, 46)
 				row.BorderSizePixel = 0
-				row.LayoutOrder = LO()
+				row.LayoutOrder = 0
 				row.BackgroundColor3 = mirrorOn and glass.panelHover or glass.panel
-				row.BackgroundTransparency = 0.4
+				row.BackgroundTransparency = 0.25
+				row.Visible = true
 				mkCorner(row, 10)
 				mkAnimStroke(row, 1)
 				local title = Instance.new("TextLabel", row)
@@ -14397,24 +14439,33 @@ frame9.Visible = false
 				sub.TextXAlignment = Enum.TextXAlignment.Left
 				local function paint(on)
 					title.TextColor3 = on and glass.text or glass.muted
-					TweenService:Create(row, TweenInfo.new(0.15), {
-						BackgroundColor3 = on and glass.panelHover or glass.panel,
-					}):Play()
+					pcall(function()
+						TweenService:Create(row, TweenInfo.new(0.15), {
+							BackgroundColor3 = on and glass.panelHover or glass.panel,
+						}):Play()
+					end)
 				end
-				local sw, setSw = mkSwitch(row, mirrorOn, function(on)
-					mirrorOn = on
-					Config.mirrorTpDownEnabled = on
-					paint(on)
-					if Config._setMirrorTpDown then
-						pcall(Config._setMirrorTpDown, on)
+				local sw, setSw
+				pcall(function()
+					sw, setSw = mkSwitch(row, mirrorOn, function(on)
+						mirrorOn = on
+						Config.mirrorTpDownEnabled = on
+						paint(on)
+						if Config._setMirrorTpDown then
+							pcall(Config._setMirrorTpDown, on)
+						end
+						pcall(fn34)
+					end)
+					if sw then
+						sw.Position = UDim2.new(1, -50, 0.5, -12)
 					end
-					fn34()
 				end)
-				sw.Position = UDim2.new(1, -50, 0.5, -12)
 				function Config._syncMirrorTpDown(on)
 					mirrorOn = on == true
 					Config.mirrorTpDownEnabled = mirrorOn
-					setSw(mirrorOn)
+					if setSw then
+						pcall(setSw, mirrorOn)
+					end
 					paint(mirrorOn)
 				end
 			end
