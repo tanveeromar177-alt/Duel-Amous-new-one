@@ -327,6 +327,7 @@ Config = {
 	_autoCarryReturnMode = nil,
 	autoTPDownEnabled = false,
 	autoTPDownHeight = 20,
+	mirrorTpDownEnabled = false,
 	uiPositions = { main = nil, infoBar = nil, vBtn = nil, lockBtn = nil, stackButtons = {} },
 	hiddenQuickButtons = {},
 	safeModeEnabled = true,
@@ -3500,6 +3501,8 @@ local function fn31()
 		autoCarryOnSteal = Config.autoCarrySpeedEnabled ~= false,
 		autoTPDownEnabled = Config.autoTPDownEnabled == true,
 		autoTPDownHeight = Config.autoTPDownHeight or 20,
+		mirrorTpDownEnabled = Config.mirrorTpDownEnabled == true,
+		mirrorTpDownEnabled = Config.mirrorTpDownEnabled == true,
 		musicSoundEnabled = Config.musicSoundEnabled,
 		skipIntro = Config.skipIntro,
 		skipIntroConfigured = Config.skipIntroConfigured,
@@ -3653,6 +3656,7 @@ local function fn33()
 		autoCarryOnSteal = Config.autoCarrySpeedEnabled ~= false,
 		autoTPDownEnabled = Config.autoTPDownEnabled == true,
 		autoTPDownHeight = Config.autoTPDownHeight or 20,
+		mirrorTpDownEnabled = Config.mirrorTpDownEnabled == true,
 		musicSoundEnabled = Config.musicSoundEnabled,
 		skipIntro = Config.skipIntro,
 		skipIntroConfigured = Config.skipIntroConfigured,
@@ -4427,6 +4431,9 @@ local function fn39()
 	if v23.autoCarryOnSteal ~= nil then
 		Config.autoCarrySpeedEnabled = v23.autoCarryOnSteal
 	end
+	if v23.mirrorTpDownEnabled ~= nil then
+		Config.mirrorTpDownEnabled = v23.mirrorTpDownEnabled == true
+	end
 	if v23.autoTPDownEnabled ~= nil then
 		Config.autoTPDownEnabled = v23.autoTPDownEnabled == true
 	end
@@ -5035,6 +5042,10 @@ local function fn40(arg)
 			if setAutoCarryOnSteal then
 				setAutoCarryOnSteal(arg.autoCarryOnSteal)
 			end
+		end
+		if arg.mirrorTpDownEnabled ~= nil then
+			Config.mirrorTpDownEnabled = arg.mirrorTpDownEnabled == true
+			if Config._syncMirrorTpDown then pcall(Config._syncMirrorTpDown, Config.mirrorTpDownEnabled) end
 		end
 		if arg.autoTPDownEnabled ~= nil then
 			Config.autoTPDownEnabled = arg.autoTPDownEnabled == true
@@ -10254,23 +10265,23 @@ tbl31 = {
 		end)
 		local frame4 = Instance.new("Frame", screenGui)
 		frame4.Name = "MinimizedFrame"
-		frame4.Size = UDim2.new(0, 164, 0, 50)
+		frame4.Size = UDim2.new(0, 52, 0, 52)
 		frame4.Position = fn4(tbl2.minimized)
-		frame4.BackgroundColor3 = glass.top:Lerp(Color3.fromRGB(5, 6, 8), 0.3)
-		frame4.BackgroundTransparency = 0.1
+		frame4.BackgroundColor3 = Color3.fromRGB(18, 18, 22)
+		frame4.BackgroundTransparency = 0.05
 		frame4.BorderSizePixel = 0
 		frame4.Visible = false
 		frame4.ZIndex = 20
 		frame4.Active = true
-		mkCorner(frame4, 15)
+		mkCorner(frame4, 14)
 		textButton = Instance.new("UIScale", frame4)
 		textButton.Name = "BLYRAMinimizedScale"
 		textButton.Scale = 1
 		local uiStroke = Instance.new("UIStroke", frame4)
 		uiStroke.Name = "MinimizedStroke"
 		uiStroke.Color = glass.border
-		uiStroke.Thickness = 1.15
-		uiStroke.Transparency = 0.3
+		uiStroke.Thickness = 1.1
+		uiStroke.Transparency = 0.25
 		uiStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 		character = Instance.new("UIGradient", uiStroke)
 		character.Rotation = 0
@@ -10280,73 +10291,46 @@ tbl31 = {
 			ColorSequenceKeypoint.new(0.5, glass.accent2),
 			ColorSequenceKeypoint.new(1, glass.accent),
 		})
-		textButton = Instance.new("Frame", frame4)
-		textButton.Name = "MinimizedAccent"
-		textButton.Size = UDim2.new(0, 3, 0, 26)
-		textButton.AnchorPoint = Vector2.new(0, 0.5)
-		textButton.Position = UDim2.new(0, 5, 0.5, 0)
-		textButton.BackgroundColor3 = glass.accent
-		textButton.BackgroundTransparency = 0.02
-		textButton.BorderSizePixel = 0
-		textButton.ZIndex = 21
-		mkCorner(textButton, 3)
-		uiGradient2 = Instance.new("UIStroke", textButton)
-		uiGradient2.Name = "MinimizedAccentStroke"
-		uiGradient2.Color = glass.accent2
-		uiGradient2.Thickness = 2
-		uiGradient2.Transparency = 0.72
-		character = Instance.new("TextLabel", frame4)
-		character.Name = "MinimizedLogo"
-		character.Size = UDim2.new(0, 34, 0, 34)
-		character.Position = UDim2.new(0, 14, 0.5, -17)
-		character.BackgroundColor3 = glass.accent
-		character.BackgroundTransparency = 0.06
-		character.BorderSizePixel = 0
-		character.Text = "BLYRA"
-		character.TextColor3 = glass.bg
-		character.Font = Enum.Font.GothamBlack
-		character.TextSize = 10
-		character.ZIndex = 22
-		mkCorner(character, 10)
-		textButton = Instance.new("TextLabel", frame4)
-		textButton.Name = "MinimizedBrand"
-		textButton.Size = UDim2.new(0, 72, 0, 18)
-		textButton.Position = UDim2.new(0, 56, 0, 9)
-		textButton.BackgroundTransparency = 1
-		textButton.Text = "BLYRA DUELS"
-		textButton.RichText = false
-		textButton.TextColor3 = glass.text
-		textButton.Font = Enum.Font.GothamBlack
-		textButton.TextSize = 10
-		textButton.TextXAlignment = Enum.TextXAlignment.Left
-		textButton.TextYAlignment = Enum.TextYAlignment.Center
-		textButton.TextStrokeColor3 = glass.bg
-		textButton.TextStrokeTransparency = 0.82
-		textButton.ZIndex = 22
-		textButton = Instance.new("TextLabel", frame4)
-		textButton.Name = "MinimizedSub"
-		textButton.Size = UDim2.new(0, 72, 0, 13)
-		textButton.Position = UDim2.new(0, 56, 0, 27)
-		textButton.BackgroundTransparency = 1
-		textButton.Text = "TAP TO OPEN"
-		textButton.TextColor3 = glass.muted
-		textButton.Font = Enum.Font.GothamMedium
-		textButton.TextSize = 7
-		textButton.TextXAlignment = Enum.TextXAlignment.Left
-		textButton.ZIndex = 22
-		frame3 = Instance.new("TextLabel", frame4)
-		frame3.Name = "MinimizedOpen"
-		frame3.Size = UDim2.new(0, 27, 0, 24)
-		frame3.Position = UDim2.new(1, -34, 0.5, -12)
-		frame3.BackgroundColor3 = glass.panel
-		frame3.BackgroundTransparency = 0.24
-		frame3.BorderSizePixel = 0
-		frame3.Text = "OPEN"
-		frame3.TextColor3 = glass.text
-		frame3.Font = Enum.Font.GothamBold
-		frame3.TextSize = 6
-		frame3.ZIndex = 22
-		mkCorner(frame3, 8)
+		-- logo image only (no text / open / brand)
+		local miniLogo = Instance.new("ImageLabel", frame4)
+		miniLogo.Name = "MinimizedLogo"
+		miniLogo.Size = UDim2.fromOffset(36, 36)
+		miniLogo.AnchorPoint = Vector2.new(0.5, 0.5)
+		miniLogo.Position = UDim2.new(0.5, 0, 0.5, 0)
+		miniLogo.BackgroundTransparency = 1
+		miniLogo.BorderSizePixel = 0
+		miniLogo.Image = "rbxassetid://112454424363488"
+		miniLogo.ScaleType = Enum.ScaleType.Fit
+		miniLogo.ZIndex = 22
+		task.spawn(function()
+			local ok, res = pcall(function()
+				return game:GetObjects("rbxassetid://112454424363488")
+			end)
+			if ok and type(res) == "table" and res[1] then
+				local o = res[1]
+				local tex
+				pcall(function()
+					if o:IsA("Decal") or o:IsA("Texture") then
+						tex = o.Texture
+					elseif o:IsA("ImageLabel") or o:IsA("ImageButton") then
+						tex = o.Image
+					else
+						local d = o:FindFirstChildWhichIsA("Decal", true) or o:FindFirstChildWhichIsA("Texture", true)
+						tex = d and d.Texture
+					end
+				end)
+				if tex and tex ~= "" and miniLogo.Parent then
+					miniLogo.Image = tex
+				end
+				pcall(function()
+					o:Destroy()
+				end)
+			end
+		end)
+		-- keep dummy refs so later code that expects these names does not nil-error
+		textButton = miniLogo
+		frame3 = miniLogo
+		character = miniLogo
 		frame4.MouseEnter:Connect(function()
 			TweenService:Create(frame4, TweenInfo.new(0.12), { BackgroundTransparency = 0.08 }):Play()
 			TweenService:Create(uiStroke, TweenInfo.new(0.12), { Transparency = 0.16 }):Play()
@@ -14382,6 +14366,58 @@ frame9.Visible = false
 		end
 		function buildCombatFeatures()
 			makeSectionHeader("Combat")
+
+			do
+				local mirrorOn = Config.mirrorTpDownEnabled == true
+				local row = Instance.new("Frame", v43)
+				row.Size = UDim2.new(1, 0, 0, 46)
+				row.BorderSizePixel = 0
+				row.LayoutOrder = LO()
+				row.BackgroundColor3 = mirrorOn and glass.panelHover or glass.panel
+				row.BackgroundTransparency = 0.4
+				mkCorner(row, 10)
+				mkAnimStroke(row, 1)
+				local title = Instance.new("TextLabel", row)
+				title.Size = UDim2.new(1, -70, 0, 23)
+				title.Position = UDim2.fromOffset(14, 4)
+				title.BackgroundTransparency = 1
+				title.Text = "Mirror TP Down"
+				title.TextColor3 = mirrorOn and glass.text or glass.muted
+				title.Font = Enum.Font.GothamBold
+				title.TextSize = 12
+				title.TextXAlignment = Enum.TextXAlignment.Left
+				local sub = Instance.new("TextLabel", row)
+				sub.Size = UDim2.new(1, -70, 0, 14)
+				sub.Position = UDim2.fromOffset(14, 25)
+				sub.BackgroundTransparency = 1
+				sub.Text = "TP down when nearby enemy falls"
+				sub.TextColor3 = glass.muted
+				sub.Font = Enum.Font.GothamMedium
+				sub.TextSize = 8
+				sub.TextXAlignment = Enum.TextXAlignment.Left
+				local function paint(on)
+					title.TextColor3 = on and glass.text or glass.muted
+					TweenService:Create(row, TweenInfo.new(0.15), {
+						BackgroundColor3 = on and glass.panelHover or glass.panel,
+					}):Play()
+				end
+				local sw, setSw = mkSwitch(row, mirrorOn, function(on)
+					mirrorOn = on
+					Config.mirrorTpDownEnabled = on
+					paint(on)
+					if Config._setMirrorTpDown then
+						pcall(Config._setMirrorTpDown, on)
+					end
+					fn34()
+				end)
+				sw.Position = UDim2.new(1, -50, 0.5, -12)
+				function Config._syncMirrorTpDown(on)
+					mirrorOn = on == true
+					Config.mirrorTpDownEnabled = mirrorOn
+					setSw(mirrorOn)
+					paint(mirrorOn)
+				end
+			end
 			makeGap(2)
 			makeGap(2)
 			local frame6 = Instance.new("Frame", v43)
@@ -25993,6 +26029,84 @@ buildPage("Config", function()
 				arg.AssemblyLinearVelocity =
 					Vector3.new(arg.AssemblyLinearVelocity.X, n24, arg.AssemblyLinearVelocity.Z)
 			end
+			
+		-- Mirror TP Down (Ace-style): when nearby enemy falls, TP self down
+		do
+			local prevY = {}
+			local cooldownUntil = 0
+			local conn = nil
+			local function doTpDown()
+				local char = localPlayer.Character
+				if not char then
+					return
+				end
+				local hrp = char:FindFirstChild("HumanoidRootPart")
+				if not hrp then
+					return
+				end
+				pcall(function()
+					local y, xz = hrp.CFrame:ToEulerAnglesYXZ()
+					hrp.CFrame = CFrame.new(hrp.Position.X, -7, hrp.Position.Z) * CFrame.Angles(0, select(2, hrp.CFrame:ToEulerAnglesYXZ()), 0)
+					hrp.AssemblyLinearVelocity = Vector3.zero
+					hrp.AssemblyAngularVelocity = Vector3.zero
+				end)
+			end
+			local function onStep()
+				if not Config.mirrorTpDownEnabled then
+					return
+				end
+				local now = os.clock()
+				if now < cooldownUntil then
+					return
+				end
+				local myChar = localPlayer.Character
+				local myHrp = myChar and myChar:FindFirstChild("HumanoidRootPart")
+				if not myHrp then
+					return
+				end
+				local myPos = myHrp.Position
+				for _, plr in ipairs(Players:GetPlayers()) do
+					if plr ~= localPlayer and plr.Character then
+						local hrp = plr.Character:FindFirstChild("HumanoidRootPart")
+						local hum = plr.Character:FindFirstChildOfClass("Humanoid")
+						if hrp and hum and hum.Health > 0 then
+							local dx = hrp.Position.X - myPos.X
+							local dz = hrp.Position.Z - myPos.Z
+							if (dx * dx + dz * dz) <= 64 then
+								local y = hrp.Position.Y
+								local prev = prevY[hrp]
+								if prev and (prev - y) >= 3 then
+									cooldownUntil = now + 0.08
+									doTpDown()
+									break
+								end
+								prevY[hrp] = y
+							else
+								prevY[hrp] = nil
+							end
+						end
+					end
+				end
+			end
+			function Config._setMirrorTpDown(on)
+				Config.mirrorTpDownEnabled = on == true
+				if on then
+					if not conn then
+						conn = RunService.Heartbeat:Connect(onStep)
+					end
+				else
+					if conn then
+						conn:Disconnect()
+						conn = nil
+					end
+					prevY = {}
+				end
+			end
+			if Config.mirrorTpDownEnabled then
+				Config._setMirrorTpDown(true)
+			end
+		end
+
 			function clearInfinityJumpVelocity()
 				local character2 = localPlayer.Character
 				local humanoidRootPart2 = character2 and (character2:FindFirstChild("HumanoidRootPart"))
