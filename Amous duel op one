@@ -3180,7 +3180,7 @@ Config._buildHeadDisplay = function(discord)
 		table.insert(tbl27.brandLabels, textLabel2)
 		return textLabel2
 	end
-	discord = createTextLabel("discord.gg/sawyerhub", 23, UDim2.new(0.5, -110, 0, 0), 220, Enum.TextXAlignment.Center)
+	discord = createTextLabel("discord.gg/sawyerhub", 26, UDim2.new(0.5, -110, 0, 0), 220, Enum.TextXAlignment.Center)
 	-- divider line removed
 	local textLabel2 = Instance.new("TextLabel", frame)
 	textLabel2.Size = UDim2.new(1, 0, 0, 34)
@@ -3189,7 +3189,7 @@ Config._buildHeadDisplay = function(discord)
 	textLabel2.Text = string.format("%.1f", tonumber(Config.normalSpeed) or 0)
 	textLabel2.TextColor3 = Color3.fromRGB(255, 50, 60)
 	textLabel2.Font = Enum.Font.GothamBold
-	textLabel2.TextSize = 28
+	textLabel2.TextSize = 32
 	textLabel2.TextStrokeTransparency = 0.15
 	textLabel2.TextStrokeColor3 = Color3.fromRGB(70, 10, 16)
 	textLabel2.TextXAlignment = Enum.TextXAlignment.Center
@@ -6486,8 +6486,8 @@ tbl31 = {
 					tbl40.board = billboardGui
 					character2 = Instance.new("Frame", billboardGui)
 					character2.Size = UDim2.fromOffset(252, 56)
-					character2.BackgroundColor3 = Color3.fromRGB(22, 2, 7)
-					character2.BackgroundTransparency = 0.35
+					character2.BackgroundColor3 = Color3.fromRGB(215, 25, 40)
+					character2.BackgroundTransparency = 0.1
 					character2.BorderSizePixel = 0
 					tbl40.scale = Instance.new("UIScale", character2)
 					Config._setWarningE01Scale(Config.warningE01Scale)
@@ -6502,7 +6502,7 @@ tbl31 = {
 					head.Text = "WARNING E01"
 					head.Font = Enum.Font.GothamBold
 					head.TextSize = 13
-					head.TextColor3 = Color3.fromRGB(255, 90, 100)
+					head.TextColor3 = Color3.fromRGB(255, 255, 255)
 					local textLabel2 = Instance.new("TextLabel", character2)
 					textLabel2.Size = UDim2.new(1, 0, 0, 30)
 					textLabel2.Position = UDim2.fromOffset(0, 23)
@@ -6510,7 +6510,7 @@ tbl31 = {
 					textLabel2.Text = "SAFE IN 3.00s"
 					textLabel2.Font = Enum.Font.GothamMedium
 					textLabel2.TextSize = 18
-					textLabel2.TextColor3 = Color3.fromRGB(255, 100, 110)
+					textLabel2.TextColor3 = Color3.fromRGB(255, 255, 255)
 					local now = os.clock()
 					tbl40.timer = RunService.RenderStepped:Connect(function()
 						if generation ~= tbl40.generation then
@@ -6524,16 +6524,16 @@ tbl31 = {
 						if n18 > 0 then
 							textLabel2.Text = string.format("SAFE IN %.2fs", n18)
 							if n18 < 1 then
-								textLabel2.TextColor3 = Color3.fromRGB(255, 203, 72)
-								uiStroke.Color = Color3.fromRGB(240, 145, 40)
+								textLabel2.TextColor3 = Color3.fromRGB(255, 255, 255)
+								uiStroke.Color = Color3.fromRGB(232, 31, 58)
 							end
 							return
 						end
 						tbl40.timer:Disconnect()
 						tbl40.timer = nil
 						textLabel2.Text = "SAFE TO STEAL"
-						textLabel2.TextColor3 = Color3.fromRGB(73, 255, 145)
-						uiStroke.Color = Color3.fromRGB(42, 218, 112)
+						textLabel2.TextColor3 = Color3.fromRGB(255, 255, 255)
+						uiStroke.Color = Color3.fromRGB(232, 31, 58)
 						task.delay(1.5, function()
 							if generation == tbl40.generation then
 								tbl40.clear()
@@ -6543,7 +6543,7 @@ tbl31 = {
 				end,
 			}
 			function Config._setWarningE01Scale(arg)
-				Config.warningE01Scale = math.clamp(tonumber(arg) or 1, 0.5, 2.5)
+				Config.warningE01Scale = 0.75 -- fixed size (the size option was removed)
 				if tbl40.board and tbl40.board.Parent then
 					tbl40.board.Size = UDim2.fromOffset(252 * Config.warningE01Scale, 56 * Config.warningE01Scale)
 					if tbl40.scale then
@@ -9917,7 +9917,7 @@ tbl31 = {
 			if UserInputService.TouchEnabled then
 				local currentCamera = workspace.CurrentCamera
 				local viewportSize = currentCamera and currentCamera.ViewportSize or (Vector2.new(800, 600))
-				n18 = (math.clamp(math.min((viewportSize.X - 16) / 400, (viewportSize.Y - 16) / 528), 0.5, 0.82))
+				n18 = (math.clamp(math.min((viewportSize.X - 16) / 478, (viewportSize.Y - 16) / 528), 0.5, 0.82))
 			end
 			Config.uiScale = math.clamp(math.floor((tonumber(arg) or Config.uiScale or 1) * 20 + 0.5) / 20, 0.5, n18)
 			if uiScale and uiScale.Parent then
@@ -10050,7 +10050,7 @@ tbl31 = {
 		if UserInputService.TouchEnabled then
 			character = workspace.CurrentCamera
 			local viewportSize = character and character.ViewportSize or (Vector2.new(800, 600))
-			local n18 = math.clamp(math.min((viewportSize.X - 16) / 400, (viewportSize.Y - 16) / 528), 0.5, 0.82)
+			local n18 = math.clamp(math.min((viewportSize.X - 16) / 478, (viewportSize.Y - 16) / 528), 0.5, 0.82)
 			if (tonumber(Config.uiScale) or 1) > n18 then
 				Config._applyMainUIScale(n18, false)
 			end
@@ -10069,8 +10069,8 @@ tbl31 = {
 		end
 		frame = Instance.new("Frame", screenGui)
 		frame.Name = "MainWrapper"
-		frame.Size = UDim2.new(0, 400, 0, 528)
-		frame.Position = fn3(tbl2.main, UDim2.new(0.5, -200, 0.5, -264), 400, 528)
+		frame.Size = UDim2.new(0, 478, 0, 528)
+		frame.Position = fn3(tbl2.main, UDim2.new(0.5, -239, 0.5, -264), 478, 528)
 		frame.BackgroundColor3 = glass.bg
 		frame.BackgroundTransparency = 0
 		frame.BorderSizePixel = 0
@@ -10078,6 +10078,68 @@ tbl31 = {
 		frame.ClipsDescendants = false
 		frame.Visible = false
 		Config._startupGuiReady = false
+		;(function()
+			-- Keeps every dark row/container semi-transparent, even when other code tweens or resets
+			-- BackgroundTransparency (hover/open animations). Tune MIN_T: higher = more transparent.
+			local wrapper = frame
+			local MIN_T = 0.72
+			local seen = setmetatable({}, { __mode = "k" })
+			local skipNames = {
+				MainWrapper = true,
+				ClipWrapper = true,
+				MainBorder = true,
+				MainOuter = true,
+				SelectedBackground = true,
+				ModernToggle = true,
+				ModernToggleKnob = true,
+				SidebarSquare = true,
+				TabPill = true,
+				BottomNavigation = true,
+			}
+			local function isDark(c)
+				return c.R <= 0.22 and c.G <= 0.22 and c.B <= 0.22
+			end
+			local function clamp(inst)
+				local t = inst.BackgroundTransparency
+				if t < MIN_T and t < 0.99 then
+					inst.BackgroundTransparency = MIN_T
+				end
+			end
+			local function consider(inst)
+				if seen[inst] or skipNames[inst.Name] then
+					return
+				end
+				if not (inst:IsA("Frame") or inst:IsA("TextButton")) then
+					return
+				end
+				local parent = inst.Parent
+				if not parent or parent.Name == "ClipWrapper" then
+					return
+				end
+				if inst.BackgroundTransparency >= 0.99 or not isDark(inst.BackgroundColor3) then
+					return
+				end
+				if inst.AbsoluteSize.Y < 22 then
+					return
+				end
+				seen[inst] = true
+				clamp(inst)
+				inst:GetPropertyChangedSignal("BackgroundTransparency"):Connect(function()
+					clamp(inst)
+				end)
+			end
+			local function pass()
+				for _, d in ipairs(wrapper:GetDescendants()) do
+					pcall(consider, d)
+				end
+			end
+			task.spawn(function()
+				while wrapper and wrapper.Parent do
+					pcall(pass)
+					task.wait(1)
+				end
+			end)
+		end)()
 		do
 			local imageLabel = Instance.new("ImageLabel", frame)
 			imageLabel.Name = "SelectedBackground"
@@ -10199,6 +10261,7 @@ tbl31 = {
 		character.Thickness = 1.2
 		character.Transparency = 0.32
 		character.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+		character.Enabled = false
 		local uiGradient = Instance.new("UIGradient", character)
 		uiGradient.Rotation = 0
 		uiGradient.Color = ColorSequence.new({
@@ -10216,8 +10279,8 @@ tbl31 = {
 		mkCorner(character, 30)
 		uiGradient = Instance.new("Frame", character)
 		uiGradient.Name = "MainBorder"
-		uiGradient.Size = UDim2.new(1, 0, 1, -69)
-		uiGradient.Position = UDim2.new(0, 0, 0, 69)
+		uiGradient.Size = UDim2.new(1, 0, 1, -37)
+		uiGradient.Position = UDim2.new(0, 0, 0, 37)
 		uiGradient.BackgroundTransparency = 1
 		uiGradient.BorderSizePixel = 0
 		uiGradient.ClipsDescendants = true
@@ -10232,7 +10295,7 @@ tbl31 = {
 		mkCorner(frame2, 30)
 		uiGradient = Instance.new("Frame", character)
 		uiGradient.Name = "TopBar"
-		uiGradient.Size = UDim2.new(1, 0, 0, 68)
+		uiGradient.Size = UDim2.new(1, 0, 0, 36)
 		uiGradient.Position = UDim2.new(0, 0, 0, 0)
 		uiGradient.BackgroundColor3 = glass.top
 		uiGradient.BackgroundTransparency = 1
@@ -10318,13 +10381,14 @@ tbl31 = {
 		frame3.Visible = false -- SH logo removed
 		uiGradient2 = Instance.new("TextLabel", uiGradient)
 		uiGradient2.Name = "HeaderBrand"
-		uiGradient2.Size = UDim2.new(1, -80, 1, 0)
-		uiGradient2.Position = UDim2.new(0, 16, 0, 0)
+		uiGradient2.Visible = false
+		uiGradient2.Size = UDim2.new(0, 170, 0, 56)
+		uiGradient2.Position = UDim2.new(0, 0, 0, 12)
 		uiGradient2.BackgroundTransparency = 1
 		uiGradient2.Text = "Sawyer Hub"
 		uiGradient2.TextColor3 = Color3.fromRGB(255, 50, 60)
 		uiGradient2.Font = Enum.Font.GothamBlack
-		uiGradient2.TextSize = 30
+		uiGradient2.TextSize = 24
 		uiGradient2.TextXAlignment = Enum.TextXAlignment.Center
 		uiGradient2.TextYAlignment = Enum.TextYAlignment.Center
 		uiGradient2.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
@@ -10582,8 +10646,8 @@ tbl31 = {
 				if Config._closeSkinGallery then
 					pcall(Config._closeSkinGallery)
 				end
-				if not fn73(frame.Position, 400, 528) then
-					frame.Position = UDim2.new(0.5, -200, 0.5, -264)
+				if not fn73(frame.Position, 478, 528) then
+					frame.Position = UDim2.new(0.5, -239, 0.5, -264)
 				end
 				frame.Visible = true
 				if modernOpenScale then
@@ -10654,8 +10718,8 @@ tbl31 = {
 							frame4.Visible = true
 						end
 					elseif not frame.Visible and not (vx7ButtonManager and vx7ButtonManager.Visible) then
-						if not fn73(frame.Position, 400, 528) then
-							frame.Position = UDim2.new(0.5, -200, 0.5, -264)
+						if not fn73(frame.Position, 478, 528) then
+							frame.Position = UDim2.new(0.5, -239, 0.5, -264)
 						end
 						local modernOpenScale = frame:FindFirstChild("ModernOpenScale")
 						if modernOpenScale then
@@ -10704,23 +10768,35 @@ tbl31 = {
 			{}
 		frame3, frame2 = 1 / #tbl45, Instance.new("Frame", character)
 		frame2.Name = "BottomNavigation"
-		frame2.Size = UDim2.new(1, -20, 0, 44)
-		frame2.Position = UDim2.new(0, 10, 1, -52)
-		frame2.BackgroundColor3 = glass.side
-		frame2.BackgroundTransparency = 0.2
+		frame2.Size = UDim2.new(0, 118, 1, 0)
+		frame2.Position = UDim2.new(0, 0, 0, 0)
+		frame2.BackgroundColor3 = glass.panel
+		frame2.BackgroundTransparency = 1 -- sidebar black now comes from SidebarFade (soft edge into the image)
 		frame2.BorderSizePixel = 0
-		frame2.ZIndex = 10
+		frame2.ZIndex = 5
 		frame2.ClipsDescendants = true
-		mkCorner(frame2, 13)
+		mkCorner(frame2, 30)
+		;(function()
+			-- square off the sidebar's inner (right) corners so only the window corners are round
+			local sq = Instance.new("Frame", frame2)
+			sq.Name = "SidebarSquare"
+			sq.Size = UDim2.new(0, 40, 1, 0)
+			sq.Position = UDim2.new(1, -40, 0, 0)
+			sq.BackgroundColor3 = glass.panel
+			sq.BackgroundTransparency = 1
+			sq.Visible = false
+			sq.BorderSizePixel = 0
+			sq.ZIndex = 5
+		end)()
 		uiGradient2 = Instance.new("UIGradient", frame2)
 		uiGradient2.Name = "ModernNavGradient"
+		uiGradient2.Enabled = false
 		uiGradient2.Rotation = 90
 		uiGradient2.Color = ColorSequence.new({
 			ColorSequenceKeypoint.new(0, glass.side),
 			ColorSequenceKeypoint.new(0.5, glass.panel),
 			ColorSequenceKeypoint.new(1, glass.side),
 		})
-		mkStroke(frame2, glass.border, 0.8)
 		textButton = Instance.new("Frame", character)
 		textButton.Name = "NavigationDivider"
 		textButton.Size = UDim2.new(1, -28, 0, 1)
@@ -10729,6 +10805,7 @@ tbl31 = {
 		textButton.BackgroundTransparency = 0.72
 		textButton.BorderSizePixel = 0
 		textButton.ZIndex = 11
+		textButton.Visible = false
 		uiGradient2 = Instance.new("UIStroke", textButton)
 		uiGradient2.Color = Color3.fromRGB(255, 255, 255)
 		uiGradient2.Thickness = 1
@@ -10742,10 +10819,10 @@ tbl31 = {
 			ColorSequenceKeypoint.new(1, glass.accent),
 		})
 		local tbl48, str3, frame5 = {}, "Main", Instance.new("Frame", character)
-		frame5.Size = UDim2.new(1, -20, 1, -68)
-		frame5.Position = UDim2.new(0, 10, 0, 8)
+		frame5.Size = UDim2.new(1, -138, 1, -12)
+		frame5.Position = UDim2.new(0, 128, 0, 4)
 		frame5.BackgroundColor3 = glass.bg
-		frame5.BackgroundTransparency = 0.34
+		frame5.BackgroundTransparency = 1
 		frame5.BorderSizePixel = 0
 		frame5.ClipsDescendants = true
 		mkCorner(frame5, 24)
@@ -10762,29 +10839,40 @@ tbl31 = {
 			NumberSequenceKeypoint.new(0.55, 0.38),
 			NumberSequenceKeypoint.new(1, 0.18),
 		})
-		mkStroke(frame5, glass.border, 0.8).Transparency = 0.38
+		mkStroke(frame5, glass.border, 0.8).Transparency = 1
 		for i, v43 in ipairs(tbl45) do
 			textButton = Instance.new("TextButton", frame2)
 			textButton.Name = "Tab_" .. v43
-			textButton.Size = UDim2.new(frame3, -5, 1, -8)
-			textButton.Position = UDim2.new((i - 1) * frame3, 3, 0, 4)
+			textButton.Size = UDim2.new(1, -24, 0, 44)
+			textButton.Position = UDim2.new(0, 12, 0.5, -122 + (i - 1) * 60) -- 60px step = 16px gap between tabs
 			textButton.BackgroundTransparency = 1
 			textButton.Text = tbl46[v43] or v43
-			textButton.TextColor3 = glass.muted
+			textButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 			textButton.Font = Enum.Font.GothamBold
-			textButton.TextSize = 9
+			textButton.TextSize = 15
 			textButton.TextXAlignment = Enum.TextXAlignment.Center
 			textButton.BorderSizePixel = 0
 			textButton.ZIndex = 12
-			i = Instance.new("Frame", textButton)
+			;(function(btn)
+				local pill = Instance.new("Frame", btn.Parent)
+				pill.Name = "TabPill"
+				pill.Size = btn.Size
+				pill.Position = btn.Position
+				pill.BackgroundColor3 = glass.panelHover
+				pill.BackgroundTransparency = 0.35
+				pill.BorderSizePixel = 0
+				pill.ZIndex = 6
+				mkCorner(pill, 12)
+			end)(textButton)
+			i = Instance.new("Frame", frame2)
 			i.Name = "ActiveBg"
-			i.Size = UDim2.new(1, 0, 1, 0)
-			i.Position = UDim2.new(0, 0, 0, 0)
+			i.Size = textButton.Size
+			i.Position = textButton.Position
 			i.BackgroundColor3 = glass.accent
 			i.BackgroundTransparency = 1
 			i.BorderSizePixel = 0
-			i.ZIndex = -1
-			mkCorner(i, 8)
+			i.ZIndex = 7
+			mkCorner(i, 12)
 			character = Instance.new("Frame", textButton)
 			character.Name = "Indicator"
 			character.Size = UDim2.new(0.64, 0, 0, 3)
@@ -10794,8 +10882,16 @@ tbl31 = {
 			character.BackgroundTransparency = 0.68
 			character.BorderSizePixel = 0
 			character.ZIndex = 13
+			character.Visible = false
 			mkCorner(character, 2)
 			tbl48[v43] = { btn = textButton, indicator = character, activeBg = i }
+			;(function(btn)
+				btn:GetPropertyChangedSignal("TextColor3"):Connect(function()
+					if btn.TextColor3 ~= Color3.fromRGB(255, 255, 255) then
+						btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+					end
+				end)
+			end)(textButton)
 			textButton.MouseButton1Click:Connect(function()
 				if str3 == v43 then
 					return
@@ -10803,7 +10899,7 @@ tbl31 = {
 				str3 = v43
 				for k, v44 in pairs(tbl48) do
 					local flag9 = k == v43
-					v44.btn.TextColor3 = flag9 and glass.text or glass.muted
+					v44.btn.TextColor3 = Color3.fromRGB(255, 255, 255)
 					v44.activeBg.BackgroundColor3 = glass.accent
 					v44.activeBg.BackgroundTransparency = flag9 and 0.32 or 1
 					v44.indicator.BackgroundColor3 = flag9 and glass.accent2 or glass.border
@@ -10818,9 +10914,40 @@ tbl31 = {
 				end
 			end)
 		end
+		frame2.Parent = frame:FindFirstChild("ClipWrapper") or frame2.Parent
+		;(function()
+			-- Black sidebar that fades softly into the background image (tune the numbers below).
+			local clip = frame:FindFirstChild("ClipWrapper")
+			if not clip then
+				return
+			end
+			local SIDEBAR_W, FADE_INTO_IMAGE = 118, 72
+			local fade = Instance.new("Frame")
+			fade.Name = "SidebarFade"
+			fade.Size = UDim2.new(0, SIDEBAR_W + FADE_INTO_IMAGE, 1, 0)
+			fade.Position = UDim2.new(0, 0, 0, 0)
+			fade.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+			fade.BackgroundTransparency = 0
+			fade.BorderSizePixel = 0
+			fade.Active = false
+			fade.ZIndex = 0 -- above the image, below the page content and the tabs
+			fade:SetAttribute("VX7ModeBtn", true) -- theme code skips this frame and its gradient
+			mkCorner(fade, 30)
+			local fadeGradient = Instance.new("UIGradient", fade)
+			fadeGradient.Name = "SidebarFadeGradient"
+			fadeGradient.Rotation = 0
+			fadeGradient.Transparency = NumberSequence.new({
+				NumberSequenceKeypoint.new(0, 0),
+				NumberSequenceKeypoint.new(0.58, 0),
+				NumberSequenceKeypoint.new(0.72, 0.3),
+				NumberSequenceKeypoint.new(0.86, 0.7),
+				NumberSequenceKeypoint.new(1, 1),
+			})
+			fade.Parent = clip
+		end)()
 		for k, v43 in pairs(tbl48) do
 			character = k == str3
-			v43.btn.TextColor3 = character and glass.text or glass.muted
+			v43.btn.TextColor3 = Color3.fromRGB(255, 255, 255)
 			v43.activeBg.BackgroundColor3 = glass.accent
 			v43.activeBg.BackgroundTransparency = character and 0.32 or 1
 			v43.indicator.BackgroundColor3 = character and glass.accent2 or glass.border
@@ -10962,7 +11089,7 @@ tbl31 = {
 				return
 			end
 			if result.main then
-				frame.Position = fn74(result.main, UDim2.new(0.5, -200, 0.5, -264), 400, 528)
+				frame.Position = fn74(result.main, UDim2.new(0.5, -239, 0.5, -264), 478, 528)
 			end
 			if result.minimized then
 				frame4.Position = fn4(result.minimized)
@@ -12344,38 +12471,37 @@ tbl31 = {
 			return textButton3
 		end
 		function makeChoiceControl(arg, arg2, arg3, arg4)
-			arg.Size = UDim2.new(arg.Size.X.Scale, arg.Size.X.Offset, 0, 72)
+			arg.Size = UDim2.new(arg.Size.X.Scale, arg.Size.X.Offset, 0, 44)
 			for i, child in ipairs(arg:GetChildren()) do
 				if child:IsA("TextLabel") then
-					child.Position = UDim2.new(0, 12, 0, 2)
-					child.Size = UDim2.new(1, -24, 0, 28)
+					child.Position = UDim2.new(0, 12, 0, 0)
+					child.Size = UDim2.new(1, -150, 1, 0)
 					child.TextYAlignment = Enum.TextYAlignment.Center
 					break
 				end
 			end
 			local frame6 = Instance.new("Frame", arg)
 			frame6.Name = "ModernChoiceGroup"
-			frame6.Size = UDim2.new(1, -20, 0, 30)
-			frame6.Position = UDim2.new(0, 10, 0, 34)
+			frame6.Size = UDim2.new(0, 130, 0, 30)
+			frame6.Position = UDim2.new(1, -140, 0.5, -15)
 			frame6.BackgroundColor3 = glass.bg
-			frame6.BackgroundTransparency = 0.12
+			frame6.BackgroundTransparency = 1
 			frame6.BorderSizePixel = 0
 			mkCorner(frame6, 10)
-			mkStroke(frame6, glass.border, 0.75)
 			local tbl49, tbl50, n19 = {}, {}, 1 / #arg2
 			local function fn77()
 				for i, v44 in ipairs(tbl49) do
 					local enabled = i == arg3
 					v44.BackgroundColor3 = enabled and glass.accent or glass.panel
-					v44.BackgroundTransparency = enabled and 0.08 or 0.62
+					v44.BackgroundTransparency = enabled and 0.02 or 1
 					v44.TextColor3 = enabled and (Config._theme.active and Config._theme.active.contrast or glass.bg)
 						or glass.muted
 					v44.Font = enabled and Enum.Font.GothamBold or Enum.Font.GothamMedium
 					v44 = tbl50[i]
 					if v44 then
-						v44.gradient.Enabled = enabled
+						v44.gradient.Enabled = false
 						v44.stroke.Color = enabled and glass.accent2 or glass.border
-						v44.stroke.Transparency = enabled and 0.24 or 0.68
+						v44.stroke.Transparency = 1
 					end
 				end
 			end
@@ -12393,20 +12519,20 @@ tbl31 = {
 			end
 			for i, v44 in ipairs(arg2) do
 				arg = Instance.new("TextButton", frame6)
-				arg.Size = UDim2.new(n19, -(4 + 4 / #arg2), 0, 24)
-				arg.Position = UDim2.new((i - 1) * n19, 4, 0.5, -12)
+				arg.Size = UDim2.new(n19, -(4 + 4 / #arg2), 0, 28)
+				arg.Position = UDim2.new((i - 1) * n19, 4, 0.5, -14)
 				arg.BackgroundColor3 = glass.panel
-				arg.BackgroundTransparency = 0.79
+				arg.BackgroundTransparency = 1
 				arg.BorderSizePixel = 0
 				arg.Text = v44
 				arg.TextColor3 = glass.muted
 				arg.Font = Enum.Font.GothamMedium
-				arg.TextSize = 10
+				arg.TextSize = 13
 				arg.AutoButtonColor = false
 				arg.ZIndex = 7
-				mkCorner(arg, 8)
+				mkCorner(arg, 12)
 				v44 = mkStroke(arg, glass.border, 0.7)
-				v44.Transparency = 0.68
+				v44.Transparency = 1
 				local uiGradient3 = Instance.new("UIGradient", arg)
 				uiGradient3.Name = "ModernChoiceGradient"
 				uiGradient3.Rotation = 0
@@ -13712,28 +13838,31 @@ tbl31 = {
 					local billboardGui = Instance.new("BillboardGui")
 					billboardGui.Name = "RagCountdownBillboard"
 					billboardGui.Adornee = humanoidRootPart2
-					billboardGui.Size = UDim2.new(0, 84, 0, 42)
+					billboardGui.Size = UDim2.new(0, 66, 0, 32)
 					billboardGui.StudsOffset = Vector3.new(0, 2.5, 0)
 					billboardGui.AlwaysOnTop = true
 					billboardGui.Parent = playerGui2
 					v45 = billboardGui
 					local textLabel5 = Instance.new("TextLabel")
 					textLabel5.Size = UDim2.fromScale(1, 1)
-					textLabel5.BackgroundTransparency = 1
+					textLabel5.BackgroundColor3 = Color3.fromRGB(215, 25, 40)
+					textLabel5.BackgroundTransparency = 0.1
 					textLabel5.Font = Enum.Font.GothamBlack
 					textLabel5.TextScaled = true
 					textLabel5.TextColor3 = Color3.fromRGB(255, 255, 255)
 					textLabel5.TextStrokeColor3 = Color3.new(0, 0, 0)
-					textLabel5.TextStrokeTransparency = 0
+					textLabel5.TextStrokeTransparency = 1
+					Instance.new("UICorner", textLabel5).CornerRadius = UDim.new(0, 8)
+					local ragPad = Instance.new("UIPadding", textLabel5)
+					ragPad.PaddingTop = UDim.new(0, 4)
+					ragPad.PaddingBottom = UDim.new(0, 4)
 					textLabel5.Parent = billboardGui
 					task.spawn(function()
 						local function fn83()
 							pcall(function()
 								local currentThemePalette = Config._currentThemePalette
 									or Config._theme and Config._theme.active
-								textLabel5.TextColor3 = currentThemePalette
-										and (currentThemePalette.accent or currentThemePalette.text)
-									or (Color3.fromRGB(255, 255, 255))
+								textLabel5.TextColor3 = Color3.fromRGB(255, 255, 255)
 							end)
 						end
 						local n21 = tonumber(arg) or 2.5
@@ -13940,7 +14069,7 @@ tbl31 = {
 					screenGui2.Parent = playerGui2
 					local frame7 = Instance.new("Frame", screenGui2)
 					frame7.Name = "EnemyRagdollOverlay"
-					frame7.Size = UDim2.fromOffset(104, 50)
+					frame7.Size = UDim2.fromOffset(80, 40)
 					frame7.AnchorPoint = Vector2.new(0.5, 0.5)
 					frame7.BackgroundTransparency = 1
 					frame7.BorderSizePixel = 0
@@ -13949,8 +14078,8 @@ tbl31 = {
 					frame6 = Instance.new("Frame", frame7)
 					frame6.Size = UDim2.new(1, -8, 1, -8)
 					frame6.Position = UDim2.fromOffset(4, 4)
-					frame6.BackgroundColor3 = Color3.fromRGB(12, 13, 17)
-					frame6.BackgroundTransparency = 0.16
+					frame6.BackgroundColor3 = arg4 == "medusa" and Color3.fromRGB(12, 13, 17) or Color3.fromRGB(215, 25, 40)
+					frame6.BackgroundTransparency = arg4 == "medusa" and 0.16 or 0.1
 					frame6.BorderSizePixel = 0
 					frame6.ZIndex = 1001
 					Instance.new("UICorner", frame6).CornerRadius = UDim.new(0, 11)
@@ -13959,27 +14088,27 @@ tbl31 = {
 						name and (name.accent or name.text) or (Color3.fromRGB(232, 69, 79)),
 						name and (name.accent2 or name.accent) or (Color3.fromRGB(184, 105, 255)),
 						Instance.new("UIStroke", frame6)
-					uiStroke2.Color = arg4 == "medusa" and accent2 or accent
+					uiStroke2.Color = arg4 == "medusa" and accent2 or Color3.fromRGB(232, 31, 58)
 					uiStroke2.Transparency = 0.18
 					uiStroke2.Thickness = 1.2
 					local textLabel5 = Instance.new("TextLabel", frame6)
-					textLabel5.Size = UDim2.new(1, 0, 0, 14)
-					textLabel5.Position = UDim2.fromOffset(0, 3)
+					textLabel5.Size = UDim2.new(1, 0, 0, 11)
+					textLabel5.Position = UDim2.fromOffset(0, 2)
 					textLabel5.BackgroundTransparency = 1
 					textLabel5.Text = arg4 == "medusa" and "MEDUSA" or "RAGDOLL"
 					textLabel5.Font = Enum.Font.GothamBold
 					textLabel5.TextSize = 7
-					textLabel5.TextColor3 = arg4 == "medusa" and accent2 or accent
+					textLabel5.TextColor3 = arg4 == "medusa" and accent2 or Color3.fromRGB(255, 255, 255)
 					textLabel5.TextStrokeTransparency = 1
 					textLabel5.ZIndex = 1002
 					local textLabel6 = Instance.new("TextLabel", frame6)
-					textLabel6.Size = UDim2.new(1, -8, 0, 25)
-					textLabel6.Position = UDim2.fromOffset(4, 14)
+					textLabel6.Size = UDim2.new(1, -8, 0, 20)
+					textLabel6.Position = UDim2.fromOffset(4, 11)
 					textLabel6.BackgroundTransparency = 1
 					textLabel6.Font = Enum.Font.GothamBlack
 					textLabel6.TextScaled = false
-					textLabel6.TextSize = 19
-					textLabel6.TextColor3 = arg4 == "medusa" and accent2 or accent
+					textLabel6.TextSize = 15
+					textLabel6.TextColor3 = arg4 == "medusa" and accent2 or Color3.fromRGB(255, 255, 255)
 					textLabel6.TextStrokeColor3 = Color3.new(0, 0, 0)
 					textLabel6.TextStrokeTransparency = 0.38
 					textLabel6.ZIndex = 1002
@@ -14030,8 +14159,14 @@ tbl31 = {
 								else
 									textLabel6.TextColor3 = Color3.fromRGB(255, 72, 82)
 								end
-								textLabel5.TextColor3 = textLabel6.TextColor3
-								uiStroke2.Color = textLabel6.TextColor3
+								if arg4 == "medusa" then
+									textLabel5.TextColor3 = textLabel6.TextColor3
+									uiStroke2.Color = textLabel6.TextColor3
+								else
+									textLabel5.TextColor3 = Color3.fromRGB(255, 255, 255)
+									textLabel6.TextColor3 = Color3.fromRGB(255, 255, 255)
+									uiStroke2.Color = Color3.fromRGB(232, 31, 58)
+								end
 							end)
 						end
 						local character2 = arg3
@@ -18414,14 +18549,6 @@ tbl31 = {
 			makeGap(2)
 			Config._syncWarningE01Toggle = fn82("WARNING E01", "warningE01Enabled", function(arg)
 				Config._setWarningE01Enabled(arg)
-			end)
-			makeGap(2)
-			Config._warningE01SizeBox = makeInputRow("WARNING E01 Size (0.5-2.5)", Config.warningE01Scale, function(arg)
-				Config._setWarningE01Scale(arg)
-				if Config._warningE01SizeBox then
-					Config._warningE01SizeBox.Text = tostring(Config.warningE01Scale)
-				end
-				fn34()
 			end)
 			makeGap(8)
 			makeSectionHeader("Appearance")
