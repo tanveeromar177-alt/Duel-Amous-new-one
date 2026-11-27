@@ -122,6 +122,14 @@ pcall(function()
 		local kind = type(data)
 		if kind == "table" then
 			tbl2 = data
+			if type(data.stealBar) == "table" then
+				_G.__VX7_EARLY_STEALBAR_POS = {
+					sx = tonumber(data.stealBar.sx) or 0.5,
+					ox = tonumber(data.stealBar.ox) or 0,
+					sy = tonumber(data.stealBar.sy) or 1,
+					oy = tonumber(data.stealBar.oy) or -134,
+				}
+			end
 		end
 	end
 end)
@@ -357,6 +365,9 @@ Config = {
 	end,
 }
 Config.antiBatToggled = Config.antiBatToggled or false
+if type(_G.__VX7_EARLY_STEALBAR_POS) == "table" then
+	Config._savedStealBarPos = _G.__VX7_EARLY_STEALBAR_POS
+end
 local n, n2, n3 = 10000, 20000, 100
 local n4, n5, flag3, n6 = math.random(n, n2), 0, false, 0
 local function fn10()
@@ -2473,7 +2484,14 @@ local function fn23()
 	local Frame = new("Frame", ScreenGui)
 	Frame.Name = "StealProgressGui"
 	Frame.Size = flag4 and (udim22(372, 54)) or (udim22(440, 44))
-	Frame.Position = position or (flag4 and (udim2(0.5, -186, 1, -134)) or (udim2(0.5, -220, 1, -124)))
+	do
+		local saved = Config._savedStealBarPos
+		if type(saved) == "table" and (saved.sx or saved.ox or saved.sy or saved.oy) then
+			Frame.Position = udim2(saved.sx or 0.5, saved.ox or 0, saved.sy or 1, saved.oy or -134)
+		else
+			Frame.Position = position or (flag4 and (udim2(0.5, -186, 1, -134)) or (udim2(0.5, -220, 1, -124)))
+		end
+	end
 	Frame.AnchorPoint = Vector2.zero
 	Frame.BackgroundColor3 = color(22, 22, 26)
 	Frame.BackgroundTransparency = flag4 and 0.22 or 0.4
@@ -2715,6 +2733,41 @@ local function fn23()
 				local n13 = input.Position - position2
 				Frame.Position =
 					udim2(position3.X.Scale, position3.X.Offset + n13.X, position3.Y.Scale, position3.Y.Offset + n13.Y)
+			end
+		end)
+	)
+	table.insert(
+		tbl24,
+		UserInputService.InputEnded:Connect(function(input)
+			if not flag5 then
+				return
+			end
+			if
+				input.UserInputType == Enum.UserInputType.MouseButton1
+				or input.UserInputType == Enum.UserInputType.Touch
+			then
+				flag5 = false
+				pcall(function()
+					local p = Frame.Position
+					Config._savedStealBarPos = {
+						sx = p.X.Scale,
+						ox = p.X.Offset,
+						sy = p.Y.Scale,
+						oy = p.Y.Offset,
+					}
+				end)
+				pcall(function()
+					if type(saveUIPositions) == "function" then
+						saveUIPositions()
+					end
+				end)
+				pcall(function()
+					if type(fn34) == "function" then
+						fn34()
+					elseif type(scheduleSaveConfig) == "function" then
+						scheduleSaveConfig()
+					end
+				end)
 			end
 		end)
 	)
@@ -3239,6 +3292,28 @@ Config._buildHeadDisplay = function(discord)
 			Config._applyVisualTheme(n13)
 		end
 	end)
+	;(function()
+		-- speed label always follows the discord label's colour and stroke
+		local function syncSpeedToDiscord()
+			if not (discord and discord.Parent and textLabel2 and textLabel2.Parent) then
+				return
+			end
+			if textLabel2.TextColor3 ~= discord.TextColor3 then
+				textLabel2.TextColor3 = discord.TextColor3
+			end
+			if textLabel2.TextStrokeColor3 ~= discord.TextStrokeColor3 then
+				textLabel2.TextStrokeColor3 = discord.TextStrokeColor3
+			end
+			if textLabel2.TextStrokeTransparency ~= discord.TextStrokeTransparency then
+				textLabel2.TextStrokeTransparency = discord.TextStrokeTransparency
+			end
+		end
+		for _, prop in ipairs({ "TextColor3", "TextStrokeColor3", "TextStrokeTransparency" }) do
+			textLabel2:GetPropertyChangedSignal(prop):Connect(syncSpeedToDiscord)
+			discord:GetPropertyChangedSignal(prop):Connect(syncSpeedToDiscord)
+		end
+		syncSpeedToDiscord()
+	end)()
 	local function forceHeadPurple()
 		local purple = Color3.fromRGB(255, 50, 60)
 		local stroke = Color3.fromRGB(70, 10, 16)
@@ -3752,6 +3827,7 @@ local function fn31()
 		dropBrainrotMode = Config.dropBrainrotMode == true,
 		warningE01Enabled = Config.warningE01Enabled ~= false,
 		warningE01Scale = Config.warningE01Scale or 1,
+		selectedOutfit = Config.selectedOutfit,
 		batTpNoCollision = Config.batTpNoCollision == true,
 		buttonShape = Config.buttonShape or "Square",
 		floatScale = Config.floatScale or 0.7,
@@ -3882,6 +3958,7 @@ local function fn33()
 		dropBrainrotMode = Config.dropBrainrotMode == true,
 		warningE01Enabled = Config.warningE01Enabled ~= false,
 		warningE01Scale = Config.warningE01Scale or 1,
+		selectedOutfit = Config.selectedOutfit,
 		batTpNoCollision = Config.batTpNoCollision == true,
 		speedToggled = Config.speedToggled,
 		laggerEnabled = Config.laggerEnabled,
@@ -3987,21 +4064,66 @@ local function fn33()
 		},
 		toggles = tbl32.toggleKeybinds or {},
 	}
+	-- Sanitize non-JSON values before encode
+	do
+		local floats = {}
+		if type(tbl32.activeFloats) == "table" then
+			for _, f in ipairs(tbl32.activeFloats) do
+				if type(f) == "table" and type(f.key) == "string" then
+					local pos = f.pos
+					if type(pos) == "table" then
+						table.insert(floats, {
+							key = f.key,
+							pos = {
+								sx = tonumber(pos.sx) or 0,
+								ox = tonumber(pos.ox) or 0,
+								sy = tonumber(pos.sy) or 0,
+								oy = tonumber(pos.oy) or 0,
+							},
+						})
+					else
+						table.insert(floats, { key = f.key })
+					end
+				end
+			end
+		end
+		tbl32.activeFloats = floats
+		if type(tbl32.openPopups) == "table" then
+			local pops = {}
+			for _, p in ipairs(tbl32.openPopups) do
+				if type(p) == "string" then
+					table.insert(pops, p)
+				end
+			end
+			tbl32.openPopups = pops
+		end
+	end
+	pcall(function()
+		if _G.__VX7_FS and _G.__VX7_FS.makefolder then
+			if not (_G.__VX7_FS.isfolder and _G.__VX7_FS.isfolder("vx7")) then
+				_G.__VX7_FS.makefolder("vx7")
+			end
+		elseif makefolder then
+			pcall(makefolder, "vx7")
+		end
+	end)
 	local ok, result = pcall(function()
 		return HttpService:JSONEncode(tbl32)
 	end)
 	if ok and result then
 		pcall(function()
-			writefile_("vx7/Vx7Config.json", result)
+			writefile_("sawyerduels.json", result)
 		end)
 	else
 		tbl32.toggleKeybinds = nil
+		tbl32.activeFloats = {}
+		tbl32.openPopups = {}
 		local ok2, result2 = pcall(function()
 			return HttpService:JSONEncode(tbl32)
 		end)
 		if ok2 and result2 then
 			pcall(function()
-				writefile_("vx7/Vx7Config.json", result2)
+				writefile_("sawyerduels.json", result2)
 			end)
 		end
 	end
@@ -4032,6 +4154,10 @@ local function fn35()
 	flag4 = false
 	fn33()
 end
+-- Alias used by some feature toggles (anti-bat, outfits, etc.)
+scheduleSaveConfig = fn34
+_G.scheduleSaveConfig = fn34
+Config.scheduleSaveConfig = fn34
 local tbl32, tbl33 =
 	{
 		[Enum.KeyCode.W] = true,
@@ -4257,14 +4383,14 @@ local function fn38(arg)
 	return nil, nil
 end
 local function fn39()
-	if not isfile_("vx7/Vx7Config.json") then
+	if not isfile_("sawyerduels.json") then
 		return true
 	end
 	local data = tbl[1][6][tbl[1][3]]
 	local v23 = data
 	tbl[1][6][tbl[1][3]] = nil
 	if type(v23) ~= "table" then
-		local ok, result = pcall(readfile_, "vx7/Vx7Config.json")
+		local ok, result = pcall(readfile_, "sawyerduels.json")
 		if not ok or type(result) ~= "string" or result == "" then
 			return false
 		end
@@ -4423,8 +4549,7 @@ local function fn39()
 		tbl17.StealRadius = v23.stealRadius
 	end
 	if v23.stealFreezePercent then
-		tbl35 = tonumber(v23.stealFreezePercent) or 85
-		Config.stealFreezePercent = 85
+		Config.stealFreezePercent = math.clamp(tonumber(v23.stealFreezePercent) or 85, 50, 100)
 		if Config._syncStealFreezePercentChoice then
 			Config._syncStealFreezePercentChoice(
 				Config.stealFreezePercent == 75 and 1 or (Config.stealFreezePercent == 80 and 2 or 3)
@@ -4494,8 +4619,12 @@ local function fn39()
 	if v23.uiLocked ~= nil then
 		Config.uiLocked = v23.uiLocked
 	end
-	Config.autoLeftEnabled = false
-	Config.autoRightEnabled = false
+	if v23.autoLeftEnabled ~= nil then
+		Config.autoLeftEnabled = v23.autoLeftEnabled == true
+	end
+	if v23.autoRightEnabled ~= nil then
+		Config.autoRightEnabled = v23.autoRightEnabled == true
+	end
 	if v23.dropEnabled ~= nil then
 		Config.dropEnabled = v23.dropEnabled
 	end
@@ -4628,6 +4757,15 @@ local function fn39()
 		Config.warningE01Enabled = v23.warningE01Enabled
 	end
 	Config.warningE01Scale = math.clamp(tonumber(v23.warningE01Scale) or 1, 0.5, 2.5)
+	if type(v23.selectedOutfit) == "string" then
+		Config.selectedOutfit = v23.selectedOutfit
+		task.defer(function()
+			task.wait(1)
+			if Config._applySelectedOutfit then
+				pcall(Config._applySelectedOutfit)
+			end
+		end)
+	end
 	Config.dropBrainrotMode = false
 	if Config.safeModeEnabled and Config.dropBrainrotMode then
 		Config.dropBrainrotMode = false
@@ -4680,11 +4818,19 @@ local function fn39()
 	end
 	Config.antiRagdollMode = (v23.antiRagdollMode == "V1" or v23.antiRagdollMode == "V2") and v23.antiRagdollMode
 		or "V1"
-	Config.batAimbotVersion = "Normal"
-	Config.batLaggerAimbotVersion = "Standard"
-	Config.batTpVersion = "V2"
-	Config.batTpStuds = math.clamp(tonumber(v23.batTpStuds) or (tonumber(v23.batTpStudsV1)) or 8, 1, 20)
-	Config.batTpStudsV1 = Config.batTpStuds
+	if type(v23.batAimbotVersion) == "string" then
+		Config.batAimbotVersion = v23.batAimbotVersion
+	end
+	if type(v23.batLaggerAimbotVersion) == "string" then
+		Config.batLaggerAimbotVersion = v23.batLaggerAimbotVersion
+	end
+	if type(v23.batTpVersion) == "string" then
+		Config.batTpVersion = v23.batTpVersion
+	else
+		Config.batTpVersion = Config.batTpVersion or "V2"
+	end
+	Config.batTpStuds = math.clamp(tonumber(v23.batTpStuds) or (tonumber(v23.batTpStudsV1)) or Config.batTpStuds or 8, 1, 20)
+	Config.batTpStudsV1 = math.clamp(tonumber(v23.batTpStudsV1) or Config.batTpStuds, 1, 20)
 	if v23.smartBatTpDistance ~= nil then
 		Config.smartBatTpDistance = math.clamp(tonumber(v23.smartBatTpDistance) or 9, 1, 100)
 	end
@@ -6487,7 +6633,7 @@ tbl31 = {
 					character2 = Instance.new("Frame", billboardGui)
 					character2.Size = UDim2.fromOffset(252, 56)
 					character2.BackgroundColor3 = Color3.fromRGB(215, 25, 40)
-					character2.BackgroundTransparency = 0.1
+					character2.BackgroundTransparency = 0.42
 					character2.BorderSizePixel = 0
 					tbl40.scale = Instance.new("UIScale", character2)
 					Config._setWarningE01Scale(Config.warningE01Scale)
@@ -10395,23 +10541,39 @@ tbl31 = {
 		uiGradient2.TextStrokeTransparency = 0.45
 		uiGradient2.ZIndex = 12
 		uiGradient2 = Instance.new("Frame", uiGradient)
+		;(function(topBar)
+			local img = Instance.new("ImageLabel")
+			img.Name = "HeaderBrandImage"
+			img.Image = "rbxassetid://139521916667670"
+			img.ScaleType = Enum.ScaleType.Fit
+			img.BackgroundTransparency = 1
+			img.BorderSizePixel = 0
+			img.Active = false
+			img.AnchorPoint = Vector2.new(0, 0.5)
+			img.Position = UDim2.new(0, 9, 0.5, 0)
+			img.Size = UDim2.new(0, 100, 1, -6)
+			img.ZIndex = 13
+			img:SetAttribute("VX7ModeBtn", true)
+			img.Parent = topBar
+		end)(uiGradient)
 		local textButton2 = Instance.new("TextButton", uiGradient)
-		textButton2.Size = UDim2.new(0, 28, 0, 28)
-		textButton2.Position = UDim2.new(1, -32, 0.5, -14)
-		textButton2.BackgroundColor3 = glass.panel
-		textButton2.BackgroundTransparency = 1
+		textButton2.Size = UDim2.new(0, 32, 0, 32)
+		textButton2.Position = UDim2.new(1, -38, 0.5, -16)
+		textButton2.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+		textButton2.BackgroundTransparency = 0.86 -- soft light pad so the symbol is easy to see
 		textButton2.Text = "_"
-		textButton2.TextColor3 = glass.muted
+		textButton2.TextColor3 = Color3.fromRGB(255, 255, 255)
 		textButton2.Font = Enum.Font.GothamBold
-		textButton2.TextSize = 16
+		textButton2.TextSize = 26
 		textButton2.AutoButtonColor = false
 		mkCorner(textButton2, 8)
 		textButton2.ZIndex = 12
+		textButton2:SetAttribute("VX7ModeBtn", true) -- theme code leaves this button alone
 		textButton2.MouseEnter:Connect(function()
-			textButton2.TextColor3 = glass.text
+			textButton2.BackgroundTransparency = 0.7
 		end)
 		textButton2.MouseLeave:Connect(function()
-			textButton2.TextColor3 = glass.muted
+			textButton2.BackgroundTransparency = 0.86
 		end)
 		local frame4 = Instance.new("Frame", screenGui)
 		frame4.Name = "MinimizedFrame"
@@ -10475,7 +10637,7 @@ tbl31 = {
 		textButton.Size = UDim2.new(1, -52, 0, 28)
 		textButton.Position = UDim2.new(0, 44, 0.5, -14)
 		textButton.BackgroundTransparency = 1
-		textButton.Text = "Sawyer Hub"
+		textButton.Text = ""
 		textButton.RichText = false
 		textButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 		textButton.Font = Enum.Font.GothamBlack
@@ -10485,6 +10647,21 @@ tbl31 = {
 		textButton.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
 		textButton.TextStrokeTransparency = 0.4
 		textButton.ZIndex = 22
+		;(function(minFrame)
+			local img = Instance.new("ImageLabel")
+			img.Name = "MinimizedBrandImage"
+			img.Image = "rbxassetid://139521916667670"
+			img.ScaleType = Enum.ScaleType.Fit
+			img.BackgroundTransparency = 1
+			img.BorderSizePixel = 0
+			img.Active = false
+			img.AnchorPoint = Vector2.new(0, 0.5)
+			img.Position = UDim2.new(0, 44, 0.5, 0)
+			img.Size = UDim2.new(1, -54, 0, 34)
+			img.ZIndex = 23
+			img:SetAttribute("VX7ModeBtn", true)
+			img.Parent = minFrame
+		end)(frame4)
 		textButton = Instance.new("TextLabel", frame4)
 		textButton.Name = "MinimizedSub"
 		textButton.Visible = false
@@ -11062,11 +11239,33 @@ tbl31 = {
 					tbl49.floating[i] = v43.pos
 				end
 			end
+			-- Steal bar position
+			pcall(function()
+				local root = Config._stealBarRoot
+				if root and root.Parent then
+					local p = root.Position
+					tbl49.stealBar = {
+						sx = p.X.Scale,
+						ox = p.X.Offset,
+						sy = p.Y.Scale,
+						oy = p.Y.Offset,
+					}
+				elseif Config._savedStealBarPos then
+					tbl49.stealBar = Config._savedStealBarPos
+				end
+			end)
 			local ok, result = pcall(function()
 				return HttpService:JSONEncode(tbl49)
 			end)
 			if ok then
 				pcall(function()
+					if _G.__VX7_FS and _G.__VX7_FS.makefolder then
+						if not (_G.__VX7_FS.isfolder and _G.__VX7_FS.isfolder("vx7")) then
+							_G.__VX7_FS.makefolder("vx7")
+						end
+					elseif makefolder then
+						pcall(makefolder, "vx7")
+					end
 					writefile_("vx7/Vx7_UIPositions.json", result)
 				end)
 			end
@@ -11128,6 +11327,25 @@ tbl31 = {
 			Config._savedQuickButtonPositions = ok or {}
 			Config._savedQuickLayoutColumns = tonumber(result.quickLayoutColumns)
 			Config._savedQuickLayoutVersion = Config._savedQuickLayoutVersion or (tonumber(result.quickLayoutVersion))
+			if type(result.stealBar) == "table" then
+				Config._savedStealBarPos = {
+					sx = tonumber(result.stealBar.sx) or 0.5,
+					ox = tonumber(result.stealBar.ox) or 0,
+					sy = tonumber(result.stealBar.sy) or 1,
+					oy = tonumber(result.stealBar.oy) or -134,
+				}
+				pcall(function()
+					local root = Config._stealBarRoot
+					if root and root.Parent then
+						root.Position = UDim2.new(
+							Config._savedStealBarPos.sx,
+							Config._savedStealBarPos.ox,
+							Config._savedStealBarPos.sy,
+							Config._savedStealBarPos.oy
+						)
+					end
+				end)
+			end
 			if result.popups then
 				for k, popup in pairs(result.popups) do
 					savedPopupPositions[k] = UDim2.new(popup.sx or 0, popup.ox or 0, popup.sy or 0, popup.oy or 0)
@@ -13846,7 +14064,7 @@ tbl31 = {
 					local textLabel5 = Instance.new("TextLabel")
 					textLabel5.Size = UDim2.fromScale(1, 1)
 					textLabel5.BackgroundColor3 = Color3.fromRGB(215, 25, 40)
-					textLabel5.BackgroundTransparency = 0.1
+					textLabel5.BackgroundTransparency = 0.42
 					textLabel5.Font = Enum.Font.GothamBlack
 					textLabel5.TextScaled = true
 					textLabel5.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -14079,7 +14297,7 @@ tbl31 = {
 					frame6.Size = UDim2.new(1, -8, 1, -8)
 					frame6.Position = UDim2.fromOffset(4, 4)
 					frame6.BackgroundColor3 = arg4 == "medusa" and Color3.fromRGB(12, 13, 17) or Color3.fromRGB(215, 25, 40)
-					frame6.BackgroundTransparency = arg4 == "medusa" and 0.16 or 0.1
+					frame6.BackgroundTransparency = arg4 == "medusa" and 0.45 or 0.42
 					frame6.BorderSizePixel = 0
 					frame6.ZIndex = 1001
 					Instance.new("UICorner", frame6).CornerRadius = UDim.new(0, 11)
@@ -21475,7 +21693,7 @@ tbl31 = {
 				fn35()
 				local data
 				pcall(function()
-					local json = readfile_("vx7/Vx7Config.json")
+					local json = readfile_("sawyerduels.json")
 					if json then
 						data = HttpService:JSONDecode(json)
 					end
@@ -21609,7 +21827,7 @@ tbl31 = {
 				fn35()
 				local tbl56 = {}
 				pcall(function()
-					local json = readfile_("vx7/Vx7Config.json")
+					local json = readfile_("sawyerduels.json")
 					if json then
 						tbl56 = HttpService:JSONDecode(json)
 					end
@@ -21623,7 +21841,7 @@ tbl31 = {
 					end
 				end
 				pcall(function()
-					writefile_("vx7/Vx7Config.json", HttpService:JSONEncode(tbl56))
+					writefile_("sawyerduels.json", HttpService:JSONEncode(tbl56))
 					writefile_(
 						"vx7/Vx7Keybinds.json",
 						HttpService:JSONEncode({
@@ -21653,6 +21871,301 @@ tbl31 = {
 				textButton3.Text = frame7.Visible and "Close Share" or "Share Config"
 			end)
 			makeGap(10)
+			-- ===== OUTFITS (Config tab bottom) =====
+			makeSectionHeader("Outfits")
+			makeGap(2)
+			do
+				local outfitsData = {
+					{
+						name = "Doom",
+						hair = 15219402962,
+						glasses = 5553372199,
+						shirt = 12824678888,
+						tshirt = 135302790003177,
+						back = 107476505171223,
+					},
+					{
+						name = "H4ede",
+						head = 14192979478,
+						shirt = 4724435901,
+						pants = 14953081401,
+						face = 110597544639254,
+					},
+				}
+				Config._vx7Outfits = outfitsData
+				Config.selectedOutfit = Config.selectedOutfit or nil
+
+				local function clearCharacterAccessories(char)
+					if not char then return end
+					for _, child in ipairs(char:GetChildren()) do
+						if child:IsA("Accessory") or child:IsA("Hat") then
+							pcall(function() child:Destroy() end)
+						end
+					end
+					local shirt = char:FindFirstChildOfClass("Shirt")
+					if shirt then pcall(function() shirt:Destroy() end) end
+					local pants = char:FindFirstChildOfClass("Pants")
+					if pants then pcall(function() pants:Destroy() end) end
+					local tshirt = char:FindFirstChildOfClass("ShirtGraphic")
+					if tshirt then pcall(function() tshirt:Destroy() end) end
+				end
+
+				local function applyAssetId(char, assetId, kind)
+					if not char or not assetId then return end
+					local ok, model = pcall(function()
+						return game:GetService("InsertService"):LoadAsset(assetId)
+					end)
+					if not ok or not model then return end
+					for _, obj in ipairs(model:GetChildren()) do
+						if obj:IsA("Accessory") or obj:IsA("Hat") then
+							pcall(function()
+								obj.Parent = char
+							end)
+						elseif obj:IsA("Shirt") and (kind == "shirt" or not kind) then
+							local existing = char:FindFirstChildOfClass("Shirt")
+							if existing then existing:Destroy() end
+							obj.Parent = char
+						elseif obj:IsA("Pants") and (kind == "pants" or not kind) then
+							local existing = char:FindFirstChildOfClass("Pants")
+							if existing then existing:Destroy() end
+							obj.Parent = char
+						elseif obj:IsA("ShirtGraphic") and (kind == "tshirt" or not kind) then
+							local existing = char:FindFirstChildOfClass("ShirtGraphic")
+							if existing then existing:Destroy() end
+							obj.Parent = char
+						else
+							for _, d in ipairs(obj:GetDescendants()) do
+								if d:IsA("Accessory") or d:IsA("Hat") then
+									pcall(function() d:Clone().Parent = char end)
+								end
+							end
+						end
+					end
+					pcall(function() model:Destroy() end)
+				end
+
+				local function applyOutfitByName(name)
+					local outfit
+					for _, o in ipairs(outfitsData) do
+						if o.name == name then outfit = o break end
+					end
+					if not outfit then return end
+					Config.selectedOutfit = name
+					local char = localPlayer.Character
+					if not char then return end
+					clearCharacterAccessories(char)
+					task.wait(0.05)
+					if outfit.hair then applyAssetId(char, outfit.hair) end
+					if outfit.glasses then applyAssetId(char, outfit.glasses) end
+					if outfit.head then applyAssetId(char, outfit.head) end
+					if outfit.face then applyAssetId(char, outfit.face) end
+					if outfit.back then applyAssetId(char, outfit.back) end
+					if outfit.shirt then applyAssetId(char, outfit.shirt, "shirt") end
+					if outfit.pants then applyAssetId(char, outfit.pants, "pants") end
+					if outfit.tshirt then applyAssetId(char, outfit.tshirt, "tshirt") end
+					pcall(scheduleSaveConfig)
+					pcall(fn34)
+				end
+
+				Config._applySelectedOutfit = function()
+					if Config.selectedOutfit then
+						task.defer(function()
+							task.wait(0.6)
+							applyOutfitByName(Config.selectedOutfit)
+						end)
+					end
+				end
+
+				if not Config._outfitCharConn then
+					Config._outfitCharConn = localPlayer.CharacterAdded:Connect(function()
+						if Config.selectedOutfit then
+							task.defer(function()
+								task.wait(0.8)
+								pcall(applyOutfitByName, Config.selectedOutfit)
+							end)
+						end
+					end)
+				end
+
+				local row = Instance.new("Frame", v43)
+				row.Size = UDim2.new(1, 0, 0, 40)
+				row.BorderSizePixel = 0
+				row.LayoutOrder = LO()
+				row.BackgroundColor3 = glass.panel
+				row.BackgroundTransparency = 0.67
+				mkCorner(row, 10)
+				mkAnimStroke(row, 1)
+				local lbl = Instance.new("TextLabel", row)
+				lbl.Size = UDim2.new(1, -90, 1, 0)
+				lbl.Position = UDim2.new(0, 14, 0, 0)
+				lbl.BackgroundTransparency = 1
+				lbl.Text = "Outfits Gallery"
+				lbl.TextColor3 = glass.text
+				lbl.Font = Enum.Font.GothamBold
+				lbl.TextSize = 12
+				lbl.TextXAlignment = Enum.TextXAlignment.Left
+				local openBtn = Instance.new("TextButton", row)
+				openBtn.Size = UDim2.fromOffset(72, 28)
+				openBtn.Position = UDim2.new(1, -82, 0.5, -14)
+				openBtn.BackgroundColor3 = glass.panelHover
+				openBtn.BorderSizePixel = 0
+				openBtn.Text = "Open"
+				openBtn.TextColor3 = glass.text
+				openBtn.Font = Enum.Font.GothamBold
+				openBtn.TextSize = 12
+				openBtn.ZIndex = 9
+				mkCorner(openBtn, 8)
+				mkStroke(openBtn, glass.border or Color3.fromRGB(120, 70, 190), 0.7)
+
+				local function openOutfitsGallery()
+					local existing = localPlayer.PlayerGui:FindFirstChild("VX7_OutfitsGallery")
+					if existing then existing:Destroy() end
+					local sg = Instance.new("ScreenGui")
+					sg.Name = "VX7_OutfitsGallery"
+					sg.ResetOnSpawn = false
+					sg.IgnoreGuiInset = true
+					sg.DisplayOrder = 200
+					sg.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+					sg.Parent = localPlayer:WaitForChild("PlayerGui")
+					pcall(function()
+						if syn and syn.protect_gui then syn.protect_gui(sg)
+						elseif protectgui then protectgui(sg) end
+					end)
+
+					local dim = Instance.new("Frame", sg)
+					dim.Size = UDim2.fromScale(1, 1)
+					dim.BackgroundColor3 = Color3.new(0, 0, 0)
+					dim.BackgroundTransparency = 0.45
+					dim.BorderSizePixel = 0
+					dim.ZIndex = 1
+
+					local card = Instance.new("Frame", sg)
+					card.Size = UDim2.fromOffset(320, 260)
+					card.Position = UDim2.fromScale(0.5, 0.5)
+					card.AnchorPoint = Vector2.new(0.5, 0.5)
+					card.BackgroundColor3 = Color3.fromRGB(12, 14, 28)
+					card.BorderSizePixel = 0
+					card.ZIndex = 2
+					mkCorner(card, 14)
+					local stroke = Instance.new("UIStroke", card)
+					stroke.Color = Color3.fromRGB(80, 120, 255)
+					stroke.Thickness = 1.5
+					stroke.Transparency = 0.25
+
+					local title = Instance.new("TextLabel", card)
+					title.Size = UDim2.new(1, -40, 0, 28)
+					title.Position = UDim2.fromOffset(14, 8)
+					title.BackgroundTransparency = 1
+					title.Text = "OUTFITS"
+					title.TextColor3 = Color3.fromRGB(100, 160, 255)
+					title.Font = Enum.Font.GothamBold
+					title.TextSize = 14
+					title.TextXAlignment = Enum.TextXAlignment.Left
+					title.ZIndex = 3
+
+					local closeBtn = Instance.new("TextButton", card)
+					closeBtn.Size = UDim2.fromOffset(26, 26)
+					closeBtn.Position = UDim2.new(1, -32, 0, 8)
+					closeBtn.BackgroundColor3 = Color3.fromRGB(30, 35, 55)
+					closeBtn.Text = "X"
+					closeBtn.TextColor3 = Color3.fromRGB(200, 210, 255)
+					closeBtn.Font = Enum.Font.GothamBold
+					closeBtn.TextSize = 12
+					closeBtn.ZIndex = 4
+					mkCorner(closeBtn, 8)
+					closeBtn.MouseButton1Click:Connect(function()
+						sg:Destroy()
+					end)
+					dim.InputBegan:Connect(function(input)
+						if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+							sg:Destroy()
+						end
+					end)
+
+					local grid = Instance.new("Frame", card)
+					grid.Size = UDim2.new(1, -24, 1, -50)
+					grid.Position = UDim2.fromOffset(12, 40)
+					grid.BackgroundTransparency = 1
+					grid.ZIndex = 3
+					local layout = Instance.new("UIListLayout", grid)
+					layout.FillDirection = Enum.FillDirection.Horizontal
+					layout.Padding = UDim.new(0, 10)
+					layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+					layout.VerticalAlignment = Enum.VerticalAlignment.Center
+
+					for _, outfit in ipairs(outfitsData) do
+						local cell = Instance.new("Frame", grid)
+						cell.Size = UDim2.fromOffset(140, 190)
+						cell.BackgroundColor3 = Color3.fromRGB(18, 22, 42)
+						cell.BorderSizePixel = 0
+						cell.ZIndex = 4
+						mkCorner(cell, 12)
+						local cellStroke = Instance.new("UIStroke", cell)
+						cellStroke.Color = Color3.fromRGB(50, 70, 140)
+						cellStroke.Thickness = 1.2
+						cellStroke.Transparency = 0.3
+
+						local preview = Instance.new("Frame", cell)
+						preview.Size = UDim2.new(1, -16, 0, 120)
+						preview.Position = UDim2.fromOffset(8, 10)
+						preview.BackgroundColor3 = Color3.fromRGB(24, 28, 52)
+						preview.BorderSizePixel = 0
+						preview.ZIndex = 5
+						mkCorner(preview, 10)
+
+						local icon = Instance.new("TextLabel", preview)
+						icon.Size = UDim2.fromScale(1, 1)
+						icon.BackgroundTransparency = 1
+						icon.Text = outfit.name == "Doom" and "D" or "H"
+						icon.TextColor3 = Color3.fromRGB(140, 180, 255)
+						icon.Font = Enum.Font.GothamBlack
+						icon.TextSize = 42
+						icon.ZIndex = 6
+
+						local nameLbl = Instance.new("TextLabel", cell)
+						nameLbl.Size = UDim2.new(1, -8, 0, 18)
+						nameLbl.Position = UDim2.new(0, 4, 0, 134)
+						nameLbl.BackgroundTransparency = 1
+						nameLbl.Text = outfit.name:upper()
+						nameLbl.TextColor3 = Color3.fromRGB(220, 230, 255)
+						nameLbl.Font = Enum.Font.GothamBold
+						nameLbl.TextSize = 12
+						nameLbl.ZIndex = 5
+
+						local equipBtn = Instance.new("TextButton", cell)
+						equipBtn.Size = UDim2.new(1, -20, 0, 26)
+						equipBtn.Position = UDim2.new(0, 10, 1, -34)
+						equipBtn.BackgroundColor3 = Config.selectedOutfit == outfit.name
+							and Color3.fromRGB(40, 100, 220)
+							or Color3.fromRGB(35, 45, 80)
+						equipBtn.BorderSizePixel = 0
+						equipBtn.Text = Config.selectedOutfit == outfit.name and "EQUIPPED" or "EQUIP"
+						equipBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+						equipBtn.Font = Enum.Font.GothamBold
+						equipBtn.TextSize = 11
+						equipBtn.ZIndex = 6
+						mkCorner(equipBtn, 8)
+
+						equipBtn.MouseButton1Click:Connect(function()
+							applyOutfitByName(outfit.name)
+							equipBtn.Text = "EQUIPPED"
+							equipBtn.BackgroundColor3 = Color3.fromRGB(40, 100, 220)
+							for _, sibling in ipairs(grid:GetChildren()) do
+								if sibling:IsA("Frame") then
+									local btn = sibling:FindFirstChildWhichIsA("TextButton", true)
+									if btn and btn ~= equipBtn then
+										btn.Text = "EQUIP"
+										btn.BackgroundColor3 = Color3.fromRGB(35, 45, 80)
+									end
+								end
+							end
+						end)
+					end
+				end
+
+				openBtn.MouseButton1Click:Connect(openOutfitsGallery)
+			end
+			makeGap(6)
 		end
 		buildPage("Main", function()
 			makeGap(2)
@@ -27583,6 +28096,22 @@ tbl31 = {
 				elseif uiScaleBox then
 					uiScaleBox.Text = tostring(Config.uiScale)
 				end
+				-- Restore float / steal-bar scales after config load
+				pcall(function()
+					if type(fn8) == "function" then
+						fn8(Config.floatScale or 0.7)
+					end
+				end)
+				pcall(function()
+					if Config._applyStealBarScale then
+						Config._applyStealBarScale(Config.stealBarScale or 1)
+					end
+				end)
+				pcall(function()
+					if Config._applyPopupScale then
+						Config._applyPopupScale(Config.popupScale or 1)
+					end
+				end)
 				if textBox then
 					textBox.Text = tostring(tbl17.StealRadius)
 				end
@@ -29145,13 +29674,9 @@ Config._buildQuickGui = function()
 	if Config._savedQuickLayoutVersion == nil then
 		Config._savedQuickLayoutVersion = tonumber(tbl2.quickLayoutVersion)
 	end
-	quickButtons = Config._savedQuickLayoutVersion ~= nil and Config._savedQuickLayoutVersion ~= 4
+	-- Keep saved positions across layout versions (was wiping them before)
 	Config._quickLayoutColumns = quickLayoutColumns
 	Config._quickLayoutVersion = 4
-	if quickButtons then
-		Config._savedQuickButtonPositions = {}
-		Config.hiddenQuickButtons = {}
-	end
 	Config._savedQuickLayoutVersion = 4
 	local viewportSize = workspace.CurrentCamera and workspace.CurrentCamera.ViewportSize or (Vector2.new(1920, 1080))
 	local n22, n23 = viewportSize.X - (n18 * quickLayoutColumns + n20 * (quickLayoutColumns - 1) + n21 * 2) - 28
